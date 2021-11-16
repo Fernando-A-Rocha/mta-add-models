@@ -1,0 +1,19 @@
+<meta>
+    <!-- DOCUMENTATION:
+        https://github.com/Fernando-A-Rocha/mta-add-models
+    -->
+    <info author="Fernando" description="Add Models (Peds, Vehicles, Objects)" version="1.0"/>
+    <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21024.0"></min_mta_version> <!-- https://nightly.mtasa.com -->
+
+    <!-- mod files -->
+    <file src="models/20001.dff"/>
+    <file src="models/20001.txd"/>
+    <file src="models/20002.dff"/>
+    <file src="models/20002.txd"/>
+    <file src="models/20003.dff"/>
+    <file src="models/20003.txd"/>
+    
+    <script type="shared" src="shared.lua"/>
+    <script type="client" src="client.lua"/>
+    <script type="server" src="server.lua"/>
+</meta>
