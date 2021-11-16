@@ -16,4 +16,14 @@
     <script type="shared" src="shared.lua"/>
     <script type="client" src="client.lua"/>
     <script type="server" src="server.lua"/>
+
+    
+    <export type="shared" function="getDataNameFromType"/>
+    <export type="shared" function="getDataTypeFromName"/>
+    <export type="shared" function="getModNameFromID"/>
+    <export type="shared" function="isDefaultID"/>
+    <export type="shared" function="isCustomModID"/>
+
+    <!-- call after creating the model serverside -->
+    <export type="server" function="setElementCustomModel"/>
 </meta>

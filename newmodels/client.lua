@@ -95,7 +95,7 @@ function (stoppedResource)
 	end
 end)
 
-function setElementCustomMod(element, modType, id)
+function clientSetElementCustomMod(element, modType, id)
 	local good, reason = verifySetModArguments(element, modType, id)
 	if not good then
 		return false, reason
@@ -110,7 +110,7 @@ function setElementCustomMod(element, modType, id)
 		if success then
 
 			-- try setting again
-			return setElementCustomMod(element, modType, id)
+			return clientSetElementCustomMod(element, modType, id)
 		else
 			return false, reason2
 		end
@@ -132,7 +132,7 @@ end
 addEventHandler( "onClientElementDataChange", root, 
 function (theKey, oldValue, newValue)
 	
-	local modType = getDataNameType(theKey)
+	local modType = getDataTypeFromName(theKey)
 	if modType and tonumber(newValue) then
 		local id = tonumber(newValue)
 
@@ -150,11 +150,11 @@ function (theKey, oldValue, newValue)
 
 		if isCustomModID(et, id) then
 
-			local success, reason = setElementCustomMod(source, et, id)
+			local success, reason = clientSetElementCustomMod(source, et, id)
 			if not success then
-				outputChatBox("[onClientElementDataChange] Failed setElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
+				outputChatBox("[onClientElementDataChange] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
 			else
-				outputChatBox("[onClientElementDataChange] setElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
+				outputChatBox("[onClientElementDataChange] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
 			end
 
 		elseif isDefaultID(et, id) then
@@ -185,11 +185,11 @@ function ()
 		-- the model only needs to be set once in onClientElementDataChange
 		-- when a ped/player is streamed out the model is deallocated/freed
 
-		local success, reason = setElementCustomMod(source, "ped", id)
+		local success, reason = clientSetElementCustomMod(source, "ped", id)
 		if not success then
-			outputChatBox("[onClientElementStreamIn] Failed setElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
+			outputChatBox("[onClientElementStreamIn] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
 		else
-			outputChatBox("[onClientElementStreamIn] setElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
+			outputChatBox("[onClientElementStreamIn] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
 		end
 
 	elseif isDefaultID(et, id) then
