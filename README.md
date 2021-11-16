@@ -42,7 +42,8 @@ Minimalistic & bug free, enjoy!
 
 ### Example #1
 
-Spawning a ped with a new skin ID:
+Spawning a ped with a new skin ID:\
+**Before you would use setElementModel, with clientside-set models you can't**
 ```lua
 local skin = 20001 -- valid modded skin ID that you defined
 local ped = createPed(1, 0,0,5) -- creates a ped in the center of the map; skin ID 1 is irrelevant
@@ -55,7 +56,7 @@ end
 
 ### Example #2
 
-Spawning a player after login and setting their skin ID:
+Spawning a player after login and setting their skin ID:\
 **Before you would use setElementModel, with clientside-set models you can't**
 ```lua
 -- fetch player data from database, here we use static values.
@@ -74,7 +75,7 @@ setElementData(thePlayer, data_name, skin) -- sets the skin ID data
 
 ### Example #3
 
-Saving a player's skin ID on disconnect
+Saving a player's skin ID on disconnect:\
 **Before you would use getElementModel, with clientside-set models you can't**
 ```lua
 addEventHandler( "onPlayerQuit", root, 
