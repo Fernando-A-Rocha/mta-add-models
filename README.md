@@ -16,8 +16,8 @@ Currently very minimalistic & mainly for testing purposes
 ## Commands
 
 - /listmods
-- /pedcustomskin [ID]
-- /mycustomskin [ID]
+- /pedskin [ID]
+- /myskin [ID]
 - /allocatedids
 
 ## Quick Tutorial

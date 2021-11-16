@@ -5,7 +5,7 @@
 ]]
 
 
-function setElementCustomMod(element, modType, id)
+function setElementCustomModel(element, modType, id)
 	local good, reason = verifySetModArguments(element, modType, id)
 	if not good then
 		return false, reason
@@ -16,45 +16,56 @@ function setElementCustomMod(element, modType, id)
 end
 
 
-function customPedCmd(thePlayer, cmd, id)
+function pedSkinCmd(thePlayer, cmd, id)
 
 	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Custom Skin ID]", thePlayer, 255,194,14)
+		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
 	end
 	id = tonumber(id)
 
-	local x,y,z = getElementPosition(thePlayer)
-	local rx,ry,rz = getElementRotation(thePlayer)
-	local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
+	if isCustomModID("ped", id) or isDefaultID("ped", id) then
 
-	local thePed = createPed(1, x,y,z)
-	if not thePed then
-		return outputChatBox("Error spawning ped", thePlayer, 255,0,0)
-	end
-	setElementInterior(thePed, int)
-	setElementDimension(thePed, dim)
-	setElementRotation(thePed, rx,ry,rz, "default",true)
 
-	local success, reason = setElementCustomMod(thePed, "ped", id)
-	if not success then
-		destroyElement(thePed)
-		outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
+		local x,y,z = getElementPosition(thePlayer)
+		local rx,ry,rz = getElementRotation(thePlayer)
+		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
+
+		local thePed = createPed(1, x,y,z)
+		if not thePed then
+			return outputChatBox("Error spawning ped", thePlayer, 255,0,0)
+		end
+		setElementInterior(thePed, int)
+		setElementDimension(thePed, dim)
+		setElementRotation(thePed, rx,ry,rz, "default",true)
+
+		local success, reason = setElementCustomModel(thePed, "ped", id)
+		if not success then
+			destroyElement(thePed)
+			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
+		end
+	else
+		outputChatBox("Ped model ID "..id.." is not defined", thePlayer,255,0,0)
 	end
 end
-addCommandHandler("pedcustomskin", customPedCmd, false, false)
+addCommandHandler("pedskin", pedSkinCmd, false, false)
 
-function customSkinCmd(thePlayer, cmd, id)
+function mySkinCmd(thePlayer, cmd, id)
 	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Custom Skin ID]", thePlayer, 255,194,14)
+		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
 	end
 	id = tonumber(id)
 
-	local success, reason = setElementCustomMod(thePlayer, "ped", id)
-	if not success then
-		outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
+	if isCustomModID("ped", id) or isDefaultID("ped", id) then
+
+		local success, reason = setElementCustomModel(thePlayer, "ped", id)
+		if not success then
+			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
+		end
+	else
+		outputChatBox("Ped model ID "..id.." is not defined", thePlayer,255,0,0)
 	end
 end
-addCommandHandler("mycustomskin", customSkinCmd, false, false)
+addCommandHandler("myskin", mySkinCmd, false, false)
 
 function listModsCmd(thePlayer, cmd)
 

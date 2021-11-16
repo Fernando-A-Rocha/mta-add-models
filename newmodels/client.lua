@@ -76,11 +76,24 @@ function allocateNewMod(modType, id)
 	
 	allocated_ids[id] = { -- store info
 		modType = modType,
-		id = id,
 		allocated_id = allocated_id,
 	}
 	return true
 end
+
+function deallocateNewMod(modType, id, allocated_id)
+
+	engineFreeModel(allocated_id)
+	allocated_ids[id] = nil
+	print("Freed allocated ID "..allocated_id.." for "..modType.." mod ID "..id)
+end
+
+addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
+function (stoppedResource)
+	for id, v in pairs(allocated_ids) do
+		deallocateNewMod(v.modType, id, v.allocated_id)
+	end
+end)
 
 function setElementCustomMod(element, modType, id)
 	local good, reason = verifySetModArguments(element, modType, id)
@@ -103,7 +116,17 @@ function setElementCustomMod(element, modType, id)
 		end
 	end
 
-	return setElementModel(element, allocated_info.allocated_id)
+	setElementModel(element, allocated_info.allocated_id)
+	return true
+end
+
+function freeElementCustomMod(element, modType, id)
+	local allocated_info = allocated_ids[id]
+	if not allocated_info then
+		return
+	end
+
+	deallocateNewMod(modType, id, allocated_info.allocated_id)
 end
 
 addEventHandler( "onClientElementDataChange", root, 
@@ -111,6 +134,7 @@ function (theKey, oldValue, newValue)
 	
 	local modType = getDataNameType(theKey)
 	if modType and tonumber(newValue) then
+		local id = tonumber(newValue)
 
 		local et = getElementType(source)
 
@@ -122,12 +146,74 @@ function (theKey, oldValue, newValue)
 		else
 			return
 		end
-		
-		local success, reason = setElementCustomMod(source, modType, newValue)
-		if not success then
-			outputChatBox("Failed setElementCustomMod(source, '"..modType.."', "..newValue.."): "..reason, 255,0,0)
+		if et == "player" then et = "ped" end--so it can be recognised in the array
+
+		if isCustomModID(et, id) then
+
+			local success, reason = setElementCustomMod(source, et, id)
+			if not success then
+				outputChatBox("[onClientElementDataChange] Failed setElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
+			else
+				outputChatBox("[onClientElementDataChange] setElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
+			end
+
+		elseif isDefaultID(et, id) then
+			setElementModel(source, id)
 		else
-			outputChatBox("setElementCustomMod(source, '"..modType.."', "..newValue..") worked", 0,255,0)
+			outputChatBox("[onClientElementDataChange] Warning: unknown "..et.." model ID: "..id, 255,255,0)
 		end
+	end
+end)
+
+addEventHandler( "onClientElementStreamIn", root, 
+function ()
+	local et = getElementType(source)
+
+	-- Ped support
+	if not (et == "ped" or et == "player") then
+		return
+	end
+	if et == "player" then et = "ped" end--so it can be recognised in the array
+
+	local id = tonumber(getElementData(source, dataNames[et]))
+	if not (id) then return end -- doesn't have a custom model
+
+	if isCustomModID(et, id) then
+
+		local allocated_info = allocated_ids[id]
+		if allocated_info then return end -- ignore if already allocated:
+		-- the model only needs to be set once in onClientElementDataChange
+		-- when a ped/player is streamed out the model is deallocated/freed
+
+		local success, reason = setElementCustomMod(source, "ped", id)
+		if not success then
+			outputChatBox("[onClientElementStreamIn] Failed setElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
+		else
+			outputChatBox("[onClientElementStreamIn] setElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
+		end
+
+	elseif isDefaultID(et, id) then
+		setElementModel(source, id)
+	else
+		outputChatBox("[onClientElementStreamIn] Warning: unknown "..et.." model ID: "..id, 255,255,0)
+	end
+end)
+
+addEventHandler( "onClientElementStreamOut", root, 
+function ()
+	local et = getElementType(source)
+
+	-- Ped support
+	if not (et == "ped" or et == "player") then
+		return
+	end
+	if et == "player" then et = "ped" end--so it can be recognised in the array
+
+
+	local id = tonumber(getElementData(source, dataNames[et]))
+	if not (id) then return end -- doesn't have a custom model
+
+	if isCustomModID(et, id) then
+		freeElementCustomMod(source, "ped", id)
 	end
 end)
