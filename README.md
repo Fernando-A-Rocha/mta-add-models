@@ -1,4 +1,6 @@
-# mta-add-models
+![Banner](https://i.imgur.com/bH2Yuz6.png)
+
+## About
 
 Simple MTA scripts that make use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function, syncing added models with all players\
 Minimalistic & bug free, enjoy!
