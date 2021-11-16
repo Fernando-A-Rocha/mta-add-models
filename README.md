@@ -11,10 +11,10 @@ Minimalistic & bug free, enjoy!
 
 ## Commands
 
-- /listmods *lists all defined mods*
-- /allocatedids *lists all allocated mod IDs*
-- /pedskin [ID] *creates a ped and sets their skin to a default or new ID*
-- /myskin [ID] *sets your skin to a default or new ID*
+- /listmods **lists all defined mods**
+- /allocatedids **lists all allocated mod IDs**
+- /pedskin [ID] **creates a ped and sets their skin to a default or new ID**
+- /myskin [ID] **sets your skin to a default or new ID**
 
 ## Quick Tutorial
 
