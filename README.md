@@ -33,12 +33,11 @@ Minimalistic & bug free, enjoy!
 - same method for setting player skin IDs
 - **do not have** `setElementModel` in serverside scripts for setting skin IDs
 - use the **shared exported functions** in your scripts for **verifications**
-	- `getModNameFromID(modType, id)` returns mod name if defined
+	- `getDataNameFromType(modType, id)` returns the correct data name for an element type (e.g. ped)
+	- `getModNameFromID(modType, id)` returns a mod's name if defined in modList
 	- `isDefaultID(modType, id)` returns true if ID is default GTA ID
-	- `isCustomModID(modType, id)` returns true if ID is a defined new mod ID
-- call `exports.newmodels:setElementCustomModel` for setting skin ID
-	- supports default GTA IDs and new mod IDs
-	- returns true or false & fail reason
+	- `isCustomModID(modType, id)` returns true if ID is a new mod ID defined in modList
+- use `setElementData` for setting skin ID (see examples below)
 
 ### Example #1
 
