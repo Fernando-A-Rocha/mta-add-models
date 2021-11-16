@@ -32,6 +32,7 @@ Minimalistic & bug free, enjoy!
 - you can create peds & set their skin ID in a serverside script via element data
 - same method for setting player skin IDs
 - **do not have** `setElementModel` in serverside scripts for setting skin IDs
+- **do not have** `getElementModel` in serverside scripts for getting skin IDs
 - use the **shared exported functions** in your scripts for **verifications**
 	- `getDataNameFromType(modType, id)` returns the correct data name for an element type (e.g. ped)
 	- `getModNameFromID(modType, id)` returns a mod's name if defined in modList
@@ -55,6 +56,7 @@ end
 ### Example #2
 
 Spawning a player after login and setting their skin ID:
+**Before you would use setElementModel, with clientside-set models you can't**
 ```lua
 -- fetch player data from database, here we use static values.
 local x,y,z = 0,0,5
@@ -67,4 +69,21 @@ setElementRotation(thePlayer,rx,ry,rz)
 local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
 setElementData(thePlayer, data_name, skin) -- sets the skin ID data
 -- clients listening for this data will apply the skin ID on the player.
+````
+
+
+### Example #3
+
+Saving a player's skin ID on disconnect
+**Before you would use getElementModel, with clientside-set models you can't**
+```lua
+addEventHandler( "onPlayerQuit", root, 
+  function (quitType, reason, responsibleElement)
+    local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
+    local skin = getElementData(source, data_name)
+    if skin then
+    	-- save skin ID in the database
+    end
+  end
+)
 ````
