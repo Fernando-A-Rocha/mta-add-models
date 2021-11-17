@@ -52,19 +52,36 @@ Click [here](#gamemode-implementations) for specific gamemode implementations li
 
 ## (❗) Explanation
 
-- This applies to elements created **serverside** with the following functions:
-  - `createPed` (use a placeholder ID when creating, e.g. 1)
-  - `createObject` (use a placeholder ID when creating, e.g. 1337)
-  - `createVehicle` (use a placeholder ID when creating, e.g. 400)
-  - `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 1)
-- After creating these elements, you have to:
-  - Fetch element data name from this resouce using `getDataNameFromType(elementType)`
-  - Set their model ID via element data with the name you just obtained
-  - (Optional) Check if model ID is custom using `isDefaultID(elementType, modelID)` and `isCustomModID(elementType, modelID)`
-  - (Optional) Fetch element model name, if custom, using `getModNameFromID(elementType, modelID)`
-- This resource makes the clients listen to the set element datas in order to apply model IDs accordingly on their game
-- **DO NOT USE** `setElementModel` or `getElementModel` **ANYMORE** in **serverside** scripts for setting/getting model IDs
-- **See examples below** to understand how what's been described can be put in place.
+### Adding Custom Element Models
+
+This library lets you load mods stored within the `newmodels` resource, and also add mods stored in other resources to the `modList` that it will load from.
+
+Check the [quick tutorial](#quick-tutorial) to understand how to load mods from within the `newmodels` resource (easier).
+
+You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua):
+- `addExternalMod_IDFilenames(elementType, id, name, path)`
+- `addExternalMod_CustomFilenames(elementType, id, name, path_dff, path_txd, path_col)`
+- `removeExternalMod(id)`
+
+### Using Custom Element Models
+
+This applies to elements created **serverside** with the following functions:
+- `createPed` (use a placeholder ID when creating, e.g. 1)
+- `createObject` (use a placeholder ID when creating, e.g. 1337)
+- `createVehicle` (use a placeholder ID when creating, e.g. 400)
+- `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 1)
+
+After creating these elements, you have to:
+- Fetch element data name from this resouce using `getDataNameFromType(elementType)`
+- Set their model ID via element data with the name you just obtained
+- **(Recommended)** Check if model ID is custom using `isDefaultID(elementType, modelID)` and `isCustomModID(elementType, modelID)`
+- **(Optional)** Fetch element model name, if custom, using `getModNameFromID(elementType, modelID)`
+
+This resource makes the clients listen to the set element datas in order to apply model IDs accordingly on their game.
+
+**DO NOT USE** `setElementModel` or `getElementModel` **ANYMORE** in **serverside** scripts for setting/getting model IDs. You cannot use the new added model IDs serverside. Plus, it will break the system by overriding the element's model serverside for every player.
+
+**See examples below** to understand how what's been described can be put in place.
 
 # Lua Examples
 
