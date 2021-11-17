@@ -12,14 +12,15 @@ More info:
 
 ## Supported Types
 
-- [x] peds (skins)
+- [x] players
+- [x] peds
 - [x] objects
 - [ ] vehicles  *[coming soon]*
 
 ## Commands
 
 - /listmods **lists all defined mods**
-- /allocatedids **lists all allocated mod IDs**
+- /allocatedids **shows all allocated mod IDs in realtime**
 - /pedskin [ID] **creates a ped and sets their skin to a default or new ID**
 - /myskin [ID] **sets your skin to a default or new ID**
 
@@ -98,7 +99,7 @@ spawnPlayer(thePlayer, x,y,z, 0, 0, int, dim) -- spawns the player in the center
 setElementRotation(thePlayer,rx,ry,rz)
 
 -- setElementModel(thePlayer, skin) -- bad!
-local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
+local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
 setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the player
 ```
 
@@ -111,7 +112,7 @@ setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients lis
 addEventHandler( "onPlayerQuit", root, 
   function (quitType, reason, responsibleElement)
     -- local skin = getElementModel(source) -- bad!
-    local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
+    local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
     local skin = getElementData(source, data_name)
     if skin then
     	-- TODO: save skin ID in the database

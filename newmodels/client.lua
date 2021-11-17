@@ -7,27 +7,26 @@
 		/allocatedids
 ]]
 
+local SEE_ALLOCATED_TABLE = true -- automatically executes /allocatedids on startup
+
 local allocated_ids = {}
 
-function allocatedidsCmd(cmd)
-	for allocated_id, v in pairs(allocated_ids) do
-		outputChatBox("["..v.modType.."] ID "..v.id.." allocated to ID "..v.allocated_id, 255,194,14)
-	end
-end
-addCommandHandler("allocatedids", allocatedidsCmd, false)
+function allocateNewMod(elementType, id)
 
-function allocateNewMod(modType, id)
+	-- /!\ doesn't take 'player' as type so we need to force that to 'ped'
+	local elementType2 = elementType
+	if elementType2 == "player" then elementType2 = "ped" end
 
-	local allocated_id = engineRequestModel(modType)
+	local allocated_id = engineRequestModel(elementType2)
 	if not allocated_id then
-		return false, "Failed: engineRequestModel('"..modType.."')"
+		return false, "Failed: engineRequestModel('"..elementType2.."')"
 	end
 
 	local txdpath = modsFolder..id..".txd"
 	local dffpath = modsFolder..id..".dff"
 	local colpath
 
-	if modType == "object" then
+	if elementType == "object" then
 		colpath = modsFolder..id..".col"
 	end
 
@@ -77,15 +76,13 @@ function allocateNewMod(modType, id)
 		return false, "Failed to load mod ID "..id..": dff ("..tostring(dffworked)..") txd ("..tostring(txdworked)..") "..(col and ("col ("..tostring(colworked)..")") or "")
 	end
 	
-	allocated_ids[id] = { -- store info
-		modType = modType,
-		allocated_id = allocated_id,
-	}
+	allocated_ids[id] = allocated_id
+	outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
 	return true
 end
 
-function clientSetElementCustomMod(element, modType, id)
-	local good, reason = verifySetModArguments(element, modType, id)
+function setElementCustomModel(element, elementType, id)
+	local good, reason = verifySetModelArguments(element, elementType, id)
 	if not good then
 		return false, reason
 	end
@@ -93,68 +90,88 @@ function clientSetElementCustomMod(element, modType, id)
 	id = tonumber(id)
 
 	-- allocate as it hasn't been done already
-	local allocated_info = allocated_ids[id]
-	if not allocated_info then
-		local success, reason2 = allocateNewMod(modType, id)
+	local allocated_id = allocated_ids[id]
+	if not allocated_id then
+		local success, reason2 = allocateNewMod(elementType, id)
 		if success then
 
 			-- try setting again
-			return clientSetElementCustomMod(element, modType, id)
+			return setElementCustomModel(element, elementType, id)
 		else
 			return false, reason2
 		end
 	end
 
-	setElementModel(element, allocated_info.allocated_id)
+	setElementModel(element, allocated_id)
 	return true
 end
 
-function freeElementCustomMod(modType, id)
-	local allocated_info = allocated_ids[id]
-	if not allocated_info then
+function freeElementCustomMod(id)
+	local allocated_id = allocated_ids[id]
+	if not allocated_id then
 		return
 	end
 	
-	local allocated_id = allocated_info.allocated_id
-	engineFreeModel(allocated_id)
 	allocated_ids[id] = nil
-	print("Freed allocated ID "..allocated_id.." for "..modType.." mod ID "..id)
+	if engineFreeModel(allocated_id) then
+		outputDebugString("["..(eventName or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id, 3)
+	else
+		outputDebugString("["..(eventName or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id.." but engineFreeModel returned false", 2)
+	end
+end
+
+function hasOtherElementsWithModel(element, id)
+	for elementType, name in pairs(dataNames) do
+		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
+			if el ~= element then
+				if getElementData(el, name) == id then
+					return true
+				end
+			end
+		end
+	end
+	return false
 end
 
 addEventHandler( "onClientElementDataChange", root, 
 function (theKey, oldValue, newValue)
 	
-	local modType = getDataTypeFromName(theKey)
-	if modType and tonumber(newValue) then
+	local et = getElementType(source)
+	if isElementTypeSupported(et) and tonumber(newValue) then
+		
 		local id = tonumber(newValue)
-
-		local et = getElementType(source)
-
-		if not isElementTypeSupported(et) then
-			return
-		end
-
-		if not (modType == et) then return end -- setting model ID using the wrong name on this element
 
 		if isCustomModID(et, id) then
 
-			local success, reason = clientSetElementCustomMod(source, et, id)
+			local success, reason = setElementCustomModel(source, et, id)
 			if not success then
-				outputDebugString("[onClientElementDataChange] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 1)
+				outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
 			else
-				outputDebugString("[onClientElementDataChange] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 3)
+				outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
 			end
 
 		elseif isDefaultID(et, id) then
 			setElementModel(source, id)
 		else
-			outputDebugString("[onClientElementDataChange] Warning: unknown "..et.." model ID: "..id, 2)
+			outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
+		end
+
+		if tonumber(oldValue) then
+			local old_id = tonumber(oldValue)
+			local old_allocated_id = allocated_ids[old_id]
+			if not old_allocated_id then return end -- was not allocated
+
+			if not hasOtherElementsWithModel(source, old_id) then
+				freeElementCustomMod(old_id)
+			else
+				outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..old_allocated_id.." for new "..et.." model ID "..old_id,3)
+				return
+			end
 		end
 	end
 end)
 
-addEventHandler( "onClientElementStreamIn", root, 
-function ()
+function updateStreamedInElement(source)
 	local et = getElementType(source)
 
 	if not isElementTypeSupported(et) then
@@ -166,27 +183,27 @@ function ()
 
 	if isCustomModID(et, id) then
 
-		local allocated_info = allocated_ids[id]
-		if allocated_info then return end -- ignore if already allocated:
+		local allocated_id = allocated_ids[id]
+		if allocated_id then return end -- ignore if already allocated:
 		-- the model only needs to be set once in onClientElementDataChange
-		-- when a ped/player is streamed out the model is deallocated/freed
+		-- note: when an element is streamed out the model is deallocated/freed
 
-		local success, reason = clientSetElementCustomMod(source, "ped", id)
+		local success, reason = setElementCustomModel(source, et, id)
 		if not success then
-			outputDebugString("[onClientElementStreamIn] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 1)
+			outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
 		else
-			outputDebugString("[onClientElementStreamIn] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 3)
+			outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
 		end
 
 	elseif isDefaultID(et, id) then
 		setElementModel(source, id)
 	else
-		outputDebugString("[onClientElementStreamIn] Warning: unknown "..et.." model ID: "..id, 2)
+		outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
 	end
-end)
+end
+addEventHandler( "onClientElementStreamIn", root, function () updateStreamedInElement(source) end)
 
-addEventHandler( "onClientElementStreamOut", root, 
-function ()
+function updateStreamedOutElement(source)
 	local et = getElementType(source)
 
 	if not isElementTypeSupported(et) then
@@ -197,13 +214,64 @@ function ()
 	if not (id) then return end -- doesn't have a custom model
 
 	if isCustomModID(et, id) then
-		freeElementCustomMod("ped", id)
+		local allocated_id = allocated_ids[id]
+		if not allocated_id then return end -- was not allocated
+
+		if not hasOtherElementsWithModel(source, id) then
+			freeElementCustomMod(id)
+		else
+			outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..allocated_id.." for new "..et.." model ID "..id,3)
+			return
+		end
 	end
-end)
+end
+addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
+
+local drawing = false
+
+function togSeeAllocatedTable(cmd)
+	if not drawing then
+		addEventHandler( "onClientRender", root, drawAllocatedTable)
+		drawing = true
+	else
+		removeEventHandler( "onClientRender", root, drawAllocatedTable)
+		drawing = false
+	end
+	outputChatBox("Displaying allocated_ids on screen: "..(drawing and "Yes" or "No"))
+end
+addCommandHandler("allocatedids", togSeeAllocatedTable, false)
+
+local sx,sy = guiGetScreenSize()
+local dfontsize = 1
+local dfont = "default-bold"
+
+function drawAllocatedTable()
+	local text = toJSON(allocated_ids)
+	local width = dxGetTextWidth(text, dfontsize, dfont)
+	local x,y = sx/2 - width/2, 20
+	dxDrawText(text, x,y,x,y, "0xffffffff", dfontsize, dfont)
+end
 
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)
-	for id, v in pairs(allocated_ids) do
-		freeElementCustomMod(v.modType, id)
+	for id, allocated_id in pairs(allocated_ids) do
+		freeElementCustomMod(id)
+	end
+end)
+
+addEventHandler( "onClientResourceStart", resourceRoot,
+function (startedResource)
+	-- search for streamed in elements with custom model ID datas
+	-- these were spawned in another resource and set to using custom model ID
+	-- we need to apply the model on them
+
+	for elementType, name in pairs(dataNames) do
+		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
+			updateStreamedInElement(el)
+		end
+	end
+
+	if SEE_ALLOCATED_TABLE then
+		togSeeAllocatedTable()
 	end
 end)

@@ -11,13 +11,13 @@
 ]]
 
 
-function setElementCustomModel(element, modType, id)
-	local good, reason = verifySetModArguments(element, modType, id)
+function setElementCustomModel(element, elementType, id)
+	local good, reason = verifySetModelArguments(element, elementType, id)
 	if not good then
 		return false, reason
 	end
-	
-	setElementData(element, dataNames[modType], id)
+	local dataName = dataNames[elementType]
+	setElementData(element, dataName, id)
 	return true
 end
 
@@ -29,7 +29,8 @@ function pedSkinCmd(thePlayer, cmd, id)
 	end
 	id = tonumber(id)
 
-	if isCustomModID("ped", id) or isDefaultID("ped", id) then
+	local elementType = "ped"
+	if isCustomModID(elementType, id) or isDefaultID(elementType, id) then
 
 
 		local x,y,z = getElementPosition(thePlayer)
@@ -44,13 +45,13 @@ function pedSkinCmd(thePlayer, cmd, id)
 		setElementDimension(thePed, dim)
 		setElementRotation(thePed, rx,ry,rz, "default",true)
 
-		local success, reason = setElementCustomModel(thePed, "ped", id)
+		local success, reason = setElementCustomModel(thePed, elementType, id)
 		if not success then
 			destroyElement(thePed)
 			outputChatBox("Failed to set ped custom skin: "..reason, thePlayer, 255,0,0)
 		end
 	else
-		outputChatBox("Ped model ID "..id.." is not defined", thePlayer,255,0,0)
+		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
 	end
 end
 addCommandHandler("pedskin", pedSkinCmd, false, false)
@@ -61,14 +62,15 @@ function mySkinCmd(thePlayer, cmd, id)
 	end
 	id = tonumber(id)
 
-	if isCustomModID("ped", id) or isDefaultID("ped", id) then
+	local elementType = "player"
+	if isCustomModID(elementType, id) or isDefaultID(elementType, id) then
 
-		local success, reason = setElementCustomModel(thePlayer, "ped", id)
+		local success, reason = setElementCustomModel(thePlayer, elementType, id)
 		if not success then
 			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
 		end
 	else
-		outputChatBox("Ped model ID "..id.." is not defined", thePlayer,255,0,0)
+		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
 	end
 end
 addCommandHandler("myskin", mySkinCmd, false, false)
@@ -79,7 +81,8 @@ function objectModelCmd(thePlayer, cmd, id)
 	end
 	id = tonumber(id)
 
-	if isCustomModID("object", id) or isDefaultID("object", id) then
+	local elementType = "object"
+	if isCustomModID(elementType, id) or isDefaultID(elementType, id) then
 
 
 		local x,y,z = getElementPosition(thePlayer)
@@ -94,7 +97,7 @@ function objectModelCmd(thePlayer, cmd, id)
 		setElementDimension(theObject, dim)
 		setElementRotation(theObject, rx,ry,rz)
 
-		local success, reason = setElementCustomModel(theObject, "object", id)
+		local success, reason = setElementCustomModel(theObject, elementType, id)
 		if not success then
 			destroyElement(theObject)
 			outputChatBox("Failed to set object custom ID: "..reason, thePlayer, 255,0,0)
@@ -102,7 +105,7 @@ function objectModelCmd(thePlayer, cmd, id)
 
 		setElementPosition(thePlayer, x,y,z+4)
 	else
-		outputChatBox("Object model ID "..id.." is not defined", thePlayer,255,0,0)
+		outputChatBox("Object ID "..id.." doesn't exist", thePlayer,255,0,0)
 	end
 end
 addCommandHandler("makeobject", objectModelCmd, false, false)
@@ -110,8 +113,8 @@ addCommandHandler("makeobject", objectModelCmd, false, false)
 function listModsCmd(thePlayer, cmd)
 
 	outputChatBox("List of defined mods:", thePlayer,255,126,0)
-	for modType, mods in pairs(modList) do
-		outputChatBox(modType.." mods:", thePlayer,255,194,100)
+	for elementType, mods in pairs(modList) do
+		outputChatBox(elementType.." mods:", thePlayer,255,194,100)
 		for k, mod in pairs(mods) do
 			outputChatBox("ID "..mod.id.." - "..mod.name, thePlayer,255,194,14)
 		end
