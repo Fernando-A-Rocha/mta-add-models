@@ -17,19 +17,21 @@ More info:
 - [x] objects
 - [ ] vehicles  *[coming soon]*
 
-## Commands
+## Commands (Testing)
 
 - /listmods **lists all defined mods**
 - /allocatedids **shows all allocated mod IDs in realtime**
 - /selements **lists all streamed in elements for debugging purposes**
+- /t1 **creates a ped and sets an incorrect element model ID data**
+- /t2 **creates a ped and sets an element model ID data, then destroys it**
 - /pedskin [ID] **creates a ped and sets their skin to a default or new ID**
 - /myskin [ID] **sets your skin to a default or new ID**
 
-## Quick Tutorial
+## Quick Tutorial (Testing)
 
-- place mod files newmodels/models (dff & txd)
+- place mod files newmodels/models (dff & txd (& col for objects))
 - list them in meta.xml like the example
-- define them in shared.lua inside modList like the example
+- define them in mod_list.lua inside modList like the example
 - use the commands to test, have fun!
 
 ## Implementing
