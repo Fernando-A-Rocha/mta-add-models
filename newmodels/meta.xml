@@ -27,8 +27,13 @@
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
 
+
     <export type="shared" function="getDataNameFromType"/>
     <export type="shared" function="getModNameFromID"/>
     <export type="shared" function="isDefaultID"/>
     <export type="shared" function="isCustomModID"/>
+
+    <export type="server" function="addExternalMod_IDFilenames"/>
+    <export type="server" function="addExternalMod_CustomFilenames"/>
+    <export type="server" function="removeExternalMod"/>
 </meta>

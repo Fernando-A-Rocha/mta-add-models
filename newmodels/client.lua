@@ -30,6 +30,7 @@ function getModNameFromID(elementType, id) -- [Exported - Client Version]
 	if not tonumber(id) then return end
 	if not received_modlist then return outputDebugString("getModNameFromID: Client hasn't received modList yet", 1) end
 
+	-- iprint(received_modlist)
 	local mods = received_modlist[elementType]
 	if mods then
 		id = tonumber(id)
@@ -67,8 +68,13 @@ function allocateNewMod(elementType, id)
 		return false, "Failed to retrieve "..elementType.." mod ID "..id.." from list stored in client"
 	end
 
-	local paths = getActualModPaths(elementType, foundMod.path, id)
-
+	local paths
+	local path = foundMod.path
+	if type(path)=="table" then
+		paths = path
+	else
+		paths = getActualModPaths(elementType, path, id)
+	end
 
 	local txdpath = paths.txd
 
@@ -227,28 +233,38 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 
 	if data_et ~= et then return end
 
-	if isElementTypeSupported(et) and tonumber(newValue) then
+	if isElementTypeSupported(et) then
 		
 		local id = tonumber(newValue)
 
-		if not received_modlist then
-			waiting_queue[source] = {num=1, args={theKey, oldValue, newValue}}
-			return
-		end
+		if id then -- setting a new model id
 
-		if isCustomModID(et, id) then
-
-			local success, reason = setElementCustomModel(source, et, id)
-			if not success then
-				outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
-			else
-				outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
+			if not received_modlist then
+				waiting_queue[source] = {num=1, args={theKey, oldValue, newValue}}
+				return
 			end
 
-		elseif isDefaultID(et, id) then
-			setElementModel(source, id)
-		else
-			outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
+			if isCustomModID(et, id) then
+
+				local success, reason = setElementCustomModel(source, et, id)
+				if not success then
+					outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
+				else
+					outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
+				end
+
+			elseif isDefaultID(et, id) then
+				setElementModel(source, id)
+			else
+				outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
+			end
+		
+		elseif newValue == nil or newValue == false then
+
+			if tonumber(oldValue) then
+				-- removing new model id
+				triggerServerEvent("newmodels:resetElementModel", resourceRoot, source)
+			end
 		end
 
 		if tonumber(oldValue) then
@@ -367,16 +383,54 @@ function updateElementsInQueue()
 		end
 
 		waiting_queue[element] = nil
-		outputDebugString("updateElementsInQueue -> "..num.." on a "..getElementType(element), 3)
+		-- outputDebugString("updateElementsInQueue -> "..num.." on a "..getElementType(element), 3)
 	end
+	return true
+end
+
+function updateStreamedElements()
+
+	local freed = {}
+
+	for elementType, name in pairs(dataNames) do
+		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
+			
+			local id = tonumber(getElementData(el, name))
+			if id and not freed[id] then
+
+				local found = false
+
+				for j,mod in pairs(received_modlist[elementType]) do
+					if mod.id == id then
+						found = true
+						break
+					end
+				end
+
+				if not found then -- means the mod was removed by a serverside script
+
+					freed[id] = true
+					freeElementCustomMod(id)
+				
+				else
+					updateStreamedInElement(el)
+				end
+			end
+		end
+	end
+	return true
 end
 
 function receiveModList(modList)
 	received_modlist = modList
+
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 	-- iprint(modList)
 
-	updateElementsInQueue()
+	if updateElementsInQueue() then
+
+		updateStreamedElements()
+	end
 end
 addEventHandler("newmodels:receiveModList", resourceRoot, receiveModList)
 
@@ -400,7 +454,7 @@ function (startedResource)
 	end
 
 	if SEE_ALLOCATED_TABLE then
-		togSeeAllocatedTable()
+		togSeeAllocatedTable("-", true)
 	end
 
 	triggerLatentServerEvent("newmodels:requestModList", resourceRoot)
@@ -412,7 +466,7 @@ end)
 
 local drawing = false
 
-function togSeeAllocatedTable(cmd)
+function togSeeAllocatedTable(cmd, dontspam)
 	if not drawing then
 		addEventHandler( "onClientRender", root, drawAllocatedTable)
 		drawing = true
@@ -420,7 +474,9 @@ function togSeeAllocatedTable(cmd)
 		removeEventHandler( "onClientRender", root, drawAllocatedTable)
 		drawing = false
 	end
-	outputChatBox("Displaying allocated_ids on screen: "..(drawing and "Yes" or "No"))
+	if not (type(dontspam)=="boolean") then
+		outputChatBox("Displaying allocated_ids on screen: "..(drawing and "Yes" or "No"))
+	end
 end
 addCommandHandler("allocatedids", togSeeAllocatedTable, false)
 

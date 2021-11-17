@@ -14,7 +14,7 @@
 
 -- Custom events:
 addEvent("newmodels:requestModList", true)
-
+addEvent("newmodels:resetElementModel", true)
 
 local SERVER_READY = false
 local startTickCount
@@ -23,7 +23,8 @@ function getModNameFromID(elementType, id) -- [Exported - Server Version]
 	if not elementType then return end
 	if not tonumber(id) then return end
 	if not SERVER_READY then return outputDebugString("getModNameFromID: Server not ready yet", 1) end
-
+	
+	-- iprint(modList)
 	local mods = modList[elementType]
 	if mods then
 		id = tonumber(id)
@@ -62,6 +63,13 @@ function doModListChecks()
 
 	local used_ids = {}
 	for elementType,mods in pairs(modList) do
+
+
+		-- 0. verify element type, can't be player as that's managed automatically (syncs 'ped')
+		if elementType == "player" then
+			return modCheckError("Please remove mod from modList: player = {...}, it will be added automatically to match 'ped' mods")
+		end
+
 		for k,mod in pairs(mods) do
 
 			-- 1.  verify IDs
@@ -147,11 +155,28 @@ function sendModListWhenReady(player)
 	triggerClientEvent(player, "newmodels:receiveModList", resourceRoot, modList)
 end
 
+function sendModListWhenReady_ToAllPlayers()
+	for k,player in ipairs(getElementsByType("player")) do
+		sendModListWhenReady(player)
+	end
+end
+
 function requestModList()
 	if not isElement(client) then return end
 	sendModListWhenReady(client)
 end
 addEventHandler("newmodels:requestModList", resourceRoot, requestModList)
+
+function resetElementModel(element)
+	local model = getElementModel(element)
+	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..model,0,238, 255, 156)
+	
+	-- refresh it
+	if setElementModel(element, 0) then
+		setElementModel(element, model)
+	end
+end
+addEventHandler("newmodels:resetElementModel", resourceRoot, resetElementModel)
 
 function setElementCustomModel(element, elementType, id)
 	local good, reason = verifySetModelArguments(element, elementType, id)
@@ -162,6 +187,171 @@ function setElementCustomModel(element, elementType, id)
 	setElementData(element, dataName, id)
 	return true
 end
+
+--[[
+	The difference between this function and addExternalMod_CustomFilenames is that
+	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
+]]
+function addExternalMod_IDFilenames(elementType, id, name, path) -- [Exported]
+
+	if not (type(elementType) == "string") then
+		return false, "Missing/Invalid 'elementType' passed: "..tostring(elementType)
+	end
+	local sup,reason = isElementTypeSupported(elementType)
+	if not sup then
+		return false, "Invalid 'elementType' passed: "..reason
+	end
+
+	if elementType == "player" then
+		elementType = "ped" -- so it can be fixed later
+	end
+
+	if not tonumber(id) then
+		return false, "Missing/Invalid 'id' passed: "..tostring(id)
+	end
+	id = tonumber(id)
+
+	if not (type(name) == "string") then
+		return false, "Missing/Invalid 'name' passed: "..tostring(name)
+	end
+	if not (type(path) == "string") then
+		return false, "Missing/Invalid 'path' passed: "..tostring(path)
+	end
+
+	for elementType,mods in pairs(modList) do
+		for k,mod in pairs(mods) do
+			if mod.id == id then
+				return false, "Duplicated 'id' passed, already exists in modList"
+			end
+		end
+	end
+
+	local paths = getActualModPaths(elementType, path, id)
+	for k, path2 in pairs(paths) do
+		if not fileExists(path2) then
+
+			-- only check .col exists for objects which actually need it
+			if (k == "col" and elementType == "object") or (k ~= "col") then
+
+				return false, "File does not exist: '"..tostring(path2).."', check folder: '"..path.."'"
+			end
+		end
+	end
+
+	-- Save mod in list
+	table.insert(modList[elementType], {
+		id=id, path=path, name=name
+	})
+
+	fixModList()
+	sendModListWhenReady_ToAllPlayers()
+
+	outputDebugString("Added "..elementType.." mod ID "..id.." located in: "..path, 0, 136, 255, 89)
+	return true
+end
+
+--[[
+	The difference between this function and addExternalMod_IDFilenames is that
+	you pass directly individual file paths for dff, txd and col files
+]]
+function addExternalMod_CustomFilenames(elementType, id, name, path_dff, path_txd, path_col) -- [Exported]
+
+	if not (type(elementType) == "string") then
+		return false, "Missing/Invalid 'elementType' passed: "..tostring(elementType)
+	end
+	local sup,reason = isElementTypeSupported(elementType)
+	if not sup then
+		return false, "Invalid 'elementType' passed: "..reason
+	end
+
+	if elementType == "player" then
+		elementType = "ped" -- so it can be fixed later
+	end
+
+	if not tonumber(id) then
+		return false, "Missing/Invalid 'id' passed: "..tostring(id)
+	end
+	id = tonumber(id)
+
+	if not (type(name) == "string") then
+		return false, "Missing/Invalid 'name' passed: "..tostring(name)
+	end
+
+	local paths = {}
+
+	if not (type(path_dff) == "string") then
+		return false, "Missing/Invalid 'path_dff' passed: "..tostring(path_dff)
+	end
+	paths.dff = path_dff
+
+	if not (type(path_txd) == "string") then
+		return false, "Missing/Invalid 'path_txd' passed: "..tostring(path_txd)
+	end
+	paths.txd = path_txd
+
+	if path_col then
+		if (type(path_col) ~= "string") then
+			return false, "Missing/Invalid 'path_col' passed: "..tostring(path_col)
+		end
+		paths.col = path_col
+	end
+
+	for elementType,mods in pairs(modList) do
+		for k,mod in pairs(mods) do
+			if mod.id == id then
+				return false, "Duplicated 'id' passed, already exists in modList"
+			end
+		end
+	end
+	for k, path2 in pairs(paths) do
+		if not fileExists(path2) then
+
+			-- only check .col exists for objects which actually need it
+			if (k == "col" and elementType == "object") or (k ~= "col") then
+
+				return false, "File does not exist: '"..tostring(path2).."'"
+			end
+		end
+	end
+
+	-- Save mod in list
+	table.insert(modList[elementType], {
+		id=id, path=paths, name=name -- path will be a table here, interpreted by the client differently
+	})
+
+	fixModList()
+	sendModListWhenReady_ToAllPlayers()
+
+	outputDebugString("Added "..elementType.." mod ID "..id..": "..toJSON(paths), 0, 136, 255, 89)
+	return true
+end
+
+function removeExternalMod(id) -- [Exported]
+
+	if not tonumber(id) then
+		return false, "Missing/Invalid 'id' passed: "..tostring(id)
+	end
+	id = tonumber(id)
+
+	for elementType,mods in pairs(modList) do
+		for k,mod in pairs(mods) do
+			if mod.id == id then
+				
+				outputDebugString("Removed "..elementType.." mod ID "..id.." located in: "..mod.path, 0, 211, 255, 89)
+			
+				modList[elementType][k] = nil	
+				
+				fixModList()
+				sendModListWhenReady_ToAllPlayers()
+				
+				return true
+			end
+		end
+	end
+
+	return false, "No mod with ID "..id.." found in modList"
+end
+
 
 
 -- [Optional] Messages:
@@ -275,10 +465,16 @@ addCommandHandler("makeobject", objectModelCmd, false, false)
 function listModsCmd(thePlayer, cmd)
 
 	outputChatBox("List of defined mods:", thePlayer,255,126,0)
+
 	for elementType, mods in pairs(modList) do
-		outputChatBox(elementType.." mods:", thePlayer,255,194,100)
-		for k, mod in pairs(mods) do
-			outputChatBox("ID "..mod.id.." - "..mod.name, thePlayer,255,194,14)
+		
+		if elementType ~= "player" then -- don't repeat
+
+			outputChatBox(elementType.." mods:", thePlayer,255,194,100)
+
+			for k, mod in pairs(mods) do
+				outputChatBox("ID "..mod.id.." - "..mod.name, thePlayer,255,194,14)
+			end
 		end
 	end
 end
@@ -299,7 +495,23 @@ addCommandHandler("t2", function(thePlayer, cmd)
 	local x,y,z = getElementPosition(thePlayer)
 	local ped = createPed(0, x,y,z)
 	setElementData(ped, "skinID", 20002)
-	outputChatBox("Destroying created ped in 5 secs, observe what happens in debug", thePlayer, 255,194,14)
-	setTimer(destroyElement, 5000, 1, ped)
+	outputChatBox("Destroying created ped in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
+	setTimer(destroyElement, 3000, 1, ped)
+
+end, false, false)
+
+
+-- test 3: create ped, set custom skin and remove the model element data
+-- expected behavior: model 280 should be restored
+addCommandHandler("t3", function(thePlayer, cmd)
+
+	local x,y,z = getElementPosition(thePlayer)
+	local ped = createPed(280, x,y,z)
+	local data_name = exports.newmodels:getDataNameFromType("ped")
+	setElementData(ped, data_name, 20001)
+	outputChatBox("Removing created ped skin data in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
+	setTimer(function(ped, data_name)
+	   removeElementData(ped, data_name)
+	end, 3000, 1, ped, data_name)
 
 end, false, false)

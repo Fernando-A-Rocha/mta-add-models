@@ -1,0 +1,16 @@
+<meta>
+	<!-- DOCUMENTATION:
+        https://github.com/Fernando-A-Rocha/mta-add-models
+    -->
+    <info author="Fernando" name="newmodels Example" description="implements mta-add-models library functions" version="0.0" type="script"/>
+    
+    <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21024.0"></min_mta_version> <!-- https://nightly.mtasa.com -->
+
+    <include resource="newmodels"/>
+
+    <!-- some skins -->
+    <file src="mymodels/biker.dff"/>
+    <file src="mymodels/biker.txd"/>
+
+    <script type="server" src="server.lua"/>
+</meta>

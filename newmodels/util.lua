@@ -53,15 +53,13 @@ function getActualModPaths(elementType, folder, id)
 	if lastchar ~= "/" then
 		path = folder.."/" -- / is missing but I'm nice
 	end
-
 	path = path..id
 
-	local paths = {
+	return {
 		txd = path..".txd",
 		dff = path..".dff",
 		col = path..".col",
 	}
-	return paths
 end
 
 function isCustomModID(elementType, id) -- [Exported]
