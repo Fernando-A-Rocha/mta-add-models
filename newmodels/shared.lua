@@ -15,14 +15,18 @@ modList = {
 		{id=20001, name="Mafioso 1"},
 		{id=20003, name="Mafioso 2"},
 		{id=20002, name="Mafioso 3"},
-	}
+	},
+
+	object = {
+		{id=50001, name="Engine Hoist"},
+	},
 }
 
 
 dataNames = {
 	ped = "skinID",
+	object = "objectID", -- not yet implemented
 	-- vehicle = "vehicleID", -- not yet implemented
-	-- object = "objectID", -- not yet implemented
 }
 
 function getDataTypeFromName(dataName)
@@ -66,6 +70,10 @@ function isDefaultID(modType, id) -- [Exported]
 				return true
 			end
 		end
+	
+	elseif modType == "object" then
+		return ((id >= 321 and id <= 18630) and (id <= 11681 or id >= 12800))
+    	-- 			   min 			  max 	   exclude 11682    to    12799 SAMP ID Range
 	end
 	return false
 end
@@ -76,17 +84,17 @@ function isCustomModID(modType, id) -- [Exported]
 	if not name then
 		return false
 	end
-
 	return true
 end
 
-function verifySetModArguments(element, modType, id)
-	if not isElement(element) then
-		return false, "Invalid element passed"
-	end
 
-	local et = getElementType(element)
-	if et == "player" then et = "ped" end--so it can be recognised in the array
+function fixElementTypeName(et)
+	if et == "player" then et = "ped" end
+	return et
+end
+
+function isElementTypeSupported(et)
+	et = fixElementTypeName(et)
 
 	local found
 	for type,_ in pairs(dataNames) do
@@ -97,7 +105,21 @@ function verifySetModArguments(element, modType, id)
 	end
 
 	if not found then
-		return false, et.." element type passed: not yet supported"
+		return false, "added "..et.." mods are not yet supported"
+	end
+	return true
+end
+
+function verifySetModArguments(element, modType, id)
+	if not isElement(element) then
+		return false, "Invalid element passed"
+	end
+
+	local et = getElementType(element)
+
+	local sup,reason = isElementTypeSupported(et)
+	if not sup then
+		return false, reason
 	end
 
 	local dataName = dataNames[et]
@@ -112,4 +134,3 @@ function verifySetModArguments(element, modType, id)
 
 	return true
 end
-

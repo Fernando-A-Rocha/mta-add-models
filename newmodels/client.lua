@@ -2,6 +2,9 @@
 	Author: Fernando
 
 	client.lua
+
+	Commands:
+		/allocatedids
 ]]
 
 local allocated_ids = {}
@@ -81,13 +84,6 @@ function allocateNewMod(modType, id)
 	return true
 end
 
-addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
-function (stoppedResource)
-	for id, v in pairs(allocated_ids) do
-		freeElementCustomMod(v.modType, id)
-	end
-end)
-
 function clientSetElementCustomMod(element, modType, id)
 	local good, reason = verifySetModArguments(element, modType, id)
 	if not good then
@@ -134,29 +130,25 @@ function (theKey, oldValue, newValue)
 
 		local et = getElementType(source)
 
-		-- Ped support
-		if modType == "ped" then
-			if not (et == "ped" or et == "player") then
-				return
-			end
-		else
+		if not isElementTypeSupported(et) then
 			return
 		end
-		if et == "player" then et = "ped" end--so it can be recognised in the array
+
+		if not (modType == et) then return end -- setting model ID using the wrong name on this element
 
 		if isCustomModID(et, id) then
 
 			local success, reason = clientSetElementCustomMod(source, et, id)
 			if not success then
-				outputChatBox("[onClientElementDataChange] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
+				outputDebugString("[onClientElementDataChange] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 1)
 			else
-				outputChatBox("[onClientElementDataChange] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
+				outputDebugString("[onClientElementDataChange] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 3)
 			end
 
 		elseif isDefaultID(et, id) then
 			setElementModel(source, id)
 		else
-			outputChatBox("[onClientElementDataChange] Warning: unknown "..et.." model ID: "..id, 255,255,0)
+			outputDebugString("[onClientElementDataChange] Warning: unknown "..et.." model ID: "..id, 2)
 		end
 	end
 end)
@@ -165,11 +157,9 @@ addEventHandler( "onClientElementStreamIn", root,
 function ()
 	local et = getElementType(source)
 
-	-- Ped support
-	if not (et == "ped" or et == "player") then
+	if not isElementTypeSupported(et) then
 		return
 	end
-	if et == "player" then et = "ped" end--so it can be recognised in the array
 
 	local id = tonumber(getElementData(source, dataNames[et]))
 	if not (id) then return end -- doesn't have a custom model
@@ -183,15 +173,15 @@ function ()
 
 		local success, reason = clientSetElementCustomMod(source, "ped", id)
 		if not success then
-			outputChatBox("[onClientElementStreamIn] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 255,0,0)
+			outputDebugString("[onClientElementStreamIn] Failed clientSetElementCustomMod(source, '"..et.."', "..id.."): "..reason, 1)
 		else
-			outputChatBox("[onClientElementStreamIn] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 0,255,0)
+			outputDebugString("[onClientElementStreamIn] clientSetElementCustomMod(source, '"..et.."', "..id..") worked", 3)
 		end
 
 	elseif isDefaultID(et, id) then
 		setElementModel(source, id)
 	else
-		outputChatBox("[onClientElementStreamIn] Warning: unknown "..et.." model ID: "..id, 255,255,0)
+		outputDebugString("[onClientElementStreamIn] Warning: unknown "..et.." model ID: "..id, 2)
 	end
 end)
 
@@ -199,17 +189,21 @@ addEventHandler( "onClientElementStreamOut", root,
 function ()
 	local et = getElementType(source)
 
-	-- Ped support
-	if not (et == "ped" or et == "player") then
+	if not isElementTypeSupported(et) then
 		return
 	end
-	if et == "player" then et = "ped" end--so it can be recognised in the array
-
 
 	local id = tonumber(getElementData(source, dataNames[et]))
 	if not (id) then return end -- doesn't have a custom model
 
 	if isCustomModID(et, id) then
 		freeElementCustomMod("ped", id)
+	end
+end)
+
+addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
+function (stoppedResource)
+	for id, v in pairs(allocated_ids) do
+		freeElementCustomMod(v.modType, id)
 	end
 end)

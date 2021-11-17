@@ -12,9 +12,9 @@ More info:
 
 ## Supported Types
 
-- [x] ped (skin)
-- [ ] vehicle  *[coming soon]*
-- [ ] object  *[coming soon]*
+- [x] peds (skins)
+- [x] objects
+- [ ] vehicles  *[coming soon]*
 
 ## Commands
 
@@ -63,11 +63,26 @@ local ped = createPed(0, 0,0,5) -- creates a ped in the center of the map; skin 
 if ped then
    -- setElementModel(ped, skin) -- bad!
    local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
-   setElementData(ped, data_name, skin) -- sets the skin ID data; clients listening for this data will apply the skin ID on the created ped
+   setElementData(ped, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the created ped
 end
 ```
 
 ### Example #2
+
+(**serverside**) Spawning an object with a new model ID:
+
+**Before you would use setElementModel serverside, with clientside-set models you can't**
+```lua
+local model = 50001 -- valid modded object ID that you defined
+local object = createObject(1337, 0,0,8) -- creates an object in the center of the map; model ID 1337 is irrelevant
+if object then
+   -- setElementModel(object, model) -- bad!
+   local data_name = exports.newmodels:getDataNameFromType("object") -- gets the correct data name
+   setElementData(object, data_name, model) -- sets the model ID data; clients listening for this data will apply their corresponding allocated model ID on the created object
+end
+```
+
+### Example #3
 
 (**serverside**) Spawning a player after login and setting their skin ID:
 
@@ -84,10 +99,10 @@ setElementRotation(thePlayer,rx,ry,rz)
 
 -- setElementModel(thePlayer, skin) -- bad!
 local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
-setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply the skin ID on the player
+setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the player
 ```
 
-### Example #3
+### Example #4
 
 (**serverside**) Saving a player's skin ID on disconnect:
 

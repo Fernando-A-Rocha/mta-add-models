@@ -6,13 +6,21 @@
     
     <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21024.0"></min_mta_version> <!-- https://nightly.mtasa.com -->
 
-    <!-- mod files -->
+    <!--          mod files          -->
+
+    <!-- skins -->
     <file src="models/20001.dff"/>
     <file src="models/20001.txd"/>
     <file src="models/20002.dff"/>
     <file src="models/20002.txd"/>
     <file src="models/20003.dff"/>
     <file src="models/20003.txd"/>
+
+    <!-- objects -->
+    <file src="models/50001.dff"/>
+    <file src="models/50001.txd"/>
+    <file src="models/50001.col"/>
+
     
     <script type="shared" src="shared.lua"/>
     <script type="client" src="client.lua"/>
