@@ -1,14 +1,17 @@
 ![Banner](https://i.imgur.com/bH2Yuz6.png)
 
+# Introduction
+
 ## About
 
 **mta-add-models** is a MTA resource that acts as a library, making use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function to add new models
 - syncs all added models with all players
 - minimalistic, optimized and bug free
 
-More info:
-- MTA Forum thread: [here](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
-- Contact (author): **Discord** Nando#7736
+MTA forum topic: [here](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
+
+Contact (author): Nando#7736 **(Discord)**
+
 
 ## Supported Types
 
@@ -17,7 +20,23 @@ More info:
 - [x] objects
 - [ ] vehicles  *[coming soon]*
 
-## Commands (Testing)
+# Getting Started
+
+## Install
+
+- Get the latest release: [here](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest)
+- Download the source code Zip and extract it
+- Place the `newmodels` folder in your server's resources
+- Use command `start newmodels` in server console
+
+## Quick Tutorial
+
+- Place mod files [newmodels/models](/newmodels/models) (dff & txd (& col for objects))
+- List them in [newmodels/meta.xml](/newmodels/meta.xml) like the example
+- Define them in [newmodels/mod_list.lua](/newmodels/mod_list.lua) inside `modList` like the example
+- Use the [commands](#commands) to test, have fun!
+
+## Commands
 
 - /listmods **lists all defined mods**
 - /allocatedids **shows all allocated mod IDs in realtime**
@@ -27,18 +46,11 @@ More info:
 - /pedskin [ID] **creates a ped and sets their skin to a default or new ID**
 - /myskin [ID] **sets your skin to a default or new ID**
 
-## Quick Tutorial (Testing)
-
-- place mod files newmodels/models (dff & txd (& col for objects))
-- list them in meta.xml like the example
-- define them in mod_list.lua inside modList like the example
-- use the commands to test, have fun!
-
-## Implementing
+# Implementing
 
 Click [here](#gamemode-implementations) for specific gamemode implementations like OwlGaming.
 
-### (❗) Explanation
+## (❗) Explanation
 
 - This applies to elements created **serverside** with the following functions:
   - `createPed` (use a placeholder ID when creating, e.g. 1)
@@ -54,9 +66,9 @@ Click [here](#gamemode-implementations) for specific gamemode implementations li
 - **DO NOT USE** `setElementModel` or `getElementModel` **ANYMORE** in **serverside** scripts for setting/getting model IDs
 - **See examples below** to understand how what's been described can be put in place.
 
-## Lua Examples
+# Lua Examples
 
-### Example #1
+## Example #1
 
 (**serverside**) Spawning a ped with a new skin ID:
 
@@ -71,7 +83,7 @@ if ped then
 end
 ```
 
-### Example #2
+## Example #2
 
 (**serverside**) Spawning an object with a new model ID:
 
@@ -86,7 +98,7 @@ if object then
 end
 ```
 
-### Example #3
+## Example #3
 
 (**serverside**) Spawning a player after login and setting their skin ID:
 
@@ -106,7 +118,7 @@ local data_name = exports.newmodels:getDataNameFromType("player") -- gets the co
 setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the player
 ```
 
-### Example #4
+## Example #4
 
 (**serverside**) Saving a player's skin ID on disconnect:
 
@@ -124,9 +136,9 @@ addEventHandler( "onPlayerQuit", root,
 )
 ```
 
-## Gamemode Implementations
+# Gamemode Implementations
 
-### [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Custom Peds
+## [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Custom Peds
 
 In order to have custom new skins, you're going to have to search through all the scripts for **serverside** instances of:
 - **getElementModel** `replace with setElementData -> skinID`
@@ -148,7 +160,7 @@ You will find a lot more scripts that need to be changed if you want to use new 
 - Supporting custom skins in the [clothes](https://github.com/OwlGamingCommunity/MTA/tree/main/mods/deathmatch/resources/clothes) system
 - ...
 
-## Final Note
+# Final Note
 
 Feel free to update this README.md if you wish to provide tutorial(s) for other implementations, or generally improve the current documentation.
 
