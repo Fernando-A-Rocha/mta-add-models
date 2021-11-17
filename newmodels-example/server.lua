@@ -6,9 +6,9 @@
 	Test Implementation #1
 	
 	What it does:
-		Adds a new skin from by reading the myMods array,
-		with the files stored in this resource by calling addExternalMod_CustomFilenames
-		To try this skin use /myskin -1
+		Adds a new skin by reading the myMods array,
+		with mod files stored in this resource by calling addExternalMod_CustomFilenames
+		To try this skin use /myskin -1 (a newmodels test command)
 
 	Commands:
 		/removemod
