@@ -183,14 +183,13 @@ function setElementCustomModel(element, elementType, id)
 	end
 
 	local currModel = getElementModel(element)
-	local diffModel = 1
-	if currModel == 1 then diffModel = 0 end
-
-	if getElementModel(element) ~= allocated_id then
-		setElementModel(element, allocated_id)
-	else
-		outputDebugString("["..(eventName or "?").."] Warning: trying to set "..et.." SAME model: "..allocated_id, 2)
+	if currModel == allocated_id then
+		local diffModel = 1
+		if currModel == 1 then diffModel = 0 end
+		setElementModel(element, diffModel)
 	end
+	
+	setElementModel(element, allocated_id)
 	return true
 end
 

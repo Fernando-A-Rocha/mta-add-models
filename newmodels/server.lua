@@ -25,12 +25,13 @@ local startTickCount
 _setElementModel = setElementModel
 function setElementModel(element, id) -- force refresh
 	local currModel = getElementModel(element)
-	local diffModel = 1
-	if currModel == 1 then diffModel = 0 end
-
-	if _setElementModel(element, diffModel) then
-		_setElementModel(element, id)
+	if currModel == id then
+		local diffModel = 1
+		if currModel == 1 then diffModel = 0 end
+		_setElementModel(element, diffModel)
 	end
+
+	_setElementModel(element, id)
 	return true
 end
 
@@ -198,10 +199,9 @@ addEventHandler("newmodels:requestModList", resourceRoot, requestModList)
 
 
 function resetElementModel(element)
-	local model = getElementModel(element)
-	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..model,0,238, 255, 156)
-	
-	setElementModel(element, model)
+	local currModel = getElementModel(element)
+	setElementModel(element, currModel)
+	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..currModel,0, 36, 83, 255)
 end
 addEventHandler("newmodels:resetElementModel", resourceRoot, resetElementModel)
 
