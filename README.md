@@ -43,8 +43,9 @@ Contact (author): Nando#7736 **(Discord)**
 - /selements **lists all streamed in elements for debugging purposes**
 - /t1 **creates a ped and sets an incorrect element model ID data**
 - /t2 **creates a ped and sets an element model ID data, then destroys it**
-- /pedskin [ID] **creates a ped and sets their skin to a default or new ID**
 - /myskin [ID] **sets your skin to a default or new ID**
+- /makeped [ID] **creates a ped and sets its model to a default or new ID**
+- /makeobject [ID] **creates an object and sets its model to a default or new ID**
 
 # Implementing
 
