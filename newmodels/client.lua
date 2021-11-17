@@ -81,17 +81,10 @@ function allocateNewMod(modType, id)
 	return true
 end
 
-function deallocateNewMod(modType, id, allocated_id)
-
-	engineFreeModel(allocated_id)
-	allocated_ids[id] = nil
-	print("Freed allocated ID "..allocated_id.." for "..modType.." mod ID "..id)
-end
-
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)
 	for id, v in pairs(allocated_ids) do
-		deallocateNewMod(v.modType, id, v.allocated_id)
+		freeElementCustomMod(v.modType, id)
 	end
 end)
 
@@ -120,13 +113,16 @@ function clientSetElementCustomMod(element, modType, id)
 	return true
 end
 
-function freeElementCustomMod(element, modType, id)
+function freeElementCustomMod(modType, id)
 	local allocated_info = allocated_ids[id]
 	if not allocated_info then
 		return
 	end
-
-	deallocateNewMod(modType, id, allocated_info.allocated_id)
+	
+	local allocated_id = allocated_info.allocated_id
+	engineFreeModel(allocated_id)
+	allocated_ids[id] = nil
+	print("Freed allocated ID "..allocated_id.." for "..modType.." mod ID "..id)
 end
 
 addEventHandler( "onClientElementDataChange", root, 
@@ -214,6 +210,6 @@ function ()
 	if not (id) then return end -- doesn't have a custom model
 
 	if isCustomModID(et, id) then
-		freeElementCustomMod(source, "ped", id)
+		freeElementCustomMod("ped", id)
 	end
 end)
