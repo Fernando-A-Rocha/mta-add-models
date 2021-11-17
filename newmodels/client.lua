@@ -6,15 +6,46 @@
 	Commands:
 		/allocatedids
 		/selements
+	
+	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
-local SEE_ALLOCATED_TABLE = true -- automatically executes /allocatedids on startup
+-- Test setting:
+local SEE_ALLOCATED_TABLE = true -- [testing] automatically executes /allocatedids on startup
 
-local allocated_ids = {}
+
+
+-- Custom events:
+addEvent("newmodels:receiveModList", true)
+
+
+local allocated_ids = {} -- { [new id] = allocated id }
+local received_modlist -- will be { [element type] = {...} }
+local waiting_queue = {} -- [element] = { func num, args }
+
+
+function getModNameFromID(elementType, id) -- [Exported - Client Version]
+	if not elementType then return end
+	if not tonumber(id) then return end
+	if not received_modlist then return outputDebugString("getModNameFromID: Client hasn't received modList yet", 1) end
+
+	local mods = received_modlist[elementType]
+	if mods then
+		id = tonumber(id)
+
+		for k,v in pairs(mods) do
+			if id == v.id then
+				return v.name -- found mod
+			end
+		end
+	end
+end
 
 function allocateNewMod(elementType, id)
 
-	-- /!\ doesn't take 'player' as type so we need to force that to 'ped'
+
+	-- /!\ only this function doesn't accept 'player'
+	-- as type so we need to change that to 'ped'
 	local elementType2 = elementType
 	if elementType2 == "player" then elementType2 = "ped" end
 
@@ -23,12 +54,48 @@ function allocateNewMod(elementType, id)
 		return false, "Failed: engineRequestModel('"..elementType2.."')"
 	end
 
-	local txdpath = modsFolder..id..".txd"
-	local dffpath = modsFolder..id..".dff"
-	local colpath
 
+	local foundMod
+	for k, mod in pairs(received_modlist[elementType]) do
+		if mod.id == id then
+			foundMod = mod
+			break
+		end
+	end
+	if not foundMod then
+		return false, "Failed to retrieve "..elementType.." mod ID "..id.." from list stored in client"
+	end
+
+	local paths = getActualModPaths(elementType, foundMod.path, id)
+
+
+	local txdpath = paths.txd
+
+	if not txdpath then
+		return false, "Failed to get TXD path for mod ID "..id
+	end
+	if not fileExists(txdpath) then
+		return false, "File doesn't exist: "..txdpath
+	end
+
+	local dffpath = paths.dff
+
+	if not dffpath then
+		return false, "Failed to get DFF path for mod ID "..id
+	end
+	if not fileExists(dffpath) then
+		return false, "File doesn't exist: "..dffpath
+	end
+
+	local colpath
 	if elementType == "object" then
-		colpath = modsFolder..id..".col"
+		colpath = paths.col
+		if not colpath then
+			return false, "Failed to get COL path for mod ID "..id
+		end
+		if not fileExists(colpath) then
+			return false, "File doesn't exist: "..colpath
+		end
 	end
 
 	local txdworked,dffworked,colworked = false,false,false
@@ -134,15 +201,25 @@ function hasOtherElementsWithModel(element, id)
 	return false
 end
 
-addEventHandler( "onClientElementDataChange", root, 
-function (theKey, oldValue, newValue)
-	
+-- (1) updateElementOnDataChange
+function updateElementOnDataChange(source, theKey, oldValue, newValue)
+
+	local data_et = getDataTypeFromName(theKey)
 	local et = getElementType(source)
+
+	if data_et ~= et then return end
+
 	if isElementTypeSupported(et) and tonumber(newValue) then
 		
 		local id = tonumber(newValue)
 
+		if not received_modlist then
+			waiting_queue[source] = {num=1, args={theKey, oldValue, newValue}}
+			return
+		end
+
 		if isCustomModID(et, id) then
+
 
 			local success, reason = setElementCustomModel(source, et, id)
 			if not success then
@@ -170,9 +247,13 @@ function (theKey, oldValue, newValue)
 			end
 		end
 	end
-end)
+end
+addEventHandler( "onClientElementDataChange", root, function (theKey, oldValue, newValue) updateElementOnDataChange(source, theKey, oldValue, newValue) end)
 
+
+-- (2) updateStreamedInElement
 function updateStreamedInElement(source)
+
 	local et = getElementType(source)
 
 	if not isElementTypeSupported(et) then
@@ -181,6 +262,11 @@ function updateStreamedInElement(source)
 
 	local id = tonumber(getElementData(source, dataNames[et]))
 	if not (id) then return end -- doesn't have a custom model
+
+	if not received_modlist then
+		waiting_queue[source] = {num=2}
+		return
+	end
 
 	if isCustomModID(et, id) then
 
@@ -205,7 +291,10 @@ function updateStreamedInElement(source)
 end
 addEventHandler( "onClientElementStreamIn", root, function () updateStreamedInElement(source) end)
 
+
+-- (3) updateStreamedOutElement
 function updateStreamedOutElement(source)
+
 	local et = getElementType(source)
 
 	if not isElementTypeSupported(et) then
@@ -215,7 +304,13 @@ function updateStreamedOutElement(source)
 	local id = tonumber(getElementData(source, dataNames[et]))
 	if not (id) then return end -- doesn't have a custom model
 
+	if not received_modlist then
+		waiting_queue[source] = {num=3}
+		return
+	end
+
 	if isCustomModID(et, id) then
+
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
 
@@ -228,6 +323,75 @@ function updateStreamedOutElement(source)
 	end
 end
 addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
+addEventHandler( "onClientElementDestroy", root, function () updateStreamedOutElement(source) end) -- same behavior for stream out
+
+
+-- Free waiting_queue memory when player leaves
+addEventHandler( "onClientPlayerQuit", root, 
+function (reason)
+	if waiting_queue[source] then
+		waiting_queue[source] = nil
+	end
+end)
+
+
+function updateElementsInQueue()
+	for element, v in pairs(waiting_queue) do
+		local num = v.num
+		local args = v.args
+
+		if num == 1 then
+			local theKey, oldValue, newValue = unpack(args)
+			updateElementOnDataChange(element, theKey, oldValue, newValue)
+		elseif num == 2 then
+			updateStreamedInElement(element)
+		elseif num == 3 then
+			updateStreamedOutElement(element)
+		end
+
+		waiting_queue[element] = nil
+		outputDebugString("updateElementsInQueue -> "..num.." on a "..getElementType(element), 3)
+	end
+end
+
+function receiveModList(modList)
+	received_modlist = modList
+	outputDebugString("Received mod list on client", 0, 115, 236, 255)
+	-- iprint(modList)
+
+	updateElementsInQueue()
+end
+addEventHandler("newmodels:receiveModList", resourceRoot, receiveModList)
+
+addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
+function (stoppedResource)
+	for id, allocated_id in pairs(allocated_ids) do
+		freeElementCustomMod(id)
+	end
+end)
+
+addEventHandler( "onClientResourceStart", resourceRoot,
+function (startedResource)
+	-- search for streamed in elements with custom model ID datas
+	-- these were spawned in another resource and set to using custom model ID
+	-- we need to apply the model on them
+
+	for elementType, name in pairs(dataNames) do
+		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
+			updateStreamedInElement(el)
+		end
+	end
+
+	if SEE_ALLOCATED_TABLE then
+		togSeeAllocatedTable()
+	end
+
+	triggerLatentServerEvent("newmodels:requestModList", resourceRoot)
+end)
+
+
+---------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
+------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
 
 local drawing = false
 
@@ -290,27 +454,3 @@ function outputStreamedInElements(cmd)
 	end
 end
 addCommandHandler("selements", outputStreamedInElements, false)
-
-addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
-function (stoppedResource)
-	for id, allocated_id in pairs(allocated_ids) do
-		freeElementCustomMod(id)
-	end
-end)
-
-addEventHandler( "onClientResourceStart", resourceRoot,
-function (startedResource)
-	-- search for streamed in elements with custom model ID datas
-	-- these were spawned in another resource and set to using custom model ID
-	-- we need to apply the model on them
-
-	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
-			updateStreamedInElement(el)
-		end
-	end
-
-	if SEE_ALLOCATED_TABLE then
-		togSeeAllocatedTable()
-	end
-end)
