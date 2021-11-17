@@ -495,6 +495,7 @@ end
 addCommandHandler("listmods", listModsCmd, false, false)
 
 -- test 1: set wrong element data on ped
+-- expected behavior: it should stay with the skin it spawned with
 addCommandHandler("t1", function(thePlayer, cmd)
 
 	local x,y,z = getElementPosition(thePlayer)
@@ -504,6 +505,9 @@ addCommandHandler("t1", function(thePlayer, cmd)
 end, false, false)
 
 -- test 2: create ped, set custom skin and destroy it shortly after
+-- expected behavior:
+	-- frees the model for the client if no other streamed elements are using the same model ID
+	-- does nothing if other streamed elements are using the same model ID
 addCommandHandler("t2", function(thePlayer, cmd)
 
 	local x,y,z = getElementPosition(thePlayer)
@@ -516,7 +520,7 @@ end, false, false)
 
 
 -- test 3: create ped, set custom skin and remove the model element data
--- expected behavior: model 280 should be restored
+-- expected behavior: model it spawned with should be restored serverside
 addCommandHandler("t3", function(thePlayer, cmd)
 
 	local x,y,z = getElementPosition(thePlayer)
