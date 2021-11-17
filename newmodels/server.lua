@@ -16,6 +16,21 @@
 addEvent("newmodels:requestModList", true)
 addEvent("newmodels:resetElementModel", true)
 
+local resName = getResourceName(getThisResource())
+
+-- TESTING /!\
+function onPreFunction(sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ...)
+	if sourceResource == getThisResource() then
+		-- outputDebugString(functionName.." used in "..resName, 2)
+		return
+	end
+
+	outputDebugString(functionName.." ignored in "..getResourceName(sourceResource).." - "..tostring(luaFilename).." - Line "..tostring(luaLineNumber), 1)
+	return "skip"
+end
+-- addDebugHook("preFunction", onPreFunction, {"setElementModel", "getElementModel"})
+
+
 local SERVER_READY = false
 local startTickCount
 
@@ -355,7 +370,6 @@ end
 
 
 -- [Optional] Messages:
-local resName = getResourceName(getThisResource())
 
 addEventHandler( "onResourceStart", resourceRoot, -- startup message
 function (startedResource)

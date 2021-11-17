@@ -22,7 +22,7 @@
     <file src="models/50001.col"/>
 
 
-    <script type="shared" src="util.lua"/>
+    <script type="shared" src="shared.lua"/>
     <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
