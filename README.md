@@ -20,6 +20,13 @@ Contact (author): Nando#7736 **(Discord)**
 - [x] objects
 - [ ] vehicles  *[coming soon]*
 
+## Your opinion matters!
+
+Click the button to check the project's feedback page:
+
+[<img src="https://i.imgur.com/x19GaN1.png?1">](https://github.com/Fernando-A-Rocha/mta-add-models/issues/7)
+
+
 # Getting Started
 
 ## Install
