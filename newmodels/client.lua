@@ -182,7 +182,15 @@ function setElementCustomModel(element, elementType, id)
 		end
 	end
 
-	setElementModel(element, allocated_id)
+	local currModel = getElementModel(element)
+	local diffModel = 1
+	if currModel == 1 then diffModel = 0 end
+
+	if getElementModel(element) ~= allocated_id then
+		setElementModel(element, allocated_id)
+	else
+		outputDebugString("["..(eventName or "?").."] Warning: trying to set "..et.." SAME model: "..allocated_id, 2)
+	end
 	return true
 end
 
@@ -231,6 +239,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 	if et == "player" and data_et == "ped" then data_et = "player" end
 	if et == "ped" and data_et == "player" then data_et = "ped" end
 
+
 	if data_et ~= et then return end
 
 	if isElementTypeSupported(et) then
@@ -254,7 +263,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 				end
 
 			elseif isDefaultID(et, id) then
-				setElementModel(source, id)
+				outputDebugString("["..(eventName or "?").."] Warning: trying to set "..et.." default ID: "..id, 2)
 			else
 				outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
 			end
@@ -316,8 +325,7 @@ function updateStreamedInElement(source)
 		end
 
 	elseif isDefaultID(et, id) then
-		outputDebugString("["..(eventName or "?").."] default ID: setElementModel(source, "..id..") worked", 3)
-		setElementModel(source, id)
+		outputDebugString("["..(eventName or "?").."] Warning: trying to set "..et.." default ID: "..id, 2)
 	else
 		outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
 	end
@@ -358,6 +366,49 @@ end
 addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
 addEventHandler( "onClientElementDestroy", root, function () updateStreamedOutElement(source) end) -- same behavior for stream out
 
+-- (4) updateModelChangedElement
+function updateModelChangedElement(source, oldModel, newModel)
+	local et = getElementType(source)
+	if not isElementTypeSupported(et) then
+		return
+	end
+
+	if not received_modlist then
+		waiting_queue[source] = {num=4, args={oldModel,newModel}}
+		return
+	end
+
+	-- outputChatBox("MODEL CHANGE: "..tostring(oldModel).." => "..tostring(newModel))
+
+	local id
+	for id2, allocated_id in pairs(allocated_ids) do
+		if allocated_id == tonumber(newModel) then
+			id = id2
+			break
+		end
+	end
+
+	local old_id
+	for id2, allocated_id in pairs(allocated_ids) do
+		if tonumber(oldModel) == allocated_id then
+			old_id = id2
+			break
+		end
+	end
+
+
+	id = id or newModel
+	local dataName = dataNames[et]
+	if getElementData(source, dataName) and not isCustomModID(et, id) then
+		setElementData(source, dataName, nil)
+		outputDebugString("Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
+	end
+
+	if old_id and isCustomModID(et, old_id) and not hasOtherElementsWithModel(source, old_id) then
+		freeElementCustomMod(old_id)
+	end
+end
+addEventHandler( "onClientElementModelChange", root, function (oldModel, newModel) updateModelChangedElement(source, oldModel, newModel) end)
 
 -- Free waiting_queue memory when player leaves
 addEventHandler( "onClientPlayerQuit", root, 
@@ -380,6 +431,9 @@ function updateElementsInQueue()
 			updateStreamedInElement(element)
 		elseif num == 3 then
 			updateStreamedOutElement(element)
+		elseif num == 4 then
+			local oldModel, newModel = unpack(args)
+			updateModelChangedElement(element, oldModel, newModel)
 		end
 
 		waiting_queue[element] = nil

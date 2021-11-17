@@ -4,35 +4,35 @@
 	server.lua
 
 	Commands:
-		/pedskin
 		/myskin
+		/makeped
 		/makeobject
 		/listmods
 
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
+local START_STOP_MESSAGES = true
+
 -- Custom events:
 addEvent("newmodels:requestModList", true)
 addEvent("newmodels:resetElementModel", true)
 
 local resName = getResourceName(getThisResource())
-
--- TESTING /!\
-function onPreFunction(sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ...)
-	if sourceResource == getThisResource() then
-		-- outputDebugString(functionName.." used in "..resName, 2)
-		return
-	end
-
-	outputDebugString(functionName.." ignored in "..getResourceName(sourceResource).." - "..tostring(luaFilename).." - Line "..tostring(luaLineNumber), 1)
-	return "skip"
-end
--- addDebugHook("preFunction", onPreFunction, {"setElementModel", "getElementModel"})
-
-
 local SERVER_READY = false
 local startTickCount
+
+_setElementModel = setElementModel
+function setElementModel(element, id) -- force refresh
+	local currModel = getElementModel(element)
+	local diffModel = 1
+	if currModel == 1 then diffModel = 0 end
+
+	if _setElementModel(element, diffModel) then
+		_setElementModel(element, id)
+	end
+	return true
+end
 
 function getModNameFromID(elementType, id) -- [Exported - Server Version]
 	if not elementType then return end
@@ -150,6 +150,20 @@ function (startedResource)
 	end
 end)
 
+addEventHandler( "onResourceStop", resourceRoot, 
+function (stoppedResource, wasDeleted)
+
+
+	for elementType, name in pairs(dataNames) do
+		for k,el in ipairs(getElementsByType(elementType)) do
+			local id = tonumber(getElementData(el, name))
+			if id then
+				resetElementModel(el)
+			end
+		end
+	end
+end)
+
 function sendModListWhenReady(player)
 	if not isElement(player) then return end
 	if not SERVER_READY then
@@ -182,25 +196,30 @@ function requestModList()
 end
 addEventHandler("newmodels:requestModList", resourceRoot, requestModList)
 
+
 function resetElementModel(element)
 	local model = getElementModel(element)
 	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..model,0,238, 255, 156)
 	
-	-- refresh it
-	if setElementModel(element, 0) then
-		setElementModel(element, model)
-	end
+	setElementModel(element, model)
 end
 addEventHandler("newmodels:resetElementModel", resourceRoot, resetElementModel)
 
-function setElementCustomModel(element, elementType, id)
-	local good, reason = verifySetModelArguments(element, elementType, id)
+function setCustomElementModel(element, et, id)
+
+	local good, reason = verifySetModelArguments(element, et, id)
 	if not good then
 		return false, reason
 	end
-	local dataName = dataNames[elementType]
-	setElementData(element, dataName, id)
-	return true
+
+	if isCustomModID(et, id) then
+		local dataName = dataNames[et]
+		setElementData(element, dataName, id)
+		return true
+	
+	else
+		return false, "Not a custom model ID: "..id
+	end
 end
 
 --[[
@@ -370,23 +389,50 @@ end
 
 
 -- [Optional] Messages:
+if START_STOP_MESSAGES then
 
-addEventHandler( "onResourceStart", resourceRoot, -- startup message
-function (startedResource)
-	local version = getResourceInfo(startedResource, "version") or false
-	outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175started", root,255,255,255, true)
-end)
-addEventHandler( "onResourceStop", resourceRoot, -- startup message
-function (stoppedResource)
-	local version = getResourceInfo(stoppedResource, "version") or false
-	outputChatBox("#ffc175[mta-add-models] #ababab"..resName..(version and (" "..version) or ("")).." #ffc175stopped", root,255,255,255, true)
-end)
+	addEventHandler( "onResourceStart", resourceRoot, -- startup message
+	function (startedResource)
+		local version = getResourceInfo(startedResource, "version") or false
+		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175started", root,255,255,255, true)
+	end)
+	addEventHandler( "onResourceStop", resourceRoot, -- startup message
+	function (stoppedResource)
+		local version = getResourceInfo(stoppedResource, "version") or false
+		outputChatBox("#ffc175[mta-add-models] #ababab"..resName..(version and (" "..version) or ("")).." #ffc175stopped", root,255,255,255, true)
+	end)
+end
 
 
 
 ---------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
 ------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
 
+
+function mySkinCmd(thePlayer, cmd, id)
+	if not tonumber(id) then
+		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
+	end
+	id = tonumber(id)
+
+	local elementType = "player"
+	if isCustomModID(elementType, id) then
+
+		local success, reason = setCustomElementModel(thePlayer, elementType, id)
+		if not success then
+			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
+		else
+			outputChatBox("Set your skin to custom ID "..id, thePlayer, 0,255,0)
+		end
+
+	elseif isDefaultID(elementType, id) then
+		outputChatBox("Set your skin to default ID "..id, thePlayer, 0,255,0)
+		setElementModel(thePlayer, id)
+	else
+		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
+	end
+end
+addCommandHandler("myskin", mySkinCmd, false, false)
 
 function pedSkinCmd(thePlayer, cmd, id)
 
@@ -411,35 +457,24 @@ function pedSkinCmd(thePlayer, cmd, id)
 		setElementDimension(thePed, dim)
 		setElementRotation(thePed, rx,ry,rz, "default",true)
 
-		local success, reason = setElementCustomModel(thePed, elementType, id)
+		if isDefaultID(elementType, id) then
+			outputChatBox("Created ped with default ID "..id, thePlayer, 0,255,0)
+			setElementModel(thePed, id)
+			return
+		end
+
+		local success, reason = setCustomElementModel(thePed, elementType, id)
 		if not success then
 			destroyElement(thePed)
-			outputChatBox("Failed to set ped custom skin: "..reason, thePlayer, 255,0,0)
+			return outputChatBox("Failed to set ped custom skin: "..reason, thePlayer, 255,0,0)
 		end
+
+		outputChatBox("Created ped with custom ID "..id, thePlayer, 0,255,0)
 	else
 		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
 	end
 end
-addCommandHandler("pedskin", pedSkinCmd, false, false)
-
-function mySkinCmd(thePlayer, cmd, id)
-	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
-	end
-	id = tonumber(id)
-
-	local elementType = "player"
-	if isCustomModID(elementType, id) or isDefaultID(elementType, id) then
-
-		local success, reason = setElementCustomModel(thePlayer, elementType, id)
-		if not success then
-			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
-		end
-	else
-		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
-	end
-end
-addCommandHandler("myskin", mySkinCmd, false, false)
+addCommandHandler("makeped", pedSkinCmd, false, false)
 
 function objectModelCmd(thePlayer, cmd, id)
 	if not tonumber(id) then
@@ -449,7 +484,6 @@ function objectModelCmd(thePlayer, cmd, id)
 
 	local elementType = "object"
 	if isCustomModID(elementType, id) or isDefaultID(elementType, id) then
-
 
 		local x,y,z = getElementPosition(thePlayer)
 		local rx,ry,rz = getElementRotation(thePlayer)
@@ -463,12 +497,19 @@ function objectModelCmd(thePlayer, cmd, id)
 		setElementDimension(theObject, dim)
 		setElementRotation(theObject, rx,ry,rz)
 
-		local success, reason = setElementCustomModel(theObject, elementType, id)
-		if not success then
-			destroyElement(theObject)
-			outputChatBox("Failed to set object custom ID: "..reason, thePlayer, 255,0,0)
+		if isDefaultID(elementType, id) then
+			outputChatBox("Created object with default ID "..id, thePlayer, 0,255,0)
+			setElementModel(theObject, id)
+			return
 		end
 
+		local success, reason = setCustomElementModel(theObject, elementType, id)
+		if not success then
+			destroyElement(theObject)
+			return outputChatBox("Failed to set object custom ID: "..reason, thePlayer, 255,0,0)
+		end
+
+		outputChatBox("Created object with custom ID "..id, thePlayer, 0,255,0)
 		setElementPosition(thePlayer, x,y,z+4)
 	else
 		outputChatBox("Object ID "..id.." doesn't exist", thePlayer,255,0,0)
@@ -533,3 +574,58 @@ addCommandHandler("t3", function(thePlayer, cmd)
 	end, 3000, 1, ped, data_name)
 
 end, false, false)
+
+
+--[[
+-- Get all valid default object IDs
+addEventHandler( "onResourceStart", resourceRoot,
+function (startedResource)
+
+	local text = "{ "
+	for i=1,20000 do
+		local o = createObject(i,0,0,5)
+		if o then
+			text = text..i..", "
+		end
+	end
+	local f = fileCreate("object_ids.lua")
+	fileWrite(f, text)
+	fileClose(f)
+end)
+--]]
+
+--[[
+-- Get all valid default vehicle IDs
+addEventHandler( "onResourceStart", resourceRoot,
+function (startedResource)
+
+	local text = "{ "
+	for i=1,20000 do
+		local o = createVehicle(i,0,0,5)
+		if o then
+			text = text..i..", "
+		end
+	end
+	local f = fileCreate("vehicle_ids.lua")
+	fileWrite(f, text)
+	fileClose(f)
+end)
+--]]
+
+--[[
+-- Get all valid default ped IDs (skins)
+addEventHandler( "onResourceStart", resourceRoot,
+function (startedResource)
+
+	local text = "{ "
+	for i=1,20000 do
+		local o = createPed(i,0,0,5)
+		if o then
+			text = text..i..", "
+		end
+	end
+	local f = fileCreate("ped_ids.lua")
+	fileWrite(f, text)
+	fileClose(f)
+end)
+--]]

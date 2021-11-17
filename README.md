@@ -72,14 +72,16 @@ This applies to elements created **serverside** with the following functions:
 - `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 1)
 
 After creating these elements, you have to:
-- Fetch element data name from this resouce using `getDataNameFromType(elementType)`
-- Set their model ID via element data with the name you just obtained
-- **(Recommended)** Check if model ID is custom using `isDefaultID(elementType, modelID)` and `isCustomModID(elementType, modelID)`
-- **(Optional)** Fetch element model name, if custom, using `getModNameFromID(elementType, modelID)`
+- **(Important)** Check if model ID is custom or default using `isDefaultID(elementType, modelID)` and `isCustomModID(elementType, modelID)`
+- If it's custom you then have to do the following:
+  - Fetch element data name from this resouce using `getDataNameFromType(elementType)`
+  - Set their model ID via element data with the name you just obtained
+  - **(Optional)** You can fetch element model name using `getModNameFromID(elementType, modelID)`
+- Otherwise if it's a default model just use `setElementModel` as usual
 
-This resource makes the clients listen to the set element datas in order to apply model IDs accordingly on their game.
+This resource makes the clients listen to the set element datas in order to apply custom model IDs accordingly on their game.
 
-**DO NOT USE** `setElementModel` or `getElementModel` **ANYMORE** in **serverside** scripts for setting/getting model IDs. You cannot use the new added model IDs serverside. Plus, it will break the system by overriding the element's model serverside for every player.
+**Remember**: You cannot use the new added model IDs serverside.
 
 **See examples below** to understand how what's been described can be put in place.
 
@@ -88,13 +90,11 @@ This resource makes the clients listen to the set element datas in order to appl
 ## Example #1
 
 (**serverside**) Spawning a ped with a new skin ID:
-
-**Before you would use setElementModel serverside, with clientside-set models you can't**
 ```lua
 local skin = 20001 -- valid modded skin ID that you defined
 local ped = createPed(0, 0,0,5) -- creates a ped in the center of the map; skin ID 0 is irrelevant
 if ped then
-   -- setElementModel(ped, skin) -- bad!
+   -- setElementModel(ped, skin) -- wrong because custom model ID is only valid clientside
    local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
    setElementData(ped, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the created ped
 end
@@ -103,13 +103,11 @@ end
 ## Example #2
 
 (**serverside**) Spawning an object with a new model ID:
-
-**Before you would use setElementModel serverside, with clientside-set models you can't**
 ```lua
 local model = 50001 -- valid modded object ID that you defined
 local object = createObject(1337, 0,0,8) -- creates an object in the center of the map; model ID 1337 is irrelevant
 if object then
-   -- setElementModel(object, model) -- bad!
+   -- setElementModel(object, model) -- wrong because custom model ID is only valid clientside
    local data_name = exports.newmodels:getDataNameFromType("object") -- gets the correct data name
    setElementData(object, data_name, model) -- sets the model ID data; clients listening for this data will apply their corresponding allocated model ID on the created object
 end
@@ -117,35 +115,36 @@ end
 
 ## Example #3
 
-(**serverside**) Spawning a player after login and setting their skin ID:
-
-**Before you would use setElementModel serverside, with clientside-set models you can't**
+(**serverside**) Spawning a player after login and setting their skin ID (custom or not):
 ```lua
 -- TODO: fetch player data from database, here we use static values:
 local x,y,z = 0,0,5
 local rx,ry,rz = 0,0,0
 local int,dim = 0,0
-local skin = 20001
+local skin = 20001 -- or can be default ID
 
 spawnPlayer(thePlayer, x,y,z, 0, 0, int, dim) -- spawns the player in the center of the map; skin ID 0 is irrelevant
 setElementRotation(thePlayer,rx,ry,rz)
 
--- setElementModel(thePlayer, skin) -- bad!
-local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
-setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the player
+if exports.newmodels:isCustomModID("player", skin) then -- skin ID is custom
+
+   -- setElementModel(thePlayer, skin) -- wrong because custom model ID is only valid clientside
+   local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
+   setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the player
+
+else -- skin ID is default, handled by script normally without calling newmodels functions
+   setElementModel(thePlayer, skin)
+end
 ```
 
 ## Example #4
 
 (**serverside**) Saving a player's skin ID on disconnect:
-
-**Before you would use getElementModel serverside, with clientside-set models you can't**
 ```lua
 addEventHandler( "onPlayerQuit", root, 
   function (quitType, reason, responsibleElement)
-    -- local skin = getElementModel(source) -- bad!
-    local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
-    local skin = getElementData(source, data_name)
+    -- get the custom skin ID (if any) or the default skin ID defined serverside
+    local skin = exports.newmodels:getDataNameFromType("player") or getElementModel(source)
     if skin then
     	-- TODO: save skin ID in the database
     end
@@ -156,14 +155,6 @@ addEventHandler( "onPlayerQuit", root,
 # Gamemode Implementations
 
 ## [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Custom Peds
-
-In order to have custom new skins, you're going to have to search through all the scripts for **serverside** instances of:
-- **getElementModel** `replace with setElementData -> skinID`
-- **setElementModel** `replace with getElementData -> skinID`
-- **createPed** `use 0 as skinid; use setElementData -> skinID afterwards`
-- **spawnPlayer** `use 0 as skinid; use setElementData -> skinID afterwards`
-
-See the proper implementation examples below, they're helpful.
 
 Example scripts that you need to adapt:
 - Clientside peds in character selection screen [account/c_characters.lua](https://github.com/OwlGamingCommunity/MTA/blob/main/mods/deathmatch/resources/account/c_characters.lua)
