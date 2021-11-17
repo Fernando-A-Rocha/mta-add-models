@@ -20,6 +20,7 @@ addEvent("newmodels:receiveModList", true)
 
 
 local allocated_ids = {} -- { [new id] = allocated id }
+local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
 local received_modlist -- will be { [element type] = {...} }
 local waiting_queue = {} -- [element] = { func num, args }
 
@@ -146,6 +147,11 @@ function allocateNewMod(elementType, id)
 	
 	allocated_ids[id] = allocated_id
 	outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
+
+	model_elements[allocated_id] = {dffmodel,txdmodel} -- Save model elements for destroying on deallocation
+	if isElement(colmodel) then
+		table.insert(model_elements[allocated_id], colmodel)
+	end
 	return true
 end
 
@@ -186,6 +192,16 @@ function freeElementCustomMod(id)
 	else
 		outputDebugString("["..(eventName or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id.." but engineFreeModel returned false", 2)
 	end
+
+	local count = 0
+	for k, element in pairs(model_elements[allocated_id]) do
+		if isElement(element) then
+			if destroyElement(element) then
+				count = count + 1
+			end
+		end
+	end
+	outputDebugString("["..(eventName or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..allocated_id, 0,227, 255, 117)
 end
 
 function hasOtherElementsWithModel(element, id)
@@ -206,6 +222,8 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 
 	local data_et = getDataTypeFromName(theKey)
 	local et = getElementType(source)
+	if et == "player" and data_et == "ped" then data_et = "player" end
+	if et == "ped" and data_et == "player" then data_et = "ped" end
 
 	if data_et ~= et then return end
 
@@ -219,7 +237,6 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 		end
 
 		if isCustomModID(et, id) then
-
 
 			local success, reason = setElementCustomModel(source, et, id)
 			if not success then
