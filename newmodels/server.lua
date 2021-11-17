@@ -199,6 +199,7 @@ addEventHandler("newmodels:requestModList", resourceRoot, requestModList)
 
 
 function resetElementModel(element)
+	if not isElement(element) then return end
 	local currModel = getElementModel(element)
 	setElementModel(element, currModel)
 	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..currModel,0, 36, 83, 255)
