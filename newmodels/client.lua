@@ -5,6 +5,7 @@
 
 	Commands:
 		/allocatedids
+		/selements
 ]]
 
 local SEE_ALLOCATED_TABLE = true -- automatically executes /allocatedids on startup
@@ -196,6 +197,7 @@ function updateStreamedInElement(source)
 		end
 
 	elseif isDefaultID(et, id) then
+		outputDebugString("["..(eventName or "?").."] default ID: setElementModel(source, "..id..") worked", 3)
 		setElementModel(source, id)
 	else
 		outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
@@ -251,6 +253,43 @@ function drawAllocatedTable()
 	local x,y = sx/2 - width/2, 20
 	dxDrawText(text, x,y,x,y, "0xffffffff", dfontsize, dfont)
 end
+
+
+function outputStreamedInElements(cmd)
+	local tab = {}
+	local total = 0
+
+	for elementType, name in pairs(dataNames) do
+		local elements = getElementsByType(elementType, getRootElement(), true)
+		local count = table.size(elements)
+		if count > 0 then
+			tab[elementType] = elements
+			total = total + count
+		end
+	end
+
+	outputChatBox("TOTAL: "..total,255,126,0)
+	for elementType, elements in pairs(tab) do
+			
+		outputChatBox(elementType..": "..table.size(elements))
+		local dataName = dataNames[elementType]
+
+		for k, element in pairs(elements) do
+			local id = tonumber(getElementData(element, dataName))
+			if id then
+				local extra = ""
+				local allocted_id = allocated_ids[id]
+				if allocated_id then
+					extra = " allocated to ID "..alocated_id
+				end
+				local x,y,z = getElementPosition(element)
+				local int,dim = getElementInterior(element), getElementDimension(element)
+				outputChatBox(" - Model ID "..id..extra.." ("..x..", "..y..", "..z.." | int: "..int..", dim: "..dim..")",255,194,14)
+			end
+		end
+	end
+end
+addCommandHandler("selements", outputStreamedInElements, false)
 
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)

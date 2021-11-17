@@ -21,6 +21,7 @@ More info:
 
 - /listmods **lists all defined mods**
 - /allocatedids **shows all allocated mod IDs in realtime**
+- /selements **lists all streamed in elements for debugging purposes**
 - /pedskin [ID] **creates a ped and sets their skin to a default or new ID**
 - /myskin [ID] **sets your skin to a default or new ID**
 
