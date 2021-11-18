@@ -13,11 +13,28 @@
 -- Test setting:
 local SEE_ALLOCATED_TABLE = true -- [testing] automatically executes /allocatedids on startup
 
-
-
 -- Custom events:
 addEvent("newmodels:receiveModList", true)
 
+
+_outputDebugString = outputDebugString
+function outputDebugString(text, mode, r,g,b)
+	if not mode then mode = 3 end
+
+	if mode == 1 then
+		r,g,b = 255,25,25
+	elseif mode == 2 then
+		r,g,b = 255,194,14
+	elseif mode == 3 then
+		r,g,b = 25,255,25
+	end
+
+	if not r then r = 255 end
+	if not g then g = 255 end
+	if not b then b = 255 end
+
+	outputChatBox(text, r,g,b)
+end
 
 local allocated_ids = {} -- { [new id] = allocated id }
 local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
@@ -43,8 +60,11 @@ function getModNameFromID(elementType, id) -- [Exported - Client Version]
 	end
 end
 
-function allocateNewMod(elementType, id)
+function allocateNewMod(element, elementType, id)
 
+	if not isElementStreamedIn(element) then
+		return false, elementType.." element not streamed in"
+	end
 
 	-- /!\ only this function doesn't accept 'player'
 	-- as type so we need to change that to 'ped'
@@ -172,7 +192,7 @@ function setElementCustomModel(element, elementType, id)
 	-- allocate as it hasn't been done already
 	local allocated_id = allocated_ids[id]
 	if not allocated_id then
-		local success, reason2 = allocateNewMod(elementType, id)
+		local success, reason2 = allocateNewMod(element, elementType, id)
 		if success then
 
 			-- try setting again
@@ -182,6 +202,7 @@ function setElementCustomModel(element, elementType, id)
 		end
 	end
 
+	-- refresh model so change can actually have an effect
 	local currModel = getElementModel(element)
 	if currModel == allocated_id then
 		local diffModel = 1
@@ -193,28 +214,44 @@ function setElementCustomModel(element, elementType, id)
 	return true
 end
 
-function freeElementCustomMod(id)
+local atimers = {}
+local adelay = 10000
+
+
+function freeElementCustomMod(id, trackElement)
 	local allocated_id = allocated_ids[id]
 	if not allocated_id then
 		return
 	end
 	
-	allocated_ids[id] = nil
-	if engineFreeModel(allocated_id) then
-		outputDebugString("["..(eventName or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id, 3)
-	else
-		outputDebugString("["..(eventName or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id.." but engineFreeModel returned false", 2)
-	end
+	if isTimer(atimers[id]) then killTimer(atimers[id]) end
+	atimers[id] = setTimer(function(a,b,c,el)
 
-	local count = 0
-	for k, element in pairs(model_elements[allocated_id]) do
-		if isElement(element) then
-			if destroyElement(element) then
-				count = count + 1
+		if (isElement(el) and not isElementStreamedIn(el)) or (not isElement(el)) then
+
+			allocated_ids[id] = nil
+			if engineFreeModel(a) then
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b, 3)
+			else
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b.." but engineFreeModel returned false", 2)
 			end
+
+			local count = 0
+			for k, element in pairs(model_elements[a]) do
+				if isElement(element) then
+					if destroyElement(element) then
+						count = count + 1
+					end
+				end
+			end
+			outputDebugString("["..(c or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..a, 0,227, 255, 117)
+
+		else
+			outputDebugString("aaaaaaaaaaa", 0,227, 255, 117)
 		end
-	end
-	outputDebugString("["..(eventName or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..allocated_id, 0,227, 255, 117)
+
+		atimers[b] = nil
+	end, adelay, 1, allocated_id, id, eventName, trackElement)
 end
 
 function hasOtherElementsWithModel(element, id)
@@ -271,7 +308,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 
 			if tonumber(oldValue) then
 				-- removing new model id
-				triggerServerEvent("newmodels:resetElementModel", resourceRoot, source)
+				triggerServerEvent("newmodels:resetElementModel", resourceRoot, source, tonumber(oldValue))
 			end
 		end
 
@@ -281,7 +318,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 			if not old_allocated_id then return end -- was not allocated
 
 			if not hasOtherElementsWithModel(source, old_id) then
-				freeElementCustomMod(old_id)
+				freeElementCustomMod(old_id, source)
 			else
 				outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..old_allocated_id.." for new "..et.." model ID "..old_id,3)
 				return
@@ -315,6 +352,8 @@ function updateStreamedInElement(source)
 		if allocated_id then return end -- ignore if already allocated:
 		-- the model only needs to be set once in onClientElementDataChange
 		-- note: when an element is streamed out the model is deallocated/freed
+
+		showElementCoords(source)
 
 		local success, reason = setElementCustomModel(source, et, id)
 		if not success then
@@ -354,8 +393,10 @@ function updateStreamedOutElement(source)
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
 
+		showElementCoords(source)
+
 		if not hasOtherElementsWithModel(source, id) then
-			freeElementCustomMod(id)
+			freeElementCustomMod(id, source)
 		else
 			outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..allocated_id.." for new "..et.." model ID "..id,3)
 			return
@@ -377,7 +418,7 @@ function updateModelChangedElement(source, oldModel, newModel)
 		return
 	end
 
-	-- outputChatBox("MODEL CHANGE: "..tostring(oldModel).." => "..tostring(newModel))
+	outputDebugString("MODEL CHANGE: "..tostring(oldModel).." => "..tostring(newModel), 0, 187,187,187)
 
 	local id
 	for id2, allocated_id in pairs(allocated_ids) do
@@ -399,12 +440,17 @@ function updateModelChangedElement(source, oldModel, newModel)
 	id = id or newModel
 	local dataName = dataNames[et]
 	if getElementData(source, dataName) and not isCustomModID(et, id) then
-		setElementData(source, dataName, nil)
-		outputDebugString("Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
-	end
 
-	if old_id and isCustomModID(et, old_id) and not hasOtherElementsWithModel(source, old_id) then
-		freeElementCustomMod(old_id)
+		if isElementStreamedIn(source) then
+			showElementCoords(source)
+
+            setElementData(source, dataName, nil)
+        	outputDebugString("["..(eventName or "?").."] Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
+
+			if old_id and isCustomModID(et, old_id) and not hasOtherElementsWithModel(source, old_id) then
+				freeElementCustomMod(old_id, source)
+			end
+        end
 	end
 end
 addEventHandler( "onClientElementModelChange", root, function (oldModel, newModel) updateModelChangedElement(source, oldModel, newModel) end)
@@ -417,6 +463,10 @@ function (reason)
 	end
 end)
 
+function showElementCoords(element)
+	local x,y,z = getElementPosition(element)
+	outputDebugString("["..(eventName or "?").."] "..x..", "..y..", "..z,0, 255,255,255)
+end
 
 function updateElementsInQueue()
 	for element, v in pairs(waiting_queue) do
@@ -464,6 +514,7 @@ function updateStreamedElements()
 
 					freed[id] = true
 					freeElementCustomMod(id)
+					-- triggerServerEvent("newmodels:resetElementModel", resourceRoot, source, tonumber(oldValue))
 				
 				else
 					updateStreamedInElement(el)
@@ -580,3 +631,11 @@ function outputStreamedInElements(cmd)
 	end
 end
 addCommandHandler("selements", outputStreamedInElements, false)
+
+addEventHandler("onClientRender", getRootElement(), function()
+    for i,v in ipairs(getElementsByType("object")) do
+        local et = getElementType(v)
+        local x,y = 15,40
+        dxDrawText(tostring(inspect(getElementData(v, dataNames[et]) ) ), x,y, x,y, "0xffffffff", 5, "default-bold")
+    end
+end)
