@@ -131,3 +131,27 @@ function table.size ( tab )
     
     return length
 end
+
+-- Enable this to have all debug console messages to go chatbox (better readability I think)
+_outputDebugString = outputDebugString
+function outputDebugString(text, mode, r,g,b)
+	if not mode then mode = 3 end
+
+	if mode == 1 then
+		r,g,b = 255,25,25
+	elseif mode == 2 then
+		r,g,b = 255,194,14
+	elseif mode == 3 then
+		r,g,b = 25,255,25
+	end
+
+	if not r then r = 255 end
+	if not g then g = 255 end
+	if not b then b = 255 end
+
+	if isElement(localPlayer) then
+		outputChatBox(text, r,g,b)
+	else
+		outputChatBox("((server)) "..text, root, r,g,b)
+	end
+end

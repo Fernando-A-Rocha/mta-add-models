@@ -23,12 +23,14 @@ function onClientElementStreamOutLibrary()
 end
 
 function isElementStreamedInLibrary(el)
-	return onClientElementsStream[el] == true and true or false
+	local result = onClientElementsStream[el] == true
+	-- print("isElementStreamedInLibrary", inspect(el), result)
+	return result
 end
 
 function setElementStreamLibrary(el, switch)
 	if isElement(el) then
-		print(inspect(el), switch)
+		-- print("setElementStreamLibrary", inspect(el), switch)
 		if switch == true and onClientElementsStream[el] == nil then
 			onClientElementsStream[el] = true
 			if not isEventHandlerAdded("onClientElementStreamOut", el, onClientElementStreamOutLibrary) then
@@ -47,4 +49,5 @@ function setElementStreamLibrary(el, switch)
 			end
 		end
 	end
+	return true
 end
