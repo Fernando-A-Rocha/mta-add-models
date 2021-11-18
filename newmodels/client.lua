@@ -162,18 +162,15 @@ function allocateNewMod(element, elementType, id)
 	end
 
 	if not (allgood) then
-
 		engineFreeModel(allocated_id)
 		if txdmodel then destroyElement(txdmodel) end -- free memory
 		if dffmodel then destroyElement(dffmodel) end -- free memory
 		if colmodel then destroyElement(colmodel) end -- free memory
-
 		return false, "Failed to load mod ID "..id..": dff ("..tostring(dffworked)..") txd ("..tostring(txdworked)..") "..(col and ("col ("..tostring(colworked)..")") or "")
 	end
 	
 	allocated_ids[id] = allocated_id
 	outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
-
 	model_elements[allocated_id] = {dffmodel,txdmodel} -- Save model elements for destroying on deallocation
 	if isElement(colmodel) then
 		table.insert(model_elements[allocated_id], colmodel)
@@ -209,8 +206,8 @@ function setElementCustomModel(element, elementType, id)
 		if currModel == 1 then diffModel = 0 end
 		setElementModel(element, diffModel)
 	end
-	
 	setElementModel(element, allocated_id)
+	setElementStreamLibrary(element, true)
 	return true
 end
 
@@ -223,19 +220,15 @@ function freeElementCustomMod(id, trackElement)
 	if not allocated_id then
 		return
 	end
-	
 	if isTimer(atimers[id]) then killTimer(atimers[id]) end
 	atimers[id] = setTimer(function(a,b,c,el)
-
-		if (isElement(el) and not isElementStreamedIn(el)) or (not isElement(el)) then
-
+		if ( isElement(el) and not isElementStreamedInLibrary(el) ) then
 			allocated_ids[id] = nil
 			if engineFreeModel(a) then
 				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b, 3)
 			else
 				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b.." but engineFreeModel returned false", 2)
 			end
-
 			local count = 0
 			for k, element in pairs(model_elements[a]) do
 				if isElement(element) then
@@ -245,11 +238,7 @@ function freeElementCustomMod(id, trackElement)
 				end
 			end
 			outputDebugString("["..(c or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..a, 0,227, 255, 117)
-
-		else
-			outputDebugString("aaaaaaaaaaa", 0,227, 255, 117)
 		end
-
 		atimers[b] = nil
 	end, adelay, 1, allocated_id, id, eventName, trackElement)
 end

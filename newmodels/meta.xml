@@ -26,6 +26,7 @@
     <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
+    <script type="client" src="streamer.lua"/>
 
 
     <export type="shared" function="getDataNameFromType"/>
