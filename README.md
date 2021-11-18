@@ -56,6 +56,8 @@ Click the button to check the project's feedback page:
 
 # Implementing
 
+This library was created with the goal of being usable in any server without breaking most of its scripts. It actually lets you use default GTA model IDs on any elements serverside, without issues. However, look no further if you want to implement new model IDs and how they can be set/fetched.
+
 Click [here](#gamemode-implementations) for specific gamemode implementations like OwlGaming.
 
 ## (❗) Explanation
