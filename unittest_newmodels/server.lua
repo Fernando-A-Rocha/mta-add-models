@@ -1,3 +1,26 @@
+--[[
+   Resource for Unit Tests
+]]
+
+addEventHandler( "onResourceStart", resourceRoot, 
+function (startedResource)
+   for k, player in ipairs(getElementsByType("player")) do
+      setElementPosition(player, 5,5,5)
+      outputChatBox("unittest_newmodels -#ff80d5 teleported to center of map", player, 255, 255, 255, true)
+   end
+end)
+
+-- Example #4 from documentation
+addCommandHandler("testquit", function(thePlayer, cmd)
+   -- get the custom skin ID (if any) or the default skin ID defined serverside
+   local data_name = exports.newmodels:getDataNameFromType("player")
+   local skin = getElementData(thePlayer, data_name) or getElementModel(thePlayer)
+   if skin then
+      -- TODO: save skin ID in the database
+      outputChatBox("Your skin ID: "..skin, thePlayer, 255,126,0)
+   end
+end, false, false)
+
 --OK
 -- print("EXAMPLE PED TEST 1")
 
@@ -41,20 +64,18 @@
 -- setTimer(setElementData, 1000, 1, object, data_name, 50001)
 -- setTimer(setElementPosition, 2500, 1, object, 3000, 3000, 3000)
 -- setTimer(setElementPosition, 5000, 1, object, 0, 0, 4)
--- setTimer(function()
---    if not destroyElement(object) then
---       outputChatBox("FAILED TO DESTROY",root,255,0,0)
---    else
---       outputChatBox("DESTROYED",root,255,255,0)
---    end
--- end, 7000, 1)
+-- setTimer(destroyElement, 7000, 1, object)
 
---NOT OK: causes recursion
--- engineFreeModel happens when element is streamed out
--- game force streams the element in
--- game sets the model to default 1337
--- game force streams the element out
--- it triggers the free function again, repeats^
+
+--[[
+   NOT OK: causes recursion
+engineFreeModel happens when element is streamed out
+game force streams the element in
+game sets the model to default 1337
+game force streams the element out
+it triggers the free function again, repeats^
+--]]
+
 -- print("EXAMPLE OBJECT TEST")
 
 -- local data_name = exports.newmodels:getDataNameFromType("object")

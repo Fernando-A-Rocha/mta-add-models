@@ -152,9 +152,10 @@ end
 addEventHandler( "onPlayerQuit", root, 
   function (quitType, reason, responsibleElement)
     -- get the custom skin ID (if any) or the default skin ID defined serverside
-    local skin = exports.newmodels:getDataNameFromType("player") or getElementModel(source)
+    local data_name = exports.newmodels:getDataNameFromType("player")
+    local skin = getElementData(source, data_name) or getElementModel(source)
     if skin then
-    	-- TODO: save skin ID in the database
+      print("TODO: save skin ID in the database")
     end
   end
 )

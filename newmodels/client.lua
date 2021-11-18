@@ -217,16 +217,21 @@ function freeElementCustomMod(id, trackElement)
 	atimers[id] = setTimer(function(a,b,c,el)
 
 		local test1 = ( isElement(el) and not isElementStreamedInLibrary(el) )
-		local test2 = ( not isElement(el) )
+		local test2 = ( isElement(el) and isElementStreamedInLibrary(el) and ((not getElementData(el, dataName)) or getElementData(el, dataName) ~= id) )
+		local test3 = ( not isElement(el) )
 
-		if test1 or test2 then
+
+		if test1 or test2 or test3 then
 
 			allocated_ids[id] = nil
 
-			if engineFreeModel(a) then
-				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b, 3)
-			else
-				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b.." but engineFreeModel returned false", 2)
+			local worked = engineFreeModel(a)
+			if test1 then
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": element not streamed in"..((not worked) and (" but engineFreeModel returned false") or ""), 3)
+			elseif test2 then
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": element streamed in with different custom model or default model"..((not worked) and (" but engineFreeModel returned false") or ""), 3)
+			elseif test3 then
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": no element found"..((not worked) and (" but engineFreeModel returned false") or ""), 3)
 			end
 
 			local count = 0
@@ -239,12 +244,6 @@ function freeElementCustomMod(id, trackElement)
 			end
 
 			outputDebugString("["..(c or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..a, 0,227, 255, 117)
-		
-		elseif not test1 then
-			outputDebugString("["..(c or "?").."] Not freeElementCustomMod "..et..": element is streamed in", 2)
-
-		elseif not test2 then
-			outputDebugString("["..(c or "?").."] Not freeElementCustomMod "..et..": element", 2)
 		end
 
 		atimers[b] = nil
@@ -629,11 +628,3 @@ function outputStreamedInElements(cmd)
 	end
 end
 addCommandHandler("selements", outputStreamedInElements, false)
-
-addEventHandler("onClientRender", getRootElement(), function()
-    for i,v in ipairs(getElementsByType("object")) do
-        local et = getElementType(v)
-        local x,y = 15,40
-        dxDrawText(tostring(inspect(getElementData(v, dataNames[et]) ) ), x,y, x,y, "0xffffffff", 5, "default-bold")
-    end
-end)

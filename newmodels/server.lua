@@ -12,15 +12,51 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
+-- Config:
 local START_STOP_MESSAGES = true
+local SERVER_FUNCS_WARNINGS = true
+
+
 
 -- Custom events:
 addEvent("newmodels:requestModList", true)
 addEvent("newmodels:resetElementModel", true)
 
-local resName = getResourceName(getThisResource())
+local thisRes = getThisResource()
+local resName = getResourceName(thisRes)
+
 local SERVER_READY = false
 local startTickCount
+
+if SERVER_FUNCS_WARNINGS then
+
+	function onCreateElement(sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ...)
+		
+		local sourceResName = getResourceName(sourceResource)
+		local args = { ... }
+
+		outputDebugString("(Func-Warn) "..functionName.." used in "..sourceResName.." ("..tostring(luaFilename).." line "..tostring(luaLineNumber)..") args: "..inspect(args), 2)
+		outputDebugString("(Func-Warn) To set a custom model ID see the tutorial provided in documentation.", 0, 255, 221, 0)
+	end
+	addDebugHook("postFunction", onCreateElement, { "createPed", "createVehicle", "createObject", "spawnPlayer" })
+
+	function onSetGetModel(sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ...)
+
+		local sourceResName = getResourceName(sourceResource)
+		local args = { ... }
+		outputDebugString("(Func-Warn) "..functionName.." used in "..sourceResName.." ("..tostring(luaFilename).." line "..tostring(luaLineNumber)..") args: "..inspect(args), 2)
+
+		if functionName == "getElementModel" then
+			outputDebugString("(Func-Warn) Remember that it will only return default IDs serverside, it's unaware of the custom model IDs set clientside.", 0, 255, 255, 0)
+
+		elseif functionName == "setElementModel" then
+			outputDebugString("(Func-Warn) Remember that it can only set default IDs serverside, it's unaware of the custom model IDs, those are set clientside.", 0, 255, 255, 0)
+
+		end
+	end
+	addDebugHook("postFunction", onSetGetModel, { "getElementModel", "setElementModel" })
+
+end
 
 _setElementModel = setElementModel
 function setElementModel(element, id) -- force refresh
@@ -172,7 +208,7 @@ function sendModListWhenReady(player)
 		local now = getTickCount()
 		if (now - startTickCount) > 10000 then -- waited too long and server still not ready
 			outputDebugString("ABORTING - STOPPING RESOURCE as SERVER_READY==false !", 1)
-			stopResource(getThisResource())
+			stopResource(thisRes)
 			return
 		end
 
