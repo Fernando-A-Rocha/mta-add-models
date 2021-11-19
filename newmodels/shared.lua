@@ -42,7 +42,7 @@ dataNames = {
 	vehicle = "vehicleID",
 
 	-- incorrect behaviour:
-	-- object = "objectID", -- there is currently a bug with engineFreeModel when object streamed out
+	object = "objectID", -- there is currently a bug with engineFreeModel when object streamed out
 }
 
 function getDataTypeFromName(dataName)

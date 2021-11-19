@@ -223,6 +223,13 @@ end
 local atimers = {}
 local adelay = 5000
 
+local prevent_object_bug = {}
+addEventHandler( "onClientElementDestroy", root, 
+function ()
+	if getElementType(source) ~= "object" then return end
+	if isTimer(prevent_object_bug[source]) then killTimer(prevent_object_bug[source]) end
+	prevent_object_bug[source] = nil
+end)
 
 function freeElementCustomMod(id, trackElement)
 	local allocated_id = allocated_ids[id]
@@ -253,23 +260,27 @@ function freeElementCustomMod(id, trackElement)
 
 			local worked = engineFreeModel(a)
 			if test1 then
-				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": element not streamed in"..((not worked) and (" but engineFreeModel returned false") or ""), 3)
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": element not streamed in"..((not worked) and (" but engineFreeModel returned false") or ""), 0,227, 255, 117)
+
+				if et == "object" then
+					prevent_object_bug[el] = setTimer(function() prevent_object_bug[el] = nil end, 2000, 1)
+				end
+
 			elseif test2 then
-				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": element streamed in with different custom model or default model"..((not worked) and (" but engineFreeModel returned false") or ""), 3)
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": element streamed in with different custom model or default model"..((not worked) and (" but engineFreeModel returned false") or ""), 0,227, 255, 117)
 			elseif test3 then
-				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": no element found"..((not worked) and (" but engineFreeModel returned false") or ""), 3)
+				outputDebugString("["..(c or "?").."] Freed allocated ID "..a.." for mod ID "..b..": no element found"..((not worked) and (" but engineFreeModel returned false") or ""), 0,227, 255, 117)
 			end
 
-			local count = 0
+			-- local count = 0
 			for k, element in pairs(model_elements[a]) do
 				if isElement(element) then
 					if destroyElement(element) then
-						count = count + 1
+						-- count = count + 1
 					end
 				end
 			end
-
-			outputDebugString("["..(c or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..a, 0,227, 255, 117)
+			-- outputDebugString("["..(c or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..a, 0,227, 255, 117)
 		end
 
 		atimers[b] = nil
@@ -373,6 +384,11 @@ function updateStreamedInElement(source)
 		if allocated_id then return end -- ignore if already allocated:
 		-- the model only needs to be set once in onClientElementDataChange
 		-- note: when an element is streamed out the model is deallocated/freed
+
+		if et == "object" and prevent_object_bug[source] then
+			-- print("Get fucked stupid bug")
+			return
+		end
 
 		showElementCoords(source)
 
