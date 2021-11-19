@@ -95,7 +95,7 @@ This resource makes the clients listen to the set element datas in order to appl
 
 **Remember**: You cannot use the new added model IDs serverside.
 
-**Special**: When doing `setVehicleHandling` on a vehicle with custom ID data, the handling is stored intelligently by the library and it will make sure the vehicle keeps it each time `setElementModel` happens (serverside and clientside), because this triggers MTA to reset the vehicle's handling. Example #6 below showcases this.
+**Special**: When doing `setVehicleHandling` (only on serverside vehicles) on a vehicle with custom ID data, the handling is stored intelligently by the library and it will make sure the vehicle keeps it each time `setElementModel` happens (serverside and clientside), because this triggers MTA to reset the vehicle's handling. Example #6 below showcases this.
 
 **See examples below** to understand how what's been described can be put in place.
 

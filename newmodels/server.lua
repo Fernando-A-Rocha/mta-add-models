@@ -52,11 +52,12 @@ function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, lua
 		return
 	end
 
-    if not savedHandlings[theVehicle] then
+	if not savedHandlings[theVehicle] then
 		savedHandlings[theVehicle] = {}
 	end
 	table.insert(savedHandlings[theVehicle], {property, var})
 	-- print(theVehicle, "Added handling: ", tostring(property), tostring(var))
+
 end
 addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
 
@@ -722,7 +723,15 @@ function makeVehicleCmd(thePlayer, cmd, id)
 		end
 
 		outputChatBox("Created vehicle with custom ID "..id, thePlayer, 0,255,0)
-		setElementPosition(thePlayer, x,y,z+4)
+		
+		setTimer(function()
+			if getPedOccupiedVehicle(thePlayer) then
+				removePedFromVehicle(thePlayer)
+				setTimer(warpPedIntoVehicle, 500, 1, thePlayer, theVehicle)
+			else
+				warpPedIntoVehicle(thePlayer, theVehicle)
+			end
+		end, 1000, 1)
 
 	elseif base_id then
 		outputChatBox("Vehicle ID "..base_id.." doesn't exist (for base ID)", thePlayer,255,0,0)
