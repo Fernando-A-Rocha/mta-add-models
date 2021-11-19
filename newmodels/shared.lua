@@ -6,11 +6,43 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
+-- Config:
+local CHAT_DEBUG_MESSAGES = true -- make debug console messages to go chatbox (better readability imo)
+
+
+if CHAT_DEBUG_MESSAGES then
+	_outputDebugString = outputDebugString
+	function outputDebugString(text, mode, r,g,b)
+		if not mode then mode = 3 end
+
+		if mode == 1 then
+			r,g,b = 255,25,25
+		elseif mode == 2 then
+			r,g,b = 255,194,14
+		elseif mode == 3 then
+			r,g,b = 25,255,25
+		end
+
+		if not r then r = 255 end
+		if not g then g = 255 end
+		if not b then b = 255 end
+
+		if isElement(localPlayer) then
+			outputChatBox(text, r,g,b)
+		else
+			outputChatBox("((server)) "..text, root, r,g,b)
+		end
+	end
+end
+
+
 dataNames = {
 	ped = "skinID",
 	player = "skinID",
+	vehicle = "vehicleID",
+
+	-- incorrect behaviour:
 	-- object = "objectID", -- there is currently a bug with engineFreeModel when object streamed out
-	-- vehicle = "vehicleID", -- not yet implemented
 }
 
 function getDataTypeFromName(dataName)
@@ -34,29 +66,33 @@ function isDefaultID(elementType, id) -- [Exported]
 	id = tonumber(id)
 	if not id then return end
 
-	if elementType == "ped" or elementType == "player" then
-		for k,id2 in pairs(pedIds) do
-			if id2 == id then
-				return true
+	if not elementType then -- check all IDs
+		return isDefaultID("ped", id) or isDefaultID("object", id) or isDefaultID("vehicle", id)
+	else
+		if elementType == "ped" or elementType == "player" then
+			for k,id2 in pairs(pedIds) do
+				if id2 == id then
+					return true
+				end
 			end
-		end
-	elseif elementType == "object" then
-		for k,id2 in pairs(objectIds) do
-			if id2 == id then
-				return true
+		elseif elementType == "object" then
+			for k,id2 in pairs(objectIds) do
+				if id2 == id then
+					return true
+				end
 			end
-		end
-	elseif elementType == "vehicle" then
-		for k,id2 in pairs(vehicleIds) do
-			if id2 == id then
-				return true
+		elseif elementType == "vehicle" then
+			for k,id2 in pairs(vehicleIds) do
+				if id2 == id then
+					return true
+				end
 			end
 		end
 	end
 	return false
 end
 
-function getActualModPaths(elementType, folder, id)
+function getActualModPaths(folder, id)
 	local path = folder
 
 	local lastchar = string.sub(folder, -1)
@@ -72,13 +108,13 @@ function getActualModPaths(elementType, folder, id)
 	}
 end
 
-function isCustomModID(elementType, id) -- [Exported]
+function isCustomModID(id) -- [Exported]
 
-	local name = getModNameFromID(elementType, id)
-	if not name then
+	local mod, elementType = getModDataFromID(id)
+	if not mod then
 		return false
 	end
-	return true
+	return true, mod, elementType
 end
 
 
@@ -130,28 +166,4 @@ function table.size ( tab )
     end
     
     return length
-end
-
--- Enable this to have all debug console messages to go chatbox (better readability I think)
-_outputDebugString = outputDebugString
-function outputDebugString(text, mode, r,g,b)
-	if not mode then mode = 3 end
-
-	if mode == 1 then
-		r,g,b = 255,25,25
-	elseif mode == 2 then
-		r,g,b = 255,194,14
-	elseif mode == 3 then
-		r,g,b = 25,255,25
-	end
-
-	if not r then r = 255 end
-	if not g then g = 255 end
-	if not b then b = 255 end
-
-	if isElement(localPlayer) then
-		outputChatBox(text, r,g,b)
-	else
-		outputChatBox("((server)) "..text, root, r,g,b)
-	end
 end

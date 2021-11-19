@@ -17,8 +17,8 @@ Contact (author): Nando#7736 **(Discord)**
 
 - [x] players
 - [x] peds
-- [x] objects
-- [ ] vehicles  *[coming soon]*
+- [x] vehicles
+- [ ] objects **(disabled until important bug is fixed, see Issues)**
 
 ## Your opinion matters!
 
@@ -33,10 +33,10 @@ Click the button to check the project's feedback page:
 
 - Get the latest release: [here](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest)
 - Download the source code Zip and extract it
-- Place the `newmodels` folder in your server's resources
+- Place the `newmodels` folder in your server's resources (other resources included are optional)
 - Use command `start newmodels` in server console
 
-## Quick Tutorial
+## Quick Testing
 
 - Place mod files [newmodels/models](/newmodels/models) (dff & txd (& col for objects))
 - List them in [newmodels/meta.xml](/newmodels/meta.xml) like the example
@@ -68,32 +68,34 @@ Click [here](#gamemode-implementations) for specific gamemode implementations li
 
 This library lets you load mods stored within the `newmodels` resource, and also add mods stored in other resources to the `modList` that it will load from.
 
-Check the [quick tutorial](#quick-tutorial) to understand how to load mods from within the `newmodels` resource (easier).
+Check the [quick testing](#quick-testing) to understand how to load mods from within the `newmodels` resource (easier).
 
 You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua):
-- `addExternalMod_IDFilenames(elementType, id, name, path)`
-- `addExternalMod_CustomFilenames(elementType, id, name, path_dff, path_txd, path_col)`
+- `addExternalMod_IDFilenames(elementType, id, base_id, name, path)`
+- `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col)`
 - `removeExternalMod(id)`
 
 ### Using Custom Element Models
 
-This applies to elements created **serverside** with the following functions:
+To create elements with custom IDs **serverside**, do the following with these functions:
 - `createPed` (use a placeholder ID when creating, e.g. 1)
 - `createObject` (use a placeholder ID when creating, e.g. 1337)
 - `createVehicle` (use a placeholder ID when creating, e.g. 400)
 - `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 1)
 
 After creating these elements, you have to:
-- **(Important)** Check if model ID is custom or default using `isDefaultID(elementType, modelID)` and `isCustomModID(elementType, modelID)`
+- **(Important)** Check if model ID is custom or default using `isDefaultID(modelID)` and `isCustomModID(modelID)`
 - If it's custom you then have to do the following:
   - Fetch element data name from this resouce using `getDataNameFromType(elementType)`
-  - Set their model ID via element data with the name you just obtained
-  - **(Optional)** You can fetch element model name using `getModNameFromID(elementType, modelID)`
+  - Set their custom model ID via element data with the name you just obtained
+  - **(Optional)** You can fetch all data of the mod using `getModDataFromID(modelID)`
 - Otherwise if it's a default model just use `setElementModel` as usual
 
 This resource makes the clients listen to the set element datas in order to apply custom model IDs accordingly on their game.
 
 **Remember**: You cannot use the new added model IDs serverside.
+
+**Special**: When doing `setVehicleHandling` on a vehicle with custom ID data, the handling is stored intelligently by the library and it will make sure the vehicle keeps it each time `setElementModel` happens (serverside and clientside), because this triggers MTA to reset the vehicle's handling. Example #6 below showcases this.
 
 **See examples below** to understand how what's been described can be put in place.
 
@@ -108,7 +110,8 @@ local ped = createPed(0, 0,0,5) -- creates a ped in the center of the map; skin 
 if ped then
    -- setElementModel(ped, skin) -- wrong because custom model ID is only valid clientside
    local data_name = exports.newmodels:getDataNameFromType("ped") -- gets the correct data name
-   setElementData(ped, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the created ped
+   setElementData(ped, data_name, skin) -- sets the skin ID data;
+   -- clients listening for this data will apply their corresponding allocated model ID on the created ped
 end
 ```
 
@@ -121,7 +124,8 @@ local object = createObject(1337, 0,0,8) -- creates an object in the center of t
 if object then
    -- setElementModel(object, model) -- wrong because custom model ID is only valid clientside
    local data_name = exports.newmodels:getDataNameFromType("object") -- gets the correct data name
-   setElementData(object, data_name, model) -- sets the model ID data; clients listening for this data will apply their corresponding allocated model ID on the created object
+   setElementData(object, data_name, model) -- sets the model ID data;
+   -- clients listening for this data will apply their corresponding allocated model ID on the created object
 end
 ```
 
@@ -129,20 +133,19 @@ end
 
 (**serverside**) Spawning a player after login and setting their skin ID (custom or not):
 ```lua
--- TODO: fetch player data from database, here we use static values:
-local x,y,z = 0,0,5
-local rx,ry,rz = 0,0,0
-local int,dim = 0,0
+-- you could fetch player data from database, here we use static values:
+local x,y,z, rx,ry,rz, int,dim = 0,0,5, 0,0,0, 0,0
 local skin = 20001 -- or can be default ID
 
 spawnPlayer(thePlayer, x,y,z, 0, 0, int, dim) -- spawns the player in the center of the map; skin ID 0 is irrelevant
 setElementRotation(thePlayer,rx,ry,rz)
 
-if exports.newmodels:isCustomModID("player", skin) then -- skin ID is custom
+if exports.newmodels:isCustomModID(skin) then -- skin ID is custom
 
    -- setElementModel(thePlayer, skin) -- wrong because custom model ID is only valid clientside
    local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
-   setElementData(thePlayer, data_name, skin) -- sets the skin ID data; clients listening for this data will apply their corresponding allocated model ID on the player
+   setElementData(thePlayer, data_name, skin) -- sets the skin ID data;
+   -- clients listening for this data will apply their corresponding allocated model ID on the player
 
 else -- skin ID is default, handled by script normally without calling newmodels functions
    setElementModel(thePlayer, skin)
@@ -159,10 +162,58 @@ addEventHandler( "onPlayerQuit", root,
     local data_name = exports.newmodels:getDataNameFromType("player")
     local skin = getElementData(source, data_name) or getElementModel(source)
     if skin then
-      print("TODO: save skin ID in the database")
+      print("save skin ID in the database")
     end
   end
 )
+```
+
+## Example #5
+
+(**serverside**) Adding a mod from your own resource:
+```lua
+-- make sure the main library resource is started before executing this code
+
+-- (you could fetch the values from a table or database)
+-- we suppose that you have a script with the following files in the root of your resource:
+--     mymod.dff and mymod.txd
+
+-- we assign custom ID 90001 to this skin mod by calling:
+local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
+  "ped", 90001, 1, "My skin mod", "mymod.dff", "mymod.txd" )
+
+if not worked then -- show why it failed to add
+  return outputDebugString(reason, 0,255, 110, 61)
+else
+  -- it means you can now use this ID to spawn custom peds or set custom player skins
+  -- like showcased in Example #1
+end
+```
+
+## Example #6
+
+(**serverside**) Spawning a vehicle and setting its handling
+```lua
+-- you could fetch this data from database, here we use static values:
+local x,y,z, rx,ry,rz, int,dim = 0,0,5, 0,0,0, 0,0
+local handling = { ["engineAcceleration"] = 15, ["brakeBias"] = 0.8, }
+local vehID = 90001 -- or can be default ID
+
+local theVehicle = createVehicle(400, x,y,z, rx,ry,rz)
+
+if exports.newmodels:isCustomModID(vehID) then -- veh ID is custom
+
+   -- setElementModel(theVehicle, vehID) -- wrong because custom model ID is only valid clientside
+   local data_name = exports.newmodels:getDataNameFromType("vehicle") -- gets the correct data name
+   setElementData(theVehicle, data_name, vehID) -- sets the veh ID data;
+   -- clients listening for this data will apply their corresponding allocated model ID on the player
+
+else -- veh ID is default, handled by script normally without calling newmodels functions
+   setElementModel(theVehicle, vehID)
+end
+for property,var in pairs(handling) do
+   setVehicleHandling(theVehicle, property, var)
+end
 ```
 
 # Gamemode Implementations

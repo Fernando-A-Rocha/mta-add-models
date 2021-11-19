@@ -2,19 +2,30 @@
     <!-- DOCUMENTATION:
         https://github.com/Fernando-A-Rocha/mta-add-models
     -->
-    <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.2.0" type="script"/>
+    <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.3.0" type="script"/>
     
-    <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21024.0"></min_mta_version> <!-- https://nightly.mtasa.com -->
+    <!-- https://nightly.mtasa.com  IMPORTANT TO HAVE THE VERSION SPECIFIED SO THAT ADDED MODELS WORK AS EXPECTED -->
+    <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21024.0"></min_mta_version>
 
     <!-- mod files -->
 
-    <!-- skins -->
+    <!-- peds -->
     <file src="models/20001.dff"/>
     <file src="models/20001.txd"/>
     <file src="models/20002.dff"/>
     <file src="models/20002.txd"/>
     <file src="models/20003.dff"/>
     <file src="models/20003.txd"/>
+
+    <!-- vehicles -->
+    <file src="models/80001.dff"/>
+    <file src="models/80001.txd"/>
+    <file src="models/80002.dff"/>
+    <file src="models/80002.txd"/>
+    <file src="models/80003.dff"/>
+    <file src="models/80003.txd"/>
+    <file src="models/80004.dff"/>
+    <file src="models/80004.txd"/>
 
     <!-- objects -->
     <file src="models/50001.dff"/>
@@ -26,11 +37,10 @@
     <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
-    <script type="client" src="streamer.lua"/>
 
 
     <export type="shared" function="getDataNameFromType"/>
-    <export type="shared" function="getModNameFromID"/>
+    <export type="shared" function="getModDataFromID"/>
     <export type="shared" function="isDefaultID"/>
     <export type="shared" function="isCustomModID"/>
 

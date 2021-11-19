@@ -4,11 +4,9 @@
 
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)
-   for k, player in ipairs(getElementsByType("player")) do
-      setElementPosition(player, 5,5,5)
-      outputChatBox("unittest_newmodels -#ff80d5 teleported to center of map", player, 255, 255, 255, true)
-   end
+   outputChatBox("unittest_newmodels -#ff80d5 use /bb to teleport to center of map ..", root, 255, 255, 255, true)
 end)
+addCommandHandler("bb", function(player) setElementPosition(player, 5,5,3.5) end, false, false)
 
 -- Example #4 from documentation
 addCommandHandler("testquit", function(thePlayer, cmd)
@@ -68,17 +66,35 @@ end, false, false)
 
 
 --[[
-   NOT OK: causes recursion
-engineFreeModel happens when element is streamed out
-game force streams the element in
-game sets the model to default 1337
-game force streams the element out
-it triggers the free function again, repeats^
+--NOT OK: causes recursion (weird behaviour):
+   when engineFreeModel happens when element is streamed out
+   game force streams the element in
+   game sets the model to default 1337
+   game force streams the element out
+   it triggers the free function again, repeats^
 --]]
-
 -- print("EXAMPLE OBJECT TEST")
 
 -- local data_name = exports.newmodels:getDataNameFromType("object")
 -- local object = createObject(1271, 0, 0, 4)
 -- setTimer(setElementData, 1000, 1, object, data_name, 50001)
 -- setTimer(setElementPosition, 2500, 1, object, 3000, 3000, 3000)
+
+
+--OK
+-- print("VEHICLE EXAMPLE TEST")
+
+-- local x,y,z, rx,ry,rz, int,dim = 0,0,5, 0,0,0, 0,0
+-- local handling = { ["engineAcceleration"] = 50, ["brakeBias"] = 1, }
+-- local data_name = exports.newmodels:getDataNameFromType("vehicle")
+-- for k,vehID in pairs({80001,80002}) do
+--    if exports.newmodels:isCustomModID(vehID) then
+--       local theVehicle = createVehicle(400, x,y,z, rx,ry,rz)
+--       if theVehicle then
+--          setElementData(theVehicle, data_name, vehID)
+--          for property,var in pairs(handling) do
+--             setVehicleHandling(theVehicle, property, var)
+--          end
+--       end
+--    end
+-- end

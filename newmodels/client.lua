@@ -10,11 +10,13 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
--- Test setting:
+-- Config:
 local SEE_ALLOCATED_TABLE = true -- [testing] automatically executes /allocatedids on startup
+
 
 -- Custom events:
 addEvent("newmodels:receiveModList", true)
+addEvent("newmodels:receiveVehicleHandling", true)
 
 
 local allocated_ids = {} -- { [new id] = allocated id }
@@ -22,20 +24,21 @@ local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
 local received_modlist -- will be { [element type] = {...} }
 local waiting_queue = {} -- [element] = { func num, args }
 
+-- Vehicle specific
+local update_handling = {} -- [element] = timer
 
-function getModNameFromID(elementType, id) -- [Exported - Client Version]
-	if not elementType then return end
+function getModDataFromID(id) -- [Exported - Client Version]
 	if not tonumber(id) then return end
-	if not received_modlist then return outputDebugString("getModNameFromID: Client hasn't received modList yet", 1) end
+	if not received_modlist then
+		-- outputDebugString("getModDataFromID: Client hasn't received modList yet", 1)
+		return
+	end
 
-	-- iprint(received_modlist)
-	local mods = received_modlist[elementType]
-	if mods then
-		id = tonumber(id)
-
+	id = tonumber(id)
+	for elementType, mods in pairs(received_modlist) do
 		for k,v in pairs(mods) do
 			if id == v.id then
-				return v.name -- found mod
+				return v, elementType -- found mod
 			end
 		end
 	end
@@ -43,7 +46,7 @@ end
 
 function allocateNewMod(element, elementType, id)
 
-	if not isElementStreamedInLibrary(element) then
+	if not isElementStreamedIn(element) then
 		return false, elementType.." element not streamed in"
 	end
 
@@ -52,7 +55,7 @@ function allocateNewMod(element, elementType, id)
 	local elementType2 = elementType
 	if elementType2 == "player" then elementType2 = "ped" end
 
-	local allocated_id = engineRequestModel(elementType2)
+	local allocated_id = engineRequestModel(elementType2, getModDataFromID(id).base_id)
 	if not allocated_id then
 		return false, "Failed: engineRequestModel('"..elementType2.."')"
 	end
@@ -74,7 +77,7 @@ function allocateNewMod(element, elementType, id)
 	if type(path)=="table" then
 		paths = path
 	else
-		paths = getActualModPaths(elementType, path, id)
+		paths = getActualModPaths(path, id)
 	end
 
 	local txdpath = paths.txd
@@ -166,7 +169,7 @@ function setElementCustomModel(element, elementType, id)
 	end
 
 	id = tonumber(id)
-	if setElementStreamLibrary(element, true) then
+	if isElementStreamedIn(element) then
 
 		-- allocate as it hasn't been done already
 		local allocated_id = allocated_ids[id]
@@ -184,11 +187,34 @@ function setElementCustomModel(element, elementType, id)
 		-- refresh model so change can actually have an effect
 		local currModel = getElementModel(element)
 		if currModel == allocated_id then
-			local diffModel = 1
-			if currModel == 1 then diffModel = 0 end
-			setElementModel(element, diffModel)
+
+			-- some logic to refresh model
+			local diffModel = 9--ped
+			if elementType == "vehicle" then
+				diffModel = 400
+			elseif elementType == "object" then
+				diffModel = 1337
+			end
+			if currModel == diffModel then
+				diffModel = diffModel + 1
+			end
+
+			if setElementModel(element, diffModel) then
+				setElementModel(element, allocated_id)
+			end
+		else
+			setElementModel(element, allocated_id)
 		end
-		setElementModel(element, allocated_id)
+
+		if getElementType(element)=="vehicle" then
+			if isTimer(update_handling[element]) then killTimer(update_handling[element]) end
+			update_handling[element] = setTimer(function()
+				if isElement(element) then
+					triggerLatentServerEvent("newmodels:updateVehicleHandling", resourceRoot, element)
+				end
+				update_handling[element] = nil
+			end, 1000, 1)
+		end
 	end
 
 	return true
@@ -212,18 +238,18 @@ function freeElementCustomMod(id, trackElement)
 		dataName = dataNames[et]
 	end
 
-	if isTimer(atimers[id]) then killTimer(atimers[id]) end
+	allocated_ids[id] = nil
 
+	if isTimer(atimers[id]) then killTimer(atimers[id]) end
 	atimers[id] = setTimer(function(a,b,c,el)
 
-		local test1 = ( isElement(el) and not isElementStreamedInLibrary(el) )
-		local test2 = ( isElement(el) and isElementStreamedInLibrary(el) and ((not getElementData(el, dataName)) or getElementData(el, dataName) ~= id) )
+		local test1 = ( isElement(el) and not isElementStreamedIn(el) )
+		local test2 = ( isElement(el) and isElementStreamedIn(el) and ((not getElementData(el, dataName)) or getElementData(el, dataName) ~= id) )
 		local test3 = ( not isElement(el) )
 
 
 		if test1 or test2 or test3 then
 
-			allocated_ids[id] = nil
 
 			local worked = engineFreeModel(a)
 			if test1 then
@@ -271,7 +297,6 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 	if et == "player" and data_et == "ped" then data_et = "player" end
 	if et == "ped" and data_et == "player" then data_et = "ped" end
 
-
 	if data_et ~= et then return end
 
 	if isElementTypeSupported(et) then
@@ -285,7 +310,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 				return
 			end
 
-			if isCustomModID(et, id) then
+			if isCustomModID( id) then
 
 				local success, reason = setElementCustomModel(source, et, id)
 				if not success then
@@ -342,7 +367,7 @@ function updateStreamedInElement(source)
 		return
 	end
 
-	if isCustomModID(et, id) then
+	if isCustomModID(id) then
 
 		local allocated_id = allocated_ids[id]
 		if allocated_id then return end -- ignore if already allocated:
@@ -384,7 +409,7 @@ function updateStreamedOutElement(source)
 		return
 	end
 
-	if isCustomModID(et, id) then
+	if isCustomModID(id) then
 
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
@@ -435,15 +460,15 @@ function updateModelChangedElement(source, oldModel, newModel)
 
 	id = id or newModel
 	local dataName = dataNames[et]
-	if getElementData(source, dataName) and not isCustomModID(et, id) then
+	if getElementData(source, dataName) and not isCustomModID(id) then
 
-		if isElementStreamedInLibrary(source) then
+		if isElementStreamedIn(source) then
 			showElementCoords(source)
 
             setElementData(source, dataName, nil)
         	outputDebugString("["..(eventName or "?").."] Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
 
-			if old_id and isCustomModID(et, old_id)
+			if old_id and isCustomModID(old_id)
 			and not hasOtherElementsWithModel(source, old_id) then
 				freeElementCustomMod(old_id, source)
 			end
@@ -521,6 +546,7 @@ function updateStreamedElements()
 	end
 	return true
 end
+addCommandHandler("fuelements", updateStreamedElements, false)
 
 function receiveModList(modList)
 	received_modlist = modList

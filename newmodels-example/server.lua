@@ -12,6 +12,7 @@
 
 	Commands:
 		/removemod
+		/testhandling
 ]]
 
 local auto_id = -1
@@ -20,45 +21,35 @@ local modelsFolder = "mymodels/"
 
 local myMods = {
 	-- this is completely a personal choice, you can have your own way of loading mods
-	-- type, 	name, 			dff path, 	txd path, 	col path,   auto assigned id
-	{"ped", "American Biker", "biker.dff", "biker.txd",    nil,           nil         },
+	-- type, baseid, name, 			dff path, 	txd path, 	col path,   auto assigned id
+
+	{"ped", 1, "American Biker", "biker.dff", "biker.txd",    nil,           nil         },
+	{"vehicle", 489, "Samoa", 	  "samoa.dff", "samoa.txd",    nil,           nil         },
 }
 
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)
 
 	local resName = getResourceName(startedResource)
-	local resPrefix = ":"..resName.."/"
 
 	for k,mod in pairs(myMods) do
 
 		local et = mod[1]
-		local name = mod[2]
-		local dff = mod[3]
-		local txd = mod[4]
-		local col = mod[5]
-
-		-- format paths
-		if dff then
-			dff = resPrefix..modelsFolder..dff
-		end
-		if txd then
-			txd = resPrefix..modelsFolder..txd
-		end
-		if col then
-			col = resPrefix..modelsFolder..col
-		end
-
+		local baseid = mod[2]
+		local name = mod[3]
+		local dff = mod[4]
+		local txd = mod[5]
+		local col = mod[6]
 
 		local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
-			et, auto_id, name,
-			dff, txd, col
+			et, auto_id, baseid, name,
+			modelsFolder..dff, modelsFolder..txd, col and modelsFolder..col or nil
 		)
 
 		if not worked then
 			outputDebugString(reason, 0,255, 110, 61)
 		else
-			mod[6] = auto_id
+			mod[7] = auto_id
 			auto_id = auto_id -1
 		end
 	end
@@ -71,7 +62,7 @@ function removeModCmd(thePlayer, cmd, id)
 	id = tonumber(id)
 
 	for k,v in pairs(myMods) do
-		if v[6] == id then
+		if v[7] == id then
 			local worked, reason = exports.newmodels:removeExternalMod(id)
 			if not worked then
 				outputDebugString(reason, 0,255, 110, 61)
@@ -80,6 +71,38 @@ function removeModCmd(thePlayer, cmd, id)
 		end
 	end
 
-	outputChatBox("Mod ID "..id.." not found in myMods, maybe it wasn't added.", thePlayer,255,0,0)
+	outputChatBox("Mod ID "..id.." not found in myMods because it wasn't added.", thePlayer,255,0,0)
 end
 addCommandHandler("removemod", removeModCmd, false, false)
+
+function testHandling(thePlayer, cmd)
+	local theVehicle = getPedOccupiedVehicle(thePlayer)
+	if not theVehicle then
+		return outputChatBox("Get inside a vehicle", thePlayer,255,200,0)
+	end
+
+	local properties = {
+		-- name => min,max that I want
+		["engineAcceleration"] = {10, 100},
+		["maxVelocity"] = {50, 500},
+		["brakeDeceleration"] = {1, 100},
+	}
+	local randomProperty
+	local randomVal
+	while not randomVal do
+		for k,v in pairs(properties) do
+			if math.random(1,2) == 1 then
+				randomProperty = k
+				randomVal = math.random(v[1], v[2])
+				break
+			end
+		end
+	end
+
+	if setVehicleHandling(theVehicle, randomProperty, randomVal) then
+		outputChatBox("Set "..randomProperty.." to "..randomVal, thePlayer, 0,255,100)
+	else
+		outputChatBox("Failed to set "..randomProperty.." to "..randomVal, thePlayer, 255,0,0)
+	end
+end
+addCommandHandler("testhandling", testHandling, false, false)
