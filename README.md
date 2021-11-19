@@ -18,7 +18,7 @@ Contact (author): Nando#7736 **(Discord)**
 - [x] players
 - [x] peds
 - [x] vehicles
-- [ ] objects **(disabled until important bug is fixed, see Issues)**
+- [x] objects
 
 ## Your opinion matters!
 
