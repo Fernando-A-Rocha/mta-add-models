@@ -41,8 +41,9 @@ dataNames = {
 	player = "skinID",
 	vehicle = "vehicleID",
 
-	-- incorrect behaviour:
-	object = "objectID", -- there is currently a bug with engineFreeModel when object streamed out
+	-- there is currently a bug with engineFreeModel when object streamed out
+	-- it is fixed in client.lua with 'prevent_object_bug'
+	object = "objectID",
 }
 
 function getDataTypeFromName(dataName)
