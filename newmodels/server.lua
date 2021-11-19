@@ -36,7 +36,7 @@ if SERVER_FUNCS_WARNINGS then
 		local args = { ... }
 
 		outputDebugString("(Func-Warn) "..functionName.." used in "..sourceResName.." ("..tostring(luaFilename).." line "..tostring(luaLineNumber)..") args: "..inspect(args), 2)
-		outputDebugString("(Func-Warn) To set a custom model ID see the tutorial provided in documentation.", 0, 255, 221, 0)
+		-- To set a custom model ID after creating an element see the tutorial provided in README.md
 	end
 	addDebugHook("postFunction", onCreateElement, { "createPed", "createVehicle", "createObject", "spawnPlayer" })
 

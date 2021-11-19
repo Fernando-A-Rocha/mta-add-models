@@ -9,7 +9,7 @@
 dataNames = {
 	ped = "skinID",
 	player = "skinID",
-	object = "objectID",
+	-- object = "objectID", -- there is currently a bug with engineFreeModel when object streamed out
 	-- vehicle = "vehicleID", -- not yet implemented
 }
 
