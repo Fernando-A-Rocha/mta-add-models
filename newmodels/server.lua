@@ -91,10 +91,12 @@ addEventHandler("newmodels:updateVehicleHandling", resourceRoot, updateVehicleHa
 _setElementModel = setElementModel
 function setElementModel(element, id) -- force refresh
 	local currModel = getElementModel(element)
-	if currModel == id then
+	local data_name = dataNames[getElementType(element)]
+	if currModel == id and not getElementData(element, data_name) then
 		local diffModel = 1
 		if currModel == 1 then diffModel = 0 end
 		_setElementModel(element, diffModel)
+		outputDebugString("refresh setElementModel("..tostring(element)..", "..tostring(id)..")", 3)
 	end
 
 	_setElementModel(element, id)
@@ -104,6 +106,45 @@ function setElementModel(element, id) -- force refresh
 	end
 
 	return true
+end
+
+--[[
+	Goal: solve the issue of element model not setting when it's already the same model serverside
+	This makes it so you don't need to use the 'refresh' element model method in any resource
+]]
+-- OTHER RESOURCES ONLY
+function onSetElementModel( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
+	if sourceResource == thisRes then return end
+
+    local args = {...}
+    local element,newModel = unpack(args)
+    if not isElement(element) then return end
+    if not tonumber(newModel) then return end
+    newModel = tonumber(newModel)
+    
+    oldModel = getElementModel(element)
+	if oldModel and newModel and oldModel == newModel then -- force refresh
+		local diffModel = 1
+		if newModel == 1 then diffModel = 0 end
+		if _setElementModel(element, diffModel) then
+			outputDebugString("[ext] refresh setElementModel("..tostring(element)..", "..tostring(newModel)..")", 3)
+			_setElementModel(element, newModel)
+		end
+	end
+
+	if getElementType(element) == "vehicle" then -- Vehicle specific
+		updateVehicleHandling(element)
+	end
+
+end
+addDebugHook( "preFunction", onSetElementModel, { "setElementModel" })
+
+function getModList() -- [Exported - Server Version]
+	if not SERVER_READY then
+		-- outputDebugString("getModDataFromID: Server not ready yet", 1)
+		return
+	end
+	return modList
 end
 
 function getModDataFromID(id) -- [Exported - Server Version]
@@ -605,7 +646,7 @@ function mySkinCmd(thePlayer, cmd, id)
 		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
 	end
 end
-addCommandHandler("myskin", mySkinCmd, false, false)
+-- addCommandHandler("myskin", mySkinCmd, false, false)
 
 function pedSkinCmd(thePlayer, cmd, id)
 

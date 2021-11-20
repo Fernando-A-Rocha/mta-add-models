@@ -65,6 +65,7 @@ You'll also need to get a specific MTA Server nightly (experimental) [version](h
 
 ## Commands
 
+Main testing commands in `newmodels`:
 - /listmods **lists all defined mods**
 - /allocatedids **shows all allocated mod IDs in realtime**
 - /selements **lists all streamed in elements for debugging purposes**
@@ -72,6 +73,12 @@ You'll also need to get a specific MTA Server nightly (experimental) [version](h
 - /makeped [ID] **creates a ped and sets its model to a default or new ID**
 - /makeobject [ID] **creates an object and sets its model to a default or new ID**
 - /makevehicle [ID] **creates a vehicle and sets its model to a default or new ID**
+
+Testing command(s) in `newmodels-example`: [here](/newmodels-example/server.lua)
+
+Testing command(s) in `sampobj_reloaded`: [here](/sampobj_reloaded/server.lua)
+
+Testing command(s) in `unittest_newmodels`: [here](/unittest_newmodels/server.lua)
 
 # Implementing
 

@@ -13,6 +13,7 @@
 	Commands:
 		/removemod
 		/testhandling
+		/testvehicles
 ]]
 
 local auto_id = -1
@@ -106,3 +107,36 @@ function testHandling(thePlayer, cmd)
 	end
 end
 addCommandHandler("testhandling", testHandling, false, false)
+
+--[[
+	Fetches all mods using exported func getModList
+	Spawns all added vehicles at the airport
+]]
+local spawned_vehs = {}
+local x,y,z = 2045.732421875, -2493.884765625, 13.546875
+local rx,ry,rz = 0,0,90
+function testVehiclesCmd(thePlayer, cmd)
+	for k,veh in pairs(spawned_vehs) do
+		if isElement(veh) then destroyElement(veh) end
+	end
+	spawned_vehs = {}
+	local elementType2 = "vehicle"
+	local data_name = exports.newmodels:getDataNameFromType(elementType2)
+	local count = 0
+	local modList = exports.newmodels:getModList()
+	for elementType, mods in pairs(modList) do
+		if elementType == elementType2 then
+			for k,mod in pairs(mods) do
+				local veh = createVehicle(400, x,y,z,rx,ry,rz)
+				if veh then
+					setElementData(veh, data_name, mod.id)
+					count = count + 1
+					x = x-12
+				end
+			end
+		end
+	end
+
+	outputChatBox("Created "..count.." new vehicles.", thePlayer, 0,255,0)
+end
+addCommandHandler("testvehicles", testVehiclesCmd, false, false)

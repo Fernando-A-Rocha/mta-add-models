@@ -49,6 +49,8 @@ modList = {
 	object = {
 		{id=50001, base_id=1337, path=modsFolder, name="Engine Hoist"},
 	},
+
+	-- Mods added via another resource's script will be appended to this Lua array
 }
 
 

@@ -23,6 +23,14 @@ local waiting_queue = {} -- [element] = { func num, args }
 -- Vehicle specific
 local update_handling = {} -- [element] = timer
 
+function getModList() -- [Exported - Client Version]
+	if not received_modlist then
+		-- outputDebugString("getModDataFromID: Client hasn't received modList yet", 1)
+		return
+	end
+	return received_modlist
+end
+
 function getModDataFromID(id) -- [Exported - Client Version]
 	if not tonumber(id) then return end
 	if not received_modlist then

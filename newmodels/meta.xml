@@ -5,7 +5,7 @@
     <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.5.0" type="script"/>
     
     <!-- https://nightly.mtasa.com  IMPORTANT TO HAVE THE VERSION SPECIFIED SO THAT ADDED MODELS WORK AS EXPECTED -->
-    <min_mta_version client="1.5.9-9.21030.0" server="1.5.9-9.21030.0"></min_mta_version>
+    <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21026.0"></min_mta_version>
 
     <!-- mod files -->
 
@@ -40,6 +40,7 @@
     <script type="client" src="client.lua"/>
 
 
+    <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>
     <export type="shared" function="getModDataFromID"/>
     <export type="shared" function="isDefaultID"/>
