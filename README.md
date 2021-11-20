@@ -101,7 +101,7 @@ You have at your disposal the following exported functions, [see code to underst
 - `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col)`
 - `removeExternalMod(id)`
 
-### Using Custom Element Models
+### Using Custom IDs
 
 To create elements with custom IDs **serverside**, do the following with these functions:
 - `createPed` (use a placeholder ID when creating, e.g. 1)
@@ -110,12 +110,12 @@ To create elements with custom IDs **serverside**, do the following with these f
 - `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 1)
 
 After creating these elements, you have to:
-- **(Important)** Check if model ID is custom or default using `isDefaultID(modelID)` and `isCustomModID(modelID)`
-- If it's custom you then have to do the following:
+- **(Important)** Check if model ID you want to set is custom or default using `isDefaultID(modelID)` and `isCustomModID(modelID)`
+- If it's a custom ID then do the following:
   - Fetch element data name from this resouce using `getDataNameFromType(elementType)`
-  - Set their custom model ID via element data with the name you just obtained
+  - Set the element's custom model ID via element data with the name you just obtained
   - **(Optional)** You can fetch all data of the mod using `getModDataFromID(modelID)`
-- Otherwise if it's a default model just use `setElementModel` as usual
+- Otherwise if it's a default ID then just use `setElementModel` as usual
 
 This resource makes the clients listen to the set element datas in order to apply custom model IDs accordingly on their game.
 
