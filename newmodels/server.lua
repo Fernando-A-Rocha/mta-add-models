@@ -272,6 +272,7 @@ function (stoppedResource, wasDeleted)
 	end
 end)
 
+local dontspamPlayers = {}
 function sendModListWhenReady(player)
 	if not isElement(player) then return end
 	if not SERVER_READY then
@@ -289,7 +290,13 @@ function sendModListWhenReady(player)
 	end
 
 	startTickCount = nil -- free memory
-	triggerClientEvent(player, "newmodels:receiveModList", resourceRoot, modList)
+	if isTimer(dontspamPlayers[player]) then killTimer(dontspamPlayers[player]) end
+	dontspamPlayers[player] = setTimer(function()
+		if isElement(player) then
+			triggerClientEvent(player, "newmodels:receiveModList", resourceRoot, modList)
+		end
+		dontspamPlayers[player] = nil -- free memory
+	end, 5000, 1)
 end
 
 function sendModListWhenReady_ToAllPlayers()
@@ -744,6 +751,7 @@ addCommandHandler("makevehicle", makeVehicleCmd, false, false)
 function listModsCmd(thePlayer, cmd)
 
 	outputChatBox("List of defined mods:", thePlayer,255,126,0)
+	local count = 0
 
 	for elementType, mods in pairs(modList) do
 		
@@ -753,9 +761,12 @@ function listModsCmd(thePlayer, cmd)
 
 			for k, mod in pairs(mods) do
 				outputChatBox("ID "..mod.id.." - "..mod.name, thePlayer,255,194,14)
+				count = count + 1
 			end
 		end
 	end
+
+	outputChatBox("Total: "..count, thePlayer,255,255,255)
 end
 addCommandHandler("listmods", listModsCmd, false, false)
 

@@ -7,12 +7,17 @@
 ]]
 
 -- Config:
+local ENABLE_DEBUG_MESSAGES = false
 local CHAT_DEBUG_MESSAGES = true -- make debug console messages to go chatbox (better readability imo)
 
 
-if CHAT_DEBUG_MESSAGES then
-	_outputDebugString = outputDebugString
-	function outputDebugString(text, mode, r,g,b)
+_outputDebugString = outputDebugString
+function outputDebugString(text, mode, r,g,b)
+	if not ENABLE_DEBUG_MESSAGES then return end
+	if not CHAT_DEBUG_MESSAGES then
+		_outputDebugString(text, mode, r,g,b)
+	else
+
 		if not mode then mode = 3 end
 
 		if mode == 1 then
@@ -34,7 +39,6 @@ if CHAT_DEBUG_MESSAGES then
 		end
 	end
 end
-
 
 dataNames = {
 	ped = "skinID",
