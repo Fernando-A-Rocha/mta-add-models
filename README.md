@@ -96,7 +96,7 @@ This library lets you load mods stored within the `newmodels` resource, and also
 
 Check the [quick testing](#quick-testing) to understand how to load mods from within the `newmodels` resource (easier).
 
-You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua):
+You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua) and [example to see implementation](/newmodels-example/server.lua):
 - `addExternalMod_IDFilenames(elementType, id, base_id, name, path)`
 - `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col)`
 - `removeExternalMod(id)`
@@ -119,7 +119,7 @@ After creating these elements, you have to:
 
 This resource makes the clients listen to the set element datas in order to apply custom model IDs accordingly on their game.
 
-**Remember**: You cannot use the new added model IDs serverside.
+**Remember**: You cannot `setElementModel` a custom ID, and `getElementModel` will never return a non-original model ID.
 
 **Special**: When doing `setVehicleHandling` (only on serverside vehicles) on a vehicle with custom ID data, the handling is stored intelligently by the library and it will make sure the vehicle keeps it each time `setElementModel` happens (serverside and clientside), because this triggers MTA to reset the vehicle's handling. Example #6 below showcases this.
 
