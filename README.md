@@ -17,8 +17,7 @@ Contact (author): Nando#7736 **(Discord)**
 
 ## Supported Types
 
-- [x] players
-- [x] peds
+- [x] players / peds
 - [x] vehicles
 - [x] objects
 
