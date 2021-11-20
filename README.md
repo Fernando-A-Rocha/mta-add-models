@@ -8,6 +8,8 @@
 - syncs all added models with all players
 - minimalistic, optimized and bug free
 
+In simpler terms, with this resource you can make scripts/change your scripts to add new skins, vehicles and objects to your server! For example we can now add all SA-MP objects whilst keeping their IDs.
+
 MTA forum topic: [here](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
 
 Contact (author): Nando#7736 **(Discord)**
@@ -29,11 +31,19 @@ Click the button to check the project's feedback page:
 
 # Getting Started
 
+## Includes
+
+- [newmodels](/newmodels): main library resource
+- (optional) [newmodels-example](/newmodels-example): an example implementation to add new objects/skins/etc to your server
+- (optional) [sampobj_reloaded](/newmodels-example): a resource that adds all SA-MP objects to your server
+  - Click [here](/https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) to download `models.zip` containing all SA-MP models required
+- (optional) [unittest_newmodels](/unittest_newmodels): a resource for testing the main scripts
+
 ## Install
 
 - Get the latest release: [here](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest)
 - Download the source code Zip and extract it
-- Place the `newmodels` folder in your server's resources (other resources included are optional)
+- Place the `newmodels` folder in your server's resources
 - Use command `start newmodels` in server console
 
 ## Quick Testing
@@ -48,11 +58,10 @@ Click the button to check the project's feedback page:
 - /listmods **lists all defined mods**
 - /allocatedids **shows all allocated mod IDs in realtime**
 - /selements **lists all streamed in elements for debugging purposes**
-- /t1 **creates a ped and sets an incorrect element model ID data**
-- /t2 **creates a ped and sets an element model ID data, then destroys it**
 - /myskin [ID] **sets your skin to a default or new ID**
 - /makeped [ID] **creates a ped and sets its model to a default or new ID**
 - /makeobject [ID] **creates an object and sets its model to a default or new ID**
+- /makevehicle [ID] **creates a vehicle and sets its model to a default or new ID**
 
 # Implementing
 

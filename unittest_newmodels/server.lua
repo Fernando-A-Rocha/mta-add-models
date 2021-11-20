@@ -118,3 +118,45 @@ function test6()
       end
    end
 end
+
+
+-- test 1: set wrong element data on ped
+-- expected behavior: it should stay with the skin it spawned with
+addCommandHandler("t1", function(thePlayer, cmd)
+
+   local x,y,z = getElementPosition(thePlayer)
+   local ped = createPed(0, x,y,z)
+   setElementData(ped, "objectID", 20002)
+
+end, false, false)
+
+-- test 2: create ped, set custom skin and destroy it shortly after
+-- expected behavior:
+   -- frees the model for the client if no other streamed elements are using the same model ID
+   -- does nothing if other streamed elements are using the same model ID
+addCommandHandler("t2", function(thePlayer, cmd)
+
+   local x,y,z = getElementPosition(thePlayer)
+   local ped = createPed(0, x,y,z)
+   setElementData(ped, "skinID", 20002)
+   outputChatBox("Destroying created ped in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
+   setTimer(destroyElement, 3000, 1, ped)
+
+end, false, false)
+
+
+-- test 3: create ped, set custom skin and remove the model element data
+-- expected behavior: model it spawned with should be restored serverside
+addCommandHandler("t3", function(thePlayer, cmd)
+
+   local x,y,z = getElementPosition(thePlayer)
+   local ped = createPed(280, x,y,z)
+   local data_name = exports.newmodels:getDataNameFromType("ped")
+   setElementData(ped, data_name, 20001)
+   outputChatBox("Removing created ped skin data in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
+   setTimer(function(ped, data_name)
+      removeElementData(ped, data_name)
+   end, 3000, 1, ped, data_name)
+
+end, false, false)
+
