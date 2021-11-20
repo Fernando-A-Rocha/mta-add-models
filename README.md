@@ -4,7 +4,7 @@
 
 ## About
 
-**mta-add-models** is a MTA resource that acts as a library, making use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function to add new models
+**mta-add-models** is a MTA resource that acts as a library, making use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function to add new peds (skins), vehicles and objects
 - syncs all added models with all players
 - minimalistic, optimized and bug free
 
@@ -14,18 +14,18 @@ MTA forum topic: [here](https://forum.mtasa.com/topic/133212-rel-add-new-models-
 
 Contact (author): Nando#7736 **(Discord)**
 
-
-## Supported Types
-
-- [x] players / peds
-- [x] vehicles
-- [x] objects
-
 ## Your opinion matters!
 
 Click the button to check the project's feedback page:
 
 [<img src="https://i.imgur.com/x19GaN1.png?1">](https://github.com/Fernando-A-Rocha/mta-add-models/issues/7)
+
+
+## Other Projects
+
+My MTA roleplay server: [San Andreas Roleplay (SA-RP)](https://forum.mtasa.com/topic/128625-rp-san-andreas-roleplay-english/) [![Discord](https://img.shields.io/discord/777891185359323146?label=discord&logo=discord)](https://sa-roleplay.net/discord)
+
+Discord Webhooks in MTA: [mta-discord-webhooks](https://github.com/Fernando-A-Rocha/mta-discord-webhooks)
 
 
 # Getting Started
