@@ -27,6 +27,8 @@ My MTA roleplay server: [San Andreas Roleplay (SA-RP)](https://forum.mtasa.com/t
 
 Discord Webhooks in MTA: [mta-discord-webhooks](https://github.com/Fernando-A-Rocha/mta-discord-webhooks)
 
+SA-MP Map Loader resource for MTA: [mta-samp-maploader](https://github.com/Fernando-A-Rocha/mta-samp-maploader)
+
 
 # Getting Started
 
