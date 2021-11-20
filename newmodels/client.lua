@@ -10,10 +10,6 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
--- Config:
-local SEE_ALLOCATED_TABLE = true -- [testing] automatically executes /allocatedids on startup
-
-
 -- Custom events:
 addEvent("newmodels:receiveModList", true)
 addEvent("newmodels:receiveVehicleHandling", true)

@@ -13,10 +13,6 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 --]]
 
--- Config:
-local START_STOP_MESSAGES = true
-
-
 -- Custom events:
 addEvent("newmodels:requestModList", true)
 addEvent("newmodels:resetElementModel", true)

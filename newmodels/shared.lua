@@ -6,11 +6,6 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
--- Config:
-local ENABLE_DEBUG_MESSAGES = false
-local CHAT_DEBUG_MESSAGES = true -- make debug console messages to go chatbox (better readability imo)
-
-
 _outputDebugString = outputDebugString
 function outputDebugString(text, mode, r,g,b)
 	if not ENABLE_DEBUG_MESSAGES then return end
