@@ -3,9 +3,10 @@
 
 	server.lua
 
-	Adds all SA-MP objects to the game using the 'newmodels' library
+	Adds all SA-MP objects to the game using the 'newmodels' library    -  Inspired by my original sampobj: https://github.com/Fernando-A-Rocha/MTA-SAMP-OBJ
 
-	Inspired by my original sampobj: https://github.com/Fernando-A-Rocha/MTA-SAMP-OBJ
+	Commands:
+		- /rsampobj: Spawns a random SA-MP object at your position
 ]]
 
 -- This causes a small freeze on resource start, but it's fine because you only need to start the resource once on server startup :)
@@ -25,3 +26,20 @@ function (startedResource)
 		end
 	end
 end)
+
+addCommandHandler("rsampobj", function(thePlayer)
+	local x,y,z = getElementPosition(thePlayer)
+	local rx,ry,rz = getElementRotation(thePlayer)
+	local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
+
+	local obj = createObject(1337, x,y,z,rx,ry,rz)
+	if not obj then
+		return outputChatBox("Error spawning object", thePlayer,255,0,0)
+	end
+	setElementInterior(obj, int)
+	setElementDimension(obj, dim)
+	local data_name = exports.newmodels:getDataNameFromType("object")
+	if data_name then
+		setElementData(obj, data_name, ids[math.random(1,#ids)])
+	end
+end, false, false)
