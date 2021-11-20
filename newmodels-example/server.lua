@@ -113,16 +113,16 @@ addCommandHandler("testhandling", testHandling, false, false)
 	Spawns all added vehicles at the airport
 ]]
 local spawned_vehs = {}
-local x,y,z = 2045.732421875, -2493.884765625, 13.546875
+local ix,iy,iz = 2045.732421875, -2493.884765625, 13.546875 -- initial position for vehicle spawn (airport)
 local rx,ry,rz = 0,0,90
 function testVehiclesCmd(thePlayer, cmd)
 	for k,veh in pairs(spawned_vehs) do
 		if isElement(veh) then destroyElement(veh) end
 	end
 	spawned_vehs = {}
+	local x,y,z = ix,iy,iz
 	local elementType2 = "vehicle"
 	local data_name = exports.newmodels:getDataNameFromType(elementType2)
-	local count = 0
 	local modList = exports.newmodels:getModList()
 	for elementType, mods in pairs(modList) do
 		if elementType == elementType2 then
@@ -130,13 +130,13 @@ function testVehiclesCmd(thePlayer, cmd)
 				local veh = createVehicle(400, x,y,z,rx,ry,rz)
 				if veh then
 					setElementData(veh, data_name, mod.id)
-					count = count + 1
+					table.insert(spawned_vehs, veh)
 					x = x-12
 				end
 			end
 		end
 	end
 
-	outputChatBox("Created "..count.." new vehicles.", thePlayer, 0,255,0)
+	outputChatBox("Created "..#spawned_vehs.." new vehicles.", thePlayer, 0,255,0)
 end
 addCommandHandler("testvehicles", testVehiclesCmd, false, false)
