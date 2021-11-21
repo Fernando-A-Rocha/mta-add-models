@@ -3,23 +3,13 @@
 
 	server.lua
 
-	Commands:
-		/myskin
-		/makeped
-		/makeobject
-		/makevehicle
-		/listmods
-
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 --]]
 
 -- Custom events:
-addEvent("newmodels:requestModList", true)
-addEvent("newmodels:resetElementModel", true)
-addEvent("newmodels:updateVehicleHandling", true)
-
-local thisRes = getThisResource()
-local resName = getResourceName(thisRes)
+addEvent(resName..":requestModList", true)
+addEvent(resName..":resetElementModel", true)
+addEvent(resName..":updateVehicleHandling", true)
 
 local SERVER_READY = false
 local startTickCount
@@ -86,7 +76,7 @@ function updateVehicleHandling(element)
 		-- print(element, "Set "..count..", deleted "..count2.." handling properties")
 	end
 end
-addEventHandler("newmodels:updateVehicleHandling", resourceRoot, updateVehicleHandling)
+addEventHandler(resName..":updateVehicleHandling", resourceRoot, updateVehicleHandling)
 
 _setElementModel = setElementModel
 function setElementModel(element, id) -- force refresh
@@ -272,7 +262,6 @@ end)
 addEventHandler( "onResourceStop", resourceRoot, 
 function (stoppedResource, wasDeleted)
 
-
 	for elementType, name in pairs(dataNames) do
 		for k,el in ipairs(getElementsByType(elementType)) do
 			local id = tonumber(getElementData(el, name))
@@ -281,21 +270,34 @@ function (stoppedResource, wasDeleted)
 			end
 		end
 	end
+
+	local notified = {}
+	for elementType,mods in pairs(modList) do
+		for k,mod in pairs(mods) do
+			local srcRes = mod.srcRes
+			if srcRes then
+				local res = getResourceFromName(srcRes)
+				if res and not notified[srcRes] then
+
+					outputDebugString("Resource '"..srcRes.."' needs to be restarted because '"..resName.."' stopped", 0, 211, 255, 0)
+					notified[srcRes] = true
+				end
+			end
+		end
+	end
 end)
 
 addEventHandler( "onResourceStop", root, 
 function (stoppedResource, wasDeleted)
 	if stoppedResource == thisRes then return end
-
+	local stoppedResName = getResourceName(stoppedResource)
 	local delCount = 0
 	for elementType,mods in pairs(modList) do
 		for k,mod in pairs(mods) do
 			local srcRes = mod.srcRes
 			if srcRes then
-				local stoppedName = getResourceName(stoppedResource)
-				if stoppedName == srcRes then
+				if stoppedResName == srcRes then
 					-- delete mod added by resource that was just stopped
-					outputDebugString("Removed "..elementType.." mod ID "..mod.id.." because resource '"..srcRes.."' stopped", 0, 211, 255, 89)
 					modList[elementType][k] = nil
 					delCount = delCount + 1
 				end
@@ -304,7 +306,8 @@ function (stoppedResource, wasDeleted)
 	end
 
 	if delCount > 0 then
-			fixModList()
+		outputDebugString("Removed "..delCount.." mods because resource '"..stoppedResName.."' stopped", 0, 211, 255, 89)
+		fixModList()
 		sendModListWhenReady_ToAllPlayers()
 	end
 end)
@@ -330,7 +333,7 @@ function sendModListWhenReady(player)
 	if isTimer(dontspamPlayers[player]) then killTimer(dontspamPlayers[player]) end
 	dontspamPlayers[player] = setTimer(function()
 		if isElement(player) then
-			triggerClientEvent(player, "newmodels:receiveModList", resourceRoot, modList)
+			triggerClientEvent(player, resName..":receiveModList", resourceRoot, modList)
 		end
 		dontspamPlayers[player] = nil -- free memory
 	end, 5000, 1)
@@ -346,7 +349,7 @@ function requestModList()
 	if not isElement(client) then return end
 	sendModListWhenReady(client)
 end
-addEventHandler("newmodels:requestModList", resourceRoot, requestModList)
+addEventHandler(resName..":requestModList", resourceRoot, requestModList)
 
 
 function resetElementModel(element, old_id)
@@ -355,7 +358,7 @@ function resetElementModel(element, old_id)
 	setElementModel(element, currModel)
 	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..currModel.." (previous ID: "..tostring(old_id)..")",0, 59, 160, 255)
 end
-addEventHandler("newmodels:resetElementModel", resourceRoot, resetElementModel)
+addEventHandler(resName..":resetElementModel", resourceRoot, resetElementModel)
 
 function setCustomElementModel(element, et, id)
 
@@ -385,6 +388,14 @@ function setCustomElementModel(element, et, id)
 		return false, "Not a custom model ID: "..id
 	end
 end
+
+
+local prevent_addrem_spam = {
+	add = {},
+	addtimer = {},
+	rem = {},
+	remtimer = {},
+}
 
 --[[
 	The difference between this function and addExternalMod_CustomFilenames is that
@@ -466,7 +477,19 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path) -- [Ex
 	fixModList()
 	sendModListWhenReady_ToAllPlayers()
 
-	outputDebugString("Added "..elementType.." mod ID "..id.." located in: "..path, 0, 136, 255, 89)
+	-- Don't spam chat/debug when mass adding/removing mods
+	if isTimer(prevent_addrem_spam.addtimer) then killTimer(prevent_addrem_spam.addtimer) end
+	
+	if not prevent_addrem_spam.add[sourceResName] then prevent_addrem_spam.add[sourceResName] = {} end
+	table.insert(prevent_addrem_spam.add[sourceResName], true)
+
+	prevent_addrem_spam.addtimer = setTimer(function()
+		for rname,mods in pairs(prevent_addrem_spam.add) do
+			outputDebugString("Added "..#mods.." mods from "..rname, 0, 136, 255, 89)
+			prevent_addrem_spam.add.rname = nil
+		end
+	end, 1000, 1)
+
 	return true
 end
 
@@ -571,7 +594,18 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	fixModList()
 	sendModListWhenReady_ToAllPlayers()
 
-	outputDebugString("Added "..elementType.." mod ID "..id..": "..toJSON(paths), 0, 136, 255, 89)
+	-- Don't spam chat/debug when mass adding/removing mods
+	if isTimer(prevent_addrem_spam.addtimer) then killTimer(prevent_addrem_spam.addtimer) end
+	
+	if not prevent_addrem_spam.add[sourceResName] then prevent_addrem_spam.add[sourceResName] = {} end
+	table.insert(prevent_addrem_spam.add[sourceResName], true)
+
+	prevent_addrem_spam.addtimer = setTimer(function()
+		for rname,mods in pairs(prevent_addrem_spam.add) do
+			outputDebugString("Added "..#mods.." mods from "..rname, 0, 136, 255, 89)
+			prevent_addrem_spam.add.rname = nil
+		end
+	end, 1000, 1)
 	return true
 end
 
@@ -592,6 +626,19 @@ function removeExternalMod(id) -- [Exported]
 				
 				fixModList()
 				sendModListWhenReady_ToAllPlayers()
+
+				-- Don't spam chat/debug when mass adding/removing mods
+				if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
+				
+				if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
+				table.insert(prevent_addrem_spam.rem[sourceResName], true)
+
+				prevent_addrem_spam.remtimer = setTimer(function()
+					for rname,mods in pairs(prevent_addrem_spam.rem) do
+						outputDebugString("Removed "..#mods.." mods from "..rname, 0, 211, 255, 89)
+						prevent_addrem_spam.rem.rname = nil
+					end
+				end, 1000, 1)
 				
 				return true
 			end
@@ -600,263 +647,3 @@ function removeExternalMod(id) -- [Exported]
 
 	return false, "No mod with ID "..id.." found in modList"
 end
-
-
--- [Optional] Messages:
-if START_STOP_MESSAGES then
-
-	addEventHandler( "onResourceStart", resourceRoot, -- startup message
-	function (startedResource)
-		local version = getResourceInfo(startedResource, "version") or false
-		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175started", root,255,255,255, true)
-	end)
-	addEventHandler( "onResourceStop", resourceRoot, -- startup message
-	function (stoppedResource)
-		local version = getResourceInfo(stoppedResource, "version") or false
-		outputChatBox("#ffc175[mta-add-models] #ababab"..resName..(version and (" "..version) or ("")).." #ffc175stopped", root,255,255,255, true)
-	end)
-end
-
-
-
----------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
-------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
-
-
-function mySkinCmd(thePlayer, cmd, id)
-	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
-	end
-	id = tonumber(id)
-
-	local elementType = "player"
-	if isCustomModID(id) then
-
-		local success, reason = setCustomElementModel(thePlayer, elementType, id)
-		if not success then
-			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
-		else
-			outputChatBox("Set your skin to custom ID "..id, thePlayer, 0,255,0)
-		end
-
-	elseif isDefaultID(elementType, id) then
-		outputChatBox("Set your skin to default ID "..id, thePlayer, 0,255,0)
-		setElementModel(thePlayer, id)
-	else
-		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
-	end
-end
-addCommandHandler("myskin", mySkinCmd, false, false)
-
-function pedSkinCmd(thePlayer, cmd, id)
-
-	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
-	end
-	id = tonumber(id)
-
-	local elementType = "ped"
-	if isCustomModID(id) or isDefaultID(elementType, id) then
-
-
-		local x,y,z = getElementPosition(thePlayer)
-		local rx,ry,rz = getElementRotation(thePlayer)
-		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
-
-		local thePed = createPed(1, x,y,z)
-		if not thePed then
-			return outputChatBox("Error spawning ped", thePlayer, 255,0,0)
-		end
-		setElementInterior(thePed, int)
-		setElementDimension(thePed, dim)
-		setElementRotation(thePed, rx,ry,rz, "default",true)
-
-		if isDefaultID(elementType, id) then
-			outputChatBox("Created ped with default ID "..id, thePlayer, 0,255,0)
-			setElementModel(thePed, id)
-			return
-		end
-
-		local success, reason = setCustomElementModel(thePed, elementType, id)
-		if not success then
-			destroyElement(thePed)
-			return outputChatBox("Failed to set ped custom skin: "..reason, thePlayer, 255,0,0)
-		end
-
-		outputChatBox("Created ped with custom ID "..id, thePlayer, 0,255,0)
-	else
-		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
-	end
-end
-addCommandHandler("makeped", pedSkinCmd, false, false)
-
-function objectModelCmd(thePlayer, cmd, id)
-	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Object ID]", thePlayer, 255,194,14)
-	end
-	id = tonumber(id)
-
-	local elementType = "object"
-	if isCustomModID(id) or isDefaultID(elementType, id) then
-
-		local x,y,z = getElementPosition(thePlayer)
-		local rx,ry,rz = getElementRotation(thePlayer)
-		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
-
-		local theObject = createObject(1337, x,y,z)
-		if not theObject then
-			return outputChatBox("Error spawning object", thePlayer, 255,0,0)
-		end
-		setElementInterior(theObject, int)
-		setElementDimension(theObject, dim)
-		setElementRotation(theObject, rx,ry,rz)
-
-		if isDefaultID(elementType, id) then
-			outputChatBox("Created object with default ID "..id, thePlayer, 0,255,0)
-			setElementModel(theObject, id)
-			return
-		end
-
-		local success, reason = setCustomElementModel(theObject, elementType, id)
-		if not success then
-			destroyElement(theObject)
-			return outputChatBox("Failed to set object custom ID: "..reason, thePlayer, 255,0,0)
-		end
-
-		outputChatBox("Created object with custom ID "..id, thePlayer, 0,255,0)
-		setElementPosition(thePlayer, x,y,z+4)
-	else
-		outputChatBox("Object ID "..id.." doesn't exist", thePlayer,255,0,0)
-	end
-end
-addCommandHandler("makeobject", objectModelCmd, false, false)
-
-
-function makeVehicleCmd(thePlayer, cmd, id)
-	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Vehicle ID]", thePlayer, 255,194,14)
-	end
-	
-	id = tonumber(id)
-
-	local elementType = "vehicle"
-	if isCustomModID(id) or isDefaultID(elementType, id) then
-
-		local x,y,z = getElementPosition(thePlayer)
-		local rx,ry,rz = getElementRotation(thePlayer)
-		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
-
-		local theVehicle = createVehicle(400, x,y,z)
-		if not theVehicle then
-			return outputChatBox("Error spawning vehicle", thePlayer, 255,0,0)
-		end
-		setElementInterior(theVehicle, int)
-		setElementDimension(theVehicle, dim)
-		setElementRotation(theVehicle, rx,ry,rz)
-
-		if isDefaultID(elementType, id) then
-			outputChatBox("Created vehicle with default ID "..id, thePlayer, 0,255,0)
-			setElementModel(theVehicle, id)
-			return
-		end
-
-		local success, reason = setCustomElementModel(theVehicle, elementType, id)
-		if not success then
-			destroyElement(theVehicle)
-			return outputChatBox("Failed to set vehicle custom ID: "..reason, thePlayer, 255,0,0)
-		end
-
-		outputChatBox("Created vehicle with custom ID "..id, thePlayer, 0,255,0)
-		
-		setTimer(function()
-			if getPedOccupiedVehicle(thePlayer) then
-				removePedFromVehicle(thePlayer)
-				setTimer(warpPedIntoVehicle, 500, 1, thePlayer, theVehicle)
-			else
-				warpPedIntoVehicle(thePlayer, theVehicle)
-			end
-		end, 1000, 1)
-
-	elseif base_id then
-		outputChatBox("Vehicle ID "..base_id.." doesn't exist (for base ID)", thePlayer,255,0,0)
-	else
-		outputChatBox("Vehicle ID "..id.." doesn't exist", thePlayer,255,0,0)
-	end
-end
-addCommandHandler("makevehicle", makeVehicleCmd, false, false)
-
-function listModsCmd(thePlayer, cmd)
-
-	outputChatBox("List of defined mods:", thePlayer,255,126,0)
-	local count = 0
-
-	for elementType, mods in pairs(modList) do
-		
-		if elementType ~= "player" then -- don't repeat
-
-			outputChatBox(elementType.." mods:", thePlayer,255,194,100)
-
-			for k, mod in pairs(mods) do
-				outputChatBox("ID "..mod.id.." - "..mod.name, thePlayer,255,194,14)
-				count = count + 1
-			end
-		end
-	end
-
-	outputChatBox("Total: "..count, thePlayer,255,255,255)
-end
-addCommandHandler("listmods", listModsCmd, false, false)
-
---[[
--- Get all valid default object IDs
-addEventHandler( "onResourceStart", resourceRoot,
-function (startedResource)
-
-	local text = "{ "
-	for i=1,20000 do
-		local o = createObject(i,0,0,5)
-		if o then
-			text = text..i..", "
-		end
-	end
-	local f = fileCreate("object_ids.lua")
-	fileWrite(f, text)
-	fileClose(f)
-end)
---]]
-
---[[
--- Get all valid default vehicle IDs
-addEventHandler( "onResourceStart", resourceRoot,
-function (startedResource)
-
-	local text = "{ "
-	for i=1,20000 do
-		local o = createVehicle(i,0,0,5)
-		if o then
-			text = text..i..", "
-		end
-	end
-	local f = fileCreate("vehicle_ids.lua")
-	fileWrite(f, text)
-	fileClose(f)
-end)
---]]
-
---[[
--- Get all valid default ped IDs (skins)
-addEventHandler( "onResourceStart", resourceRoot,
-function (startedResource)
-
-	local text = "{ "
-	for i=1,20000 do
-		local o = createPed(i,0,0,5)
-		if o then
-			text = text..i..", "
-		end
-	end
-	local f = fileCreate("ped_ids.lua")
-	fileWrite(f, text)
-	fileClose(f)
-end)
---]]

@@ -2,20 +2,16 @@
 	Author: Fernando
 
 	client.lua
-
-	Commands:
-		/allocatedids
-		/selements
 	
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
 -- Custom events:
-addEvent("newmodels:receiveModList", true)
-addEvent("newmodels:receiveVehicleHandling", true)
+addEvent(resName..":receiveModList", true)
+addEvent(resName..":receiveVehicleHandling", true)
 
 
-local allocated_ids = {} -- { [new id] = allocated id }
+allocated_ids = {} -- { [new id] = allocated id }
 local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
 local received_modlist -- will be { [element type] = {...} }
 local waiting_queue = {} -- [element] = { func num, args }
@@ -222,7 +218,7 @@ function setElementCustomModel(element, elementType, id)
 			if isTimer(update_handling[element]) then killTimer(update_handling[element]) end
 			update_handling[element] = setTimer(function()
 				if isElement(element) and not wasElementCreatedClientside(element) then
-					triggerServerEvent("newmodels:updateVehicleHandling", resourceRoot, element)
+					triggerServerEvent(resName..":updateVehicleHandling", resourceRoot, element)
 				end
 				update_handling[element] = nil
 			end, 1000, 1)
@@ -353,7 +349,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 			if tonumber(oldValue) then
 				-- removing new model id
 				if not wasElementCreatedClientside(source) then
-					triggerServerEvent("newmodels:resetElementModel", resourceRoot, source, tonumber(oldValue))
+					triggerServerEvent(resName..":resetElementModel", resourceRoot, source, tonumber(oldValue))
 				end
 			end
 		end
@@ -577,7 +573,6 @@ function updateStreamedElements()
 	end
 	return true
 end
-addCommandHandler("fuelements", updateStreamedElements, false)
 
 function receiveModList(modList)
 	received_modlist = modList
@@ -590,7 +585,7 @@ function receiveModList(modList)
 		updateStreamedElements()
 	end
 end
-addEventHandler("newmodels:receiveModList", resourceRoot, receiveModList)
+addEventHandler(resName..":receiveModList", resourceRoot, receiveModList)
 
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)
@@ -611,77 +606,5 @@ function (startedResource)
 		end
 	end
 
-	if SEE_ALLOCATED_TABLE then
-		togSeeAllocatedTable("-", true)
-	end
-
-	triggerLatentServerEvent("newmodels:requestModList", resourceRoot)
+	triggerLatentServerEvent(resName..":requestModList", resourceRoot)
 end)
-
-
----------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
-------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
-
-local drawing = false
-
-function togSeeAllocatedTable(cmd, dontspam)
-	if not drawing then
-		addEventHandler( "onClientRender", root, drawAllocatedTable)
-		drawing = true
-	else
-		removeEventHandler( "onClientRender", root, drawAllocatedTable)
-		drawing = false
-	end
-	if not (type(dontspam)=="boolean") then
-		outputChatBox("Displaying allocated_ids on screen: "..(drawing and "Yes" or "No"))
-	end
-end
-addCommandHandler("allocatedids", togSeeAllocatedTable, false)
-
-local sx,sy = guiGetScreenSize()
-local dfontsize = 1
-local dfont = "default-bold"
-
-function drawAllocatedTable()
-	local text = toJSON(allocated_ids)
-	local width = dxGetTextWidth(text, dfontsize, dfont)
-	local x,y = sx/2 - width/2, 20
-	dxDrawText(text, x,y,x,y, "0xffffffff", dfontsize, dfont)
-end
-
-
-function outputStreamedInElements(cmd)
-	local tab = {}
-	local total = 0
-
-	for elementType, name in pairs(dataNames) do
-		local elements = getElementsByType(elementType, getRootElement(), true)
-		local count = table.size(elements)
-		if count > 0 then
-			tab[elementType] = elements
-			total = total + count
-		end
-	end
-
-	outputChatBox("TOTAL: "..total,255,126,0)
-	for elementType, elements in pairs(tab) do
-			
-		outputChatBox(elementType..": "..table.size(elements))
-		local dataName = dataNames[elementType]
-
-		for k, element in pairs(elements) do
-			local id = tonumber(getElementData(element, dataName))
-			if id then
-				local extra = ""
-				local allocted_id = allocated_ids[id]
-				if allocated_id then
-					extra = " allocated to ID "..alocated_id
-				end
-				local x,y,z = getElementPosition(element)
-				local int,dim = getElementInterior(element), getElementDimension(element)
-				outputChatBox(" - Model ID "..id..extra.." ("..x..", "..y..", "..z.." | int: "..int..", dim: "..dim..")",255,194,14)
-			end
-		end
-	end
-end
-addCommandHandler("selements", outputStreamedInElements, false)

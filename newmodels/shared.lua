@@ -6,6 +6,9 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
+thisRes = getThisResource()
+resName = getResourceName(thisRes)
+
 _outputDebugString = outputDebugString
 function outputDebugString(text, mode, r,g,b)
 	if not ENABLE_DEBUG_MESSAGES then return end

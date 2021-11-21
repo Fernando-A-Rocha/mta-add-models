@@ -39,6 +39,10 @@
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
 
+    <!-- testing scripts (optional) -->
+    <script type="server" src="testing_server.lua"/>
+    <script type="client" src="testing_client.lua"/>
+
 
     <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>

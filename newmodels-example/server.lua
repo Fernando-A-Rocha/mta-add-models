@@ -121,6 +121,12 @@ function testVehiclesCmd(thePlayer, cmd)
 	end
 	spawned_vehs = {}
 	local x,y,z = ix,iy,iz
+	if getPedOccupiedVehicle(thePlayer) then
+		removePedFromVehicle(thePlayer)
+	end
+	setElementPosition(thePlayer, x+6,y,z)
+	setElementDimension(thePlayer, 0)
+	setElementInterior(thePlayer, 0)
 	local elementType2 = "vehicle"
 	local data_name = exports.newmodels:getDataNameFromType(elementType2)
 	local modList = exports.newmodels:getModList()
