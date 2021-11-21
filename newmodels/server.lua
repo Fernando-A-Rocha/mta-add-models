@@ -646,7 +646,7 @@ function mySkinCmd(thePlayer, cmd, id)
 		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
 	end
 end
--- addCommandHandler("myskin", mySkinCmd, false, false)
+addCommandHandler("myskin", mySkinCmd, false, false)
 
 function pedSkinCmd(thePlayer, cmd, id)
 

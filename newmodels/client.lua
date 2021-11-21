@@ -23,6 +23,10 @@ local waiting_queue = {} -- [element] = { func num, args }
 -- Vehicle specific
 local update_handling = {} -- [element] = timer
 
+function isClientReady() -- [Exported]
+	return received_modlist ~= nil
+end
+
 function getModList() -- [Exported - Client Version]
 	if not received_modlist then
 		-- outputDebugString("getModDataFromID: Client hasn't received modList yet", 1)
@@ -46,6 +50,11 @@ function getModDataFromID(id) -- [Exported - Client Version]
 			end
 		end
 	end
+end
+
+function wasElementCreatedClientside(element, elementType)
+	-- TODO
+	return false
 end
 
 function allocateNewMod(element, elementType, id)
@@ -213,8 +222,8 @@ function setElementCustomModel(element, elementType, id)
 		if getElementType(element)=="vehicle" then
 			if isTimer(update_handling[element]) then killTimer(update_handling[element]) end
 			update_handling[element] = setTimer(function()
-				if isElement(element) then
-					triggerLatentServerEvent("newmodels:updateVehicleHandling", resourceRoot, element)
+				if isElement(element) and not wasElementCreatedClientside(element) then
+					triggerServerEvent("newmodels:updateVehicleHandling", resourceRoot, element)
 				end
 				update_handling[element] = nil
 			end, 1000, 1)
@@ -344,7 +353,9 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 
 			if tonumber(oldValue) then
 				-- removing new model id
-				triggerServerEvent("newmodels:resetElementModel", resourceRoot, source, tonumber(oldValue))
+				if not wasElementCreatedClientside(source) then
+					triggerServerEvent("newmodels:resetElementModel", resourceRoot, source, tonumber(oldValue))
+				end
 			end
 		end
 
@@ -385,7 +396,10 @@ function updateStreamedInElement(source)
 	if isCustomModID(id) then
 
 		local allocated_id = allocated_ids[id]
-		if allocated_id then return end -- ignore if already allocated:
+		if allocated_id then
+			setElementModel(source, allocated_id)
+			return
+		end
 		-- the model only needs to be set once in onClientElementDataChange
 		-- note: when an element is streamed out the model is deallocated/freed
 
@@ -556,8 +570,6 @@ function updateStreamedElements()
 
 					freed[id] = true
 					freeElementCustomMod(id)
-					-- triggerServerEvent("newmodels:resetElementModel", resourceRoot, source, tonumber(oldValue))
-				
 				else
 					updateStreamedInElement(el)
 				end
