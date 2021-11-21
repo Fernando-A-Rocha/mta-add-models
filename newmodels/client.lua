@@ -54,7 +54,7 @@ end
 
 function allocateNewMod(element, elementType, id)
 
-	if not isElementStreamedIn(element) then
+	if if isElement(element) and not isElementStreamedIn(element) then
 		return false, elementType.." element not streamed in"
 	end
 
@@ -167,7 +167,22 @@ function allocateNewMod(element, elementType, id)
 	if isElement(colmodel) then
 		table.insert(model_elements[allocated_id], colmodel)
 	end
-	return true
+	return allocated_id
+end
+
+function forceAllocate(id) -- [Exported]
+	id = tonumber(id)
+	if not id then return false, "id not number" end
+	local isCustom, mod, elementType2 = isCustomModID(id)
+	if not isCustom then
+		return false, id.." not a custom mod ID"
+	end
+	-- allocate as it hasn't been done already
+	local allocated_id = allocated_ids[id]
+	if allocated_id then
+		return false, id.." already allocated to ID "..allocated_id
+	end
+	return allocateNewMod(nil, elementType2, id)
 end
 
 function setElementCustomModel(element, elementType, id)

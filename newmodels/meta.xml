@@ -55,4 +55,5 @@
     <export type="server" function="removeExternalMod"/>
 
     <export type="client" function="isClientReady"/>
+    <export type="client" function="forceAllocate"/>
 </meta>
