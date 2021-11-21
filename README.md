@@ -260,6 +260,10 @@ You will find a lot more scripts that need to be changed if you want to use new 
 - Supporting custom skins in the [clothes](https://github.com/OwlGamingCommunity/MTA/tree/main/mods/deathmatch/resources/clothes) system
 - ...
 
+# Generating Collision Files
+
+There's a tool to generate a `.col` file from a given `.dff` model. Check out the tutorial [here](https://github.com/Fernando-A-Rocha/mta-samp-maploader/blob/main/TUTORIAL_COL.md).
+
 # Final Note
 
 Feel free to update this README.md if you wish to provide tutorial(s) for other implementations, or generally improve the current documentation.
