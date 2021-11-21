@@ -53,8 +53,7 @@ function getModDataFromID(id) -- [Exported - Client Version]
 end
 
 function wasElementCreatedClientside(element, elementType)
-	-- TODO
-	return false
+	return isElementLocal(element)
 end
 
 function allocateNewMod(element, elementType, id)
