@@ -4,6 +4,7 @@
     <include resource="newmodels" />
 
     <script type="server" src="server.lua" />
+    <script type="server" src="testing_server.lua" />
     
     <!-- Download models.zip and extract everything into models folder -->
     <file src="models/18632.dff"></file>
