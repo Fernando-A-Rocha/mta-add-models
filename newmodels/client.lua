@@ -54,7 +54,7 @@ end
 
 function allocateNewMod(element, elementType, id)
 
-	if if isElement(element) and not isElementStreamedIn(element) then
+	if isElement(element) and not isElementStreamedIn(element) then
 		return false, elementType.." element not streamed in"
 	end
 
