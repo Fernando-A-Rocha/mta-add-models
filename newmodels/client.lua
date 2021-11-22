@@ -177,11 +177,12 @@ function forceAllocate(id) -- [Exported]
 	if not isCustom then
 		return false, id.." not a custom mod ID"
 	end
-	-- allocate as it hasn't been done already
 	local allocated_id = allocated_ids[id]
 	if allocated_id then
-		return false, id.." already allocated to ID "..allocated_id
+		return allocated_id
 	end
+	
+	-- allocate as it hasn't been done already
 	return allocateNewMod(nil, elementType2, id)
 end
 
