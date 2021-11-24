@@ -3,4 +3,6 @@
 	<script type="client" src="client.lua"/>
 	<script type="server" src="server.lua"/>
 	<script type="server" src="server_other.lua"/>
+	<file src="scantler.txd"/>
+	<file src="scantler.dff"/>
 </meta>

@@ -12,9 +12,9 @@ function (startedResource)
    -- test2()
    -- test3()
    -- test4()
-   test5()
+   -- test5()
    -- test6()
-
+   -- test7()
 
 end)
 
@@ -160,3 +160,32 @@ addCommandHandler("t3", function(thePlayer, cmd)
 
 end, false, false)
 
+
+local testPlayer
+local testVeh
+local x,y,z
+function test7()
+   local startid = 90000
+   local endid = startid+149
+   for id=startid,endid do
+      local worked, reason = exports.newmodels:addExternalMod_CustomFilenames("vehicle", id, 400, "Test "..id, "scantler.dff", "scantler.txd")
+      if not worked then
+         outputChatBox(reason, root,255,0,0)
+         break
+      end
+   end
+
+   testPlayer = getRandomPlayer()
+   if not testPlayer then return print("NO PLAYER") end
+   x,y,z = getElementPosition(testPlayer)
+   local current = 10000--wait 10 secs for mods to be properly added
+   for id=startid,endid do
+      setTimer(function()
+         if isElement(testVeh) then destroyElement(testVeh) end
+         testVeh = createVehicle(400, x+6,y+6,z+1)
+         setElementFrozen(testVeh, true)
+         setElementData(testVeh, "vehicleID", id)
+      end, current, 1)
+      current = current + 500
+   end
+end
