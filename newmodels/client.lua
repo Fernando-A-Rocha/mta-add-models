@@ -326,6 +326,7 @@ end
 
 -- (1) updateElementOnDataChange
 function updateElementOnDataChange(source, theKey, oldValue, newValue)
+	if not isElement(source) then return end
 
 	local data_et = getDataTypeFromName(theKey)
 	local et = getElementType(source)
@@ -389,6 +390,7 @@ addEventHandler( "onClientElementDataChange", root, function (theKey, oldValue, 
 
 -- (2) updateStreamedInElement
 function updateStreamedInElement(source)
+	if not isElement(source) then return end
 
 	local et = getElementType(source)
 
@@ -439,7 +441,7 @@ addEventHandler( "onClientElementStreamIn", root, function () updateStreamedInEl
 
 -- (3) updateStreamedOutElement
 function updateStreamedOutElement(source)
-
+	if not isElement(source) then return end
 	local et = getElementType(source)
 
 	if not isElementTypeSupported(et) then
@@ -474,6 +476,8 @@ addEventHandler( "onClientElementDestroy", root, function () updateStreamedOutEl
 
 -- (4) updateModelChangedElement
 function updateModelChangedElement(source, oldModel, newModel)
+	if not isElement(source) then return end
+	
 	local et = getElementType(source)
 	if not isElementTypeSupported(et) then
 		return

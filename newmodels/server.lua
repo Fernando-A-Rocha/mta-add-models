@@ -486,7 +486,7 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path) -- [Ex
 	prevent_addrem_spam.addtimer = setTimer(function()
 		for rname,mods in pairs(prevent_addrem_spam.add) do
 			outputDebugString("Added "..#mods.." mods from "..rname, 0, 136, 255, 89)
-			prevent_addrem_spam.add.rname = nil
+			prevent_addrem_spam.add[rname] = nil
 		end
 	end, 1000, 1)
 
@@ -603,7 +603,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	prevent_addrem_spam.addtimer = setTimer(function()
 		for rname,mods in pairs(prevent_addrem_spam.add) do
 			outputDebugString("Added "..#mods.." mods from "..rname, 0, 136, 255, 89)
-			prevent_addrem_spam.add.rname = nil
+			prevent_addrem_spam.add[rname] = nil
 		end
 	end, 1000, 1)
 	return true
