@@ -2,7 +2,7 @@
     <!-- DOCUMENTATION:
         https://github.com/Fernando-A-Rocha/mta-add-models
     -->
-    <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.6.6" type="script"/>
+    <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.6.7" type="script"/>
     
     <!-- https://nightly.mtasa.com  IMPORTANT TO HAVE THE VERSION SPECIFIED SO THAT ADDED MODELS WORK AS EXPECTED -->
     <min_mta_version client="1.5.9-9.21026.0" server="1.5.9-9.21026.0"></min_mta_version>

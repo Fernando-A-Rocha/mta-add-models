@@ -9,6 +9,7 @@
 -- Custom events:
 addEvent(resName..":receiveModList", true)
 addEvent(resName..":receiveVehicleHandling", true)
+addEvent(resName..":onMapListReceived", true)
 
 
 allocated_ids = {} -- { [new id] = allocated id }
@@ -598,6 +599,7 @@ function receiveModList(modList)
 	received_modlist = modList
 
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
+	triggerEvent(resName..":onMapListReceived", localPlayer) -- for other resources to handle
 	-- iprint(modList)
 
 	if updateElementsInQueue() then
