@@ -2,6 +2,8 @@
    Resource for Unit Tests
 ]]
 
+math.randomseed(getRealTime().timestamp)
+
 addCommandHandler("bb", function(player) setElementPosition(player, 5,5,3.5) end, false, false)
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)

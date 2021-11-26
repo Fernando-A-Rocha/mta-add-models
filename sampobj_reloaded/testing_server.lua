@@ -21,6 +21,7 @@ addCommandHandler("rsampobj", function(thePlayer)
 	setElementDimension(obj, dim)
 	local data_name = exports.newmodels:getDataNameFromType("object")
 	if data_name then
+		math.randomseed(getRealTime().timestamp)
 		local rid = ids[math.random(1,#ids)]
 		setElementData(obj, data_name, rid)
 		outputChatBox("Created SA-MP object ID "..rid, thePlayer, 0,255,0)

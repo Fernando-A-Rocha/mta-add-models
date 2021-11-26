@@ -90,6 +90,7 @@ function testHandling(thePlayer, cmd)
 	}
 	local randomProperty
 	local randomVal
+	math.randomseed(getRealTime().timestamp)
 	while not randomVal do
 		for k,v in pairs(properties) do
 			if math.random(1,2) == 1 then
