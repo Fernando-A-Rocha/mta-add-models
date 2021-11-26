@@ -16,9 +16,13 @@ allocated_ids = {} -- { [new id] = allocated id }
 local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
 local received_modlist -- will be { [element type] = {...} }
 local waiting_queue = {} -- [element] = { func num, args }
-
+local prevent_object_bug = {}
 local atimers = {}
 local adelay = 5000
+
+addCommandHandler("t9", function()
+	iprint(prevent_object_bug)
+end)
 
 -- Vehicle specific
 local update_handling = {} -- [element] = timer
@@ -168,7 +172,7 @@ function allocateNewMod(element, elementType, id)
 	if isTimer(atimers[id]) then killTimer(atimers[id]) end
 
 	allocated_ids[id] = allocated_id
-	outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
+	-- outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
 	model_elements[allocated_id] = {dffmodel,txdmodel} -- Save model elements for destroying on deallocation
 	if isElement(colmodel) then
 		table.insert(model_elements[allocated_id], colmodel)
@@ -194,12 +198,7 @@ function forceAllocate(id) -- [Exported]
 	local allocated_id2, reason = allocateNewMod(nil, elementType2, id)
 
 	if allocated_id2 then
-		if isTimer(atimers[id]) then killTimer(atimers[id]) end
-
-		atimers[id] = setTimer(function()
-			freeElementCustomMod(id)
-			atimers[id] = nil
-		end, adelay, 1)
+		freeElementCustomMod(id)
 	end
 
 	return allocated_id2, reason
@@ -263,73 +262,82 @@ function setElementCustomModel(element, elementType, id)
 	return true
 end
 
-local prevent_object_bug = {}
 addEventHandler( "onClientElementDestroy", root, 
 function ()
 	if getElementType(source) ~= "object" then return end
-	if isTimer(prevent_object_bug[source]) then killTimer(prevent_object_bug[source]) end
-	prevent_object_bug[source] = nil
+	if isTimer(prevent_object_bug[source]) then
+		killTimer(prevent_object_bug[source])
+		prevent_object_bug[source] = nil
+	end
 end)
 
-function freeElementCustomMod(id, trackElement)
-	local allocated_id = allocated_ids[id]
-	if not allocated_id then
-		return
-	end
+function freeElementCustomMod(id)
+	
+	local isCustom, mod, et2 = isCustomModID(id)
+	if isTimer(atimers[id]) then killTimer(atimers[id]) end
+	atimers[id] = setTimer(function()
 
-	-- trackElement = the script will only free that ID of the element is no longer streamed in
-	--  OR not tracking any element (aka on stop)
-	local et, dataName
-	if isElement(trackElement) then
-		et = getElementType(trackElement)
-		dataName = dataNames[et]
-	end
-
-
-	local test1 = ( isElement(trackElement) and not isElementStreamedIn(trackElement) )
-	local test2 = ( isElement(trackElement) and isElementStreamedIn(trackElement) and ((not getElementData(trackElement, dataName)) or getElementData(trackElement, dataName) ~= id) )
-	local test3 = ( not isElement(trackElement) )
-	if test3 then
+		local allocated_id = allocated_ids[id]
+		if not allocated_id then return end
+	
+		local test1, test2
 		-- try to find an element to track
-		local isCustom, mod, et2 = isCustomModID(id)
 		local foundElement
+
 		if et2 then
-			for k, element in ipairs(getElementsByType(et2, getRootElement(), true)) do
+			for k, element in ipairs(getElementsByType(et2)) do
 				local id2 = tonumber(getElementData(element, dataNames[et2]))
 				if id2 and id2 == id then
-					foundElement = element
-					break
+					if not foundElement then
+						foundElement = element
+					end
+
+					-- object bug fix magic
+					if isTimer(prevent_object_bug[element]) then killTimer(prevent_object_bug[element]) end
+					if et2 == "object" then
+						prevent_object_bug[element] = setTimer(function()
+							if isElementStreamedIn(element) then
+								local id3 = tonumber(getElementData(element, dataNames["object"]))
+								if id3 then
+									local aid = allocated_ids[id3]
+									if aid then
+										setElementModel(element, aid)
+									else
+										local aid2 = allocateNewMod(element, "object", id3)
+										if aid2 then
+											setElementModel(element, aid2)
+										end
+									end
+								end
+							end
+							prevent_object_bug[element] = nil
+						end, 2000, 1)
+					end
 				end
+			end
+
+			if isElement(foundElement) then
+				test1 = ( not isElementStreamedIn(foundElement) )
+				test2 = ( isElementStreamedIn(foundElement) and ((not getElementData(foundElement, dataName)) or getElementData(foundElement, dataName) ~= id) )
 			end
 		end
 
-		if isElement(foundElement) then
-			print("Found element to track in freeElementCustomMod("..id..")", foundElement)
-			return freeElementCustomMod(id, foundElement)
-		end
-	end
 
-
-	if test1 or test2 or test3 then
-		
-		if et == "object" then
-			prevent_object_bug[trackElement] = setTimer(function() prevent_object_bug[trackElement] = nil end, adelay+3000, 1)
-		end
-
-		if isTimer(atimers[id]) then killTimer(atimers[id]) end
-		atimers[id] = setTimer(function()
+		if (not isElement(foundElement)) or test1 or test2 then
 
 			local worked = engineFreeModel(allocated_id)
-			allocated_ids[id] = nil
+
+			local r,g,b = 227, 255, 117
+			if not worked then
+				r,g,b = 252, 44, 3
+			end
 
 			if test1 then
-				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": element not streamed in"..((not worked) and (" but engineFreeModel returned false") or ""), 0,227, 255, 117)
-
-
+				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": element not streamed in", 0, r,g,b)
 			elseif test2 then
-				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": element streamed in with different custom model or default model"..((not worked) and (" but engineFreeModel returned false") or ""), 0,227, 255, 117)
-			elseif test3 then
-				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": no element found"..((not worked) and (" but engineFreeModel returned false") or ""), 0,227, 255, 117)
+				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": element streamed in with different custom model or default model", r,g,b)
+			else
+				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": no element found", 0,r,g,b)
 			end
 
 			-- local count = 0
@@ -343,12 +351,13 @@ function freeElementCustomMod(id, trackElement)
 			model_elements[allocated_id] = nil
 			-- outputDebugString("["..(eventname or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..allocated_id, 0,227, 255, 117)
 			
-			atimers[id] = nil
-		end, adelay, 1)
-		
-	else
-		outputDebugString("["..(eventname or "?").."] Not freeing allocated ID "..allocated_id.." for mod ID "..id, 0,227, 255, 117)
-	end
+			allocated_ids[id] = nil
+		else
+			-- outputDebugString("["..(eventname or "?").."] Not freeing allocated ID "..allocated_id.." for mod ID "..id, 0,227, 255, 117)
+		end
+
+		atimers[id] = nil
+	end, adelay, 1)
 end
 
 function hasOtherElementsWithModel(element, id)
@@ -392,7 +401,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 				if not success then
 					outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
 				else
-					outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
+					-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
 				end
 
 			elseif isDefaultID(et, id) then
@@ -417,9 +426,9 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 			if not old_allocated_id then return end -- was not allocated
 
 			if not hasOtherElementsWithModel(source, old_id) then
-				freeElementCustomMod(old_id, source)
+				freeElementCustomMod(old_id)
 			else
-				outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..old_allocated_id.." for new "..et.." model ID "..old_id,3)
+				-- outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..old_allocated_id.." for new "..et.." model ID "..old_id,3)
 				return
 			end
 		end
@@ -448,6 +457,10 @@ function updateStreamedInElement(source)
 
 	if isCustomModID(id) then
 
+		if et == "object" and prevent_object_bug[source] then
+			return
+		end
+
 		local allocated_id = allocated_ids[id]
 		if allocated_id then
 			setElementModel(source, allocated_id)
@@ -456,18 +469,13 @@ function updateStreamedInElement(source)
 		-- the model only needs to be set once in onClientElementDataChange
 		-- note: when an element is streamed out the model is deallocated/freed
 
-		if et == "object" and prevent_object_bug[source] then
-			-- print("Get fucked stupid bug")
-			return
-		end
-
 		showElementCoords(source)
 
 		local success, reason = setElementCustomModel(source, et, id)
 		if not success then
 			outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
 		else
-			outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
+			-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
 		end
 
 	elseif isDefaultID(et, id) then
@@ -504,9 +512,9 @@ function updateStreamedOutElement(source)
 		showElementCoords(source)
 
 		if not hasOtherElementsWithModel(source, id) then
-			freeElementCustomMod(id, source)
+			freeElementCustomMod(id)
 		else
-			outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..allocated_id.." for new "..et.." model ID "..id,3)
+			-- outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..allocated_id.." for new "..et.." model ID "..id,3)
 			return
 		end
 	end
@@ -554,7 +562,6 @@ function updateModelChangedElement(source, oldModel, newModel)
 		if isElementStreamedIn(source) then
 
 			if et == "object" and prevent_object_bug[source] then
-				-- print("Get fucked stupid bug")
 				return
 			end
 		
@@ -565,7 +572,7 @@ function updateModelChangedElement(source, oldModel, newModel)
 
 			if old_id and isCustomModID(old_id)
 			and not hasOtherElementsWithModel(source, old_id) then
-				freeElementCustomMod(old_id, source)
+				freeElementCustomMod(old_id)
 			end
         end
 	end
@@ -581,8 +588,8 @@ function (reason)
 end)
 
 function showElementCoords(element)
-	local x,y,z = getElementPosition(element)
-	outputDebugString("["..(eventName or "?").."] "..x..", "..y..", "..z,0, 255,255,255)
+	-- local x,y,z = getElementPosition(element)
+	-- outputDebugString("["..(eventName or "?").."] "..x..", "..y..", "..z,0, 255,255,255)
 end
 
 function updateElementsInQueue()
