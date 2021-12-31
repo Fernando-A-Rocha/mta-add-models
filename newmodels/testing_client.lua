@@ -154,7 +154,7 @@ function createTestWindow(version, title, data)
 			local grid = guiCreateGridList(0, 5, ww,hh, false, tab)
 
 			cols0.id = guiGridListAddColumn(grid, "Custom ID", 0.2)
-			cols0.aid = guiGridListAddColumn(grid, "Model", 0.2)
+			cols0.modelid = guiGridListAddColumn(grid, "Model", 0.2)
 			cols0.pos = guiGridListAddColumn(grid, "Position", 0.5)
 
 			addEventHandler( "onClientGUIDoubleClick", grid, 
@@ -185,11 +185,13 @@ function createTestWindow(version, title, data)
 					guiGridListSetItemColor(grid, row, cols0.id, 0,255,0)
 					local allocated_id = allocated_ids[id]
 					if allocated_id then
-						guiGridListSetItemText(grid, row, cols0.aid, allocated_id, false, true)
+						guiGridListSetItemText(grid, row, cols0.modelid, allocated_id, false, true)
+					else
+						guiGridListSetItemText(grid, row, cols0.modelid, "Not allocated", false, false)
 					end
 				else
 					guiGridListSetItemText(grid, row, cols0.id, "-", false, true)
-					guiGridListSetItemText(grid, row, cols0.aid, getElementModel(element), false, true)
+					guiGridListSetItemText(grid, row, cols0.modelid, getElementModel(element), false, true)
 				end
 
 

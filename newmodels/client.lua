@@ -16,13 +16,8 @@ allocated_ids = {} -- { [new id] = allocated id }
 local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
 local received_modlist -- will be { [element type] = {...} }
 local waiting_queue = {} -- [element] = { func num, args }
-local prevent_object_bug = {}
 local atimers = {}
 local adelay = 5000
-
-addCommandHandler("t9", function()
-	iprint(prevent_object_bug)
-end)
 
 -- Vehicle specific
 local update_handling = {} -- [element] = timer
@@ -262,15 +257,6 @@ function setElementCustomModel(element, elementType, id)
 	return true
 end
 
-addEventHandler( "onClientElementDestroy", root, 
-function ()
-	if getElementType(source) ~= "object" then return end
-	if isTimer(prevent_object_bug[source]) then
-		killTimer(prevent_object_bug[source])
-		prevent_object_bug[source] = nil
-	end
-end)
-
 function freeElementCustomMod(id)
 	
 	local isCustom, mod, et2 = isCustomModID(id)
@@ -281,45 +267,19 @@ function freeElementCustomMod(id)
 		if not allocated_id then return end
 	
 		local test1, test2
-		-- try to find an element to track
-		local foundElement
+		local foundElement -- try to find an element to track
 
-		if et2 then
-			for k, element in ipairs(getElementsByType(et2)) do
-				local id2 = tonumber(getElementData(element, dataNames[et2]))
-				if id2 and id2 == id then
-					if not foundElement then
-						foundElement = element
-					end
-
-					-- object bug fix magic
-					if isTimer(prevent_object_bug[element]) then killTimer(prevent_object_bug[element]) end
-					if et2 == "object" then
-						prevent_object_bug[element] = setTimer(function()
-							if isElementStreamedIn(element) then
-								local id3 = tonumber(getElementData(element, dataNames["object"]))
-								if id3 then
-									local aid = allocated_ids[id3]
-									if aid then
-										setElementModel(element, aid)
-									else
-										local aid2 = allocateNewMod(element, "object", id3)
-										if aid2 then
-											setElementModel(element, aid2)
-										end
-									end
-								end
-							end
-							prevent_object_bug[element] = nil
-						end, 2000, 1)
-					end
-				end
+		for k, element in ipairs(getElementsByType(et2)) do
+			local id2 = tonumber(getElementData(element, dataNames[et2]))
+			if id2 and id2 == id then
+				foundElement = element
+				break
 			end
+		end
 
-			if isElement(foundElement) then
-				test1 = ( not isElementStreamedIn(foundElement) )
-				test2 = ( isElementStreamedIn(foundElement) and ((not getElementData(foundElement, dataName)) or getElementData(foundElement, dataName) ~= id) )
-			end
+		if isElement(foundElement) then
+			test1 = ( not isElementStreamedIn(foundElement) )
+			test2 = ( isElementStreamedIn(foundElement) and ((not getElementData(foundElement, dataName)) or getElementData(foundElement, dataName) ~= id) )
 		end
 
 
@@ -457,10 +417,6 @@ function updateStreamedInElement(source)
 
 	if isCustomModID(id) then
 
-		if et == "object" and prevent_object_bug[source] then
-			return
-		end
-
 		local allocated_id = allocated_ids[id]
 		if allocated_id then
 			setElementModel(source, allocated_id)
@@ -561,10 +517,6 @@ function updateModelChangedElement(source, oldModel, newModel)
 
 		if isElementStreamedIn(source) then
 
-			if et == "object" and prevent_object_bug[source] then
-				return
-			end
-		
 			showElementCoords(source)
 
             setElementData(source, dataName, nil)
