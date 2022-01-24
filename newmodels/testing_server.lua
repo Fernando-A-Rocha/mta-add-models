@@ -9,6 +9,7 @@
 		/makeobject
 		/makevehicle
 		/listmods
+		/newmodels
 ]]
 
 ---------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
@@ -29,6 +30,10 @@ if START_STOP_MESSAGES then
 	end)
 end
 
+addCommandHandler("newmodels", function(thePlayer)
+		local version = getResourceInfo(getThisResource(), "version") or false
+		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175is loaded", thePlayer, 255, 255, 255, true)
+end, false,false)
 
 function mySkinCmd(thePlayer, cmd, id)
 	if not tonumber(id) then
