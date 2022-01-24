@@ -34,9 +34,12 @@ SA-MP Map Loader resource for MTA: [mta-samp-maploader](https://github.com/Ferna
 
 ## Prerequisites
 
+- Required minimum MTA Server & Client version `1.5.9-9.21125.0`
 - Get the installers from [nightly.mtasa.com](https://nightly.mtasa.com/)
-- Required minimum MTA Client version `TBA`
-- Required minimum MTA Server version `TBA`
+- ![https://i.imgur.com/BmkUosO.png](https://i.imgur.com/BmkUosO.png)
+- Client will auto-update upon joining the server
+- *Find out what the build numbers mean here: [buildinfo.mtasa.com](https://buildinfo.mtasa.com/)*
+- **If you don't have the right version these resources will not work correctly**
 
 ## Includes
 

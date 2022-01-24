@@ -1,5 +1,4 @@
 newmodels/hello community.txt
-*.html
-sampobj_reloaded/models/*.dff
-sampobj_reloaded/models/*.txd
-sampobj_reloaded/models/*.col
+\[examples\]/sampobj_reloaded/models/*.dff
+\[examples\]/sampobj_reloaded/models/*.txd
+\[examples\]/sampobj_reloaded/models/*.col
