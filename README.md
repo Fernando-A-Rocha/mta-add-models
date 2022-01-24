@@ -44,10 +44,10 @@ SA-MP Map Loader resource for MTA: [mta-samp-maploader](https://github.com/Ferna
 ## Includes
 
 - [newmodels](/newmodels): main library resource
-- (optional) [newmodels-example](/newmodels-example): an example implementation to add new objects/skins/etc to your server
-- (optional) [sampobj_reloaded](/sampobj_reloaded): a resource that adds all SA-MP objects to your server
+- (optional) [newmodels-example](/[examples]/newmodels-example): an example implementation to add new objects/skins/etc to your server
+- (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP objects to your server
   - 👉 [Download](https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) `models.zip` containing all dff/txd/col files required
-- (optional) [unittest_newmodels](/unittest_newmodels): a resource for testing the main scripts
+- (optional) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
 
 ## Install
 
@@ -74,11 +74,11 @@ Main testing commands in `newmodels`:
 - /makeobject [ID] **creates an object and sets its model to a default or new ID**
 - /makevehicle [ID] **creates a vehicle and sets its model to a default or new ID**
 
-Testing command(s) in `newmodels-example`: [here](/newmodels-example/server.lua)
+Testing command(s) in `newmodels-example`: [here](/[examples]/newmodels-example/server.lua)
 
-Testing command(s) in `sampobj_reloaded`: [here](/sampobj_reloaded/server.lua)
+Testing command(s) in `sampobj_reloaded`: [here](/[examples]/sampobj_reloaded/server.lua)
 
-Testing command(s) in `unittest_newmodels`: [here](/unittest_newmodels/server.lua)
+Testing command(s) in `unittest_newmodels`: [here](/[examples]/unittest_newmodels/server.lua)
 
 # Implementing
 
@@ -96,7 +96,7 @@ This library lets you load mods stored within the `newmodels` resource, and also
 
 Check the [quick testing](#quick-testing) to understand how to load mods from within the `newmodels` resource (easier).
 
-You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua) and [example to see implementation](/newmodels-example/server.lua):
+You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua) and [example to see implementation](/[examples]/newmodels-example/server.lua):
 - `addExternalMod_IDFilenames(elementType, id, base_id, name, path)`
 - `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col)`
 - `removeExternalMod(id)`
