@@ -236,6 +236,7 @@ local dfont = "default-bold"
 
 function drawAllocatedTable()
 	local text = inspect(allocated_ids)
+	text="Total: "..table.size(allocated_ids).."\n"..text
 	local width = dxGetTextWidth(text, dfontsize, dfont)
 	local x,y = sx/2 - width/2, 20
 	dxDrawText(text, x,y,x,y, "0xffffffff", dfontsize, dfont)

@@ -257,33 +257,31 @@ function setElementCustomModel(element, elementType, id)
 	return true
 end
 
-function freeElementCustomMod(id)
+function freeElementCustomMod(id2)
 	
-	local isCustom, mod, et2 = isCustomModID(id)
-	if isTimer(atimers[id]) then killTimer(atimers[id]) end
-	atimers[id] = setTimer(function()
+	local isCustom, _, et2 = isCustomModID(id2)
+	if isTimer(atimers[id2]) then killTimer(atimers[id2]) end
 
+	atimers[id2] = setTimer(function(id, et, en)
+
+		local dataName = dataNames[et]
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end
 	
-		local test1, test2
-		local foundElement -- try to find an element to track
+		local oneStreamedIn = false
 
-		for k, element in ipairs(getElementsByType(et2)) do
-			local id2 = tonumber(getElementData(element, dataNames[et2]))
+		-- check if no elements streamed in have that id
+		for k, element in ipairs(getElementsByType(et)) do
+			local id2 = tonumber(getElementData(element, dataName))
 			if id2 and id2 == id then
-				foundElement = element
-				break
+				if isElementStreamedIn(element) then
+					oneStreamedIn = element
+					break
+				end
 			end
 		end
 
-		if isElement(foundElement) then
-			test1 = ( not isElementStreamedIn(foundElement) )
-			test2 = ( isElementStreamedIn(foundElement) and ((not getElementData(foundElement, dataName)) or getElementData(foundElement, dataName) ~= id) )
-		end
-
-
-		if (not isElement(foundElement)) or test1 or test2 then
+		if not oneStreamedIn then
 
 			local worked = engineFreeModel(allocated_id)
 
@@ -292,32 +290,26 @@ function freeElementCustomMod(id)
 				r,g,b = 252, 44, 3
 			end
 
-			if test1 then
-				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": element not streamed in", 0, r,g,b)
-			elseif test2 then
-				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": element streamed in with different custom model or default model", r,g,b)
-			else
-				outputDebugString("["..(eventname or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": no element found", 0,r,g,b)
-			end
+			outputDebugString("["..(en or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": none streamed in", 0,r,g,b)
 
 			-- local count = 0
 			for k, element in pairs(model_elements[allocated_id] or {}) do
 				if isElement(element) then
-					if destroyElement(element) then
+					destroyElement(element)
+					-- if destroyElement(element) then
 						-- count = count + 1
-					end
+					-- end
 				end
 			end
 			model_elements[allocated_id] = nil
-			-- outputDebugString("["..(eventname or "?").."] Destroyed "..count.." dff/txd/col elements of allocated ID "..allocated_id, 0,227, 255, 117)
-			
 			allocated_ids[id] = nil
 		else
-			-- outputDebugString("["..(eventname or "?").."] Not freeing allocated ID "..allocated_id.." for mod ID "..id, 0,227, 255, 117)
+			-- outputDebugString("["..(en or "?").."] Not freeing allocated ID "..allocated_id.." for mod ID "..id, 0,227, 255, 117)
 		end
 
 		atimers[id] = nil
-	end, adelay, 1)
+
+	end, adelay, 1, id2, et2, eventName)
 end
 
 function hasOtherElementsWithModel(element, id)
@@ -602,7 +594,7 @@ end
 function receiveModList(modList)
 	received_modlist = modList
 
-	outputDebugString("Client received mod list", 0, 115, 236, 255)
+	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 	triggerEvent(resName..":onMapListReceived", localPlayer) -- for other resources to handle
 	-- iprint(modList)
 
