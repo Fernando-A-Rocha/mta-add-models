@@ -2,7 +2,7 @@
     <!-- DOCUMENTATION:
         https://github.com/Fernando-A-Rocha/mta-add-models
     -->
-    <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.6.9" type="script"/>
+    <info author="Fernando" name="mta-add-models" description="minimalistic library for adding new models to your server" version="1.7.0" type="script"/>
     
     <!-- https://nightly.mtasa.com  IMPORTANT TO HAVE THE VERSION SPECIFIED SO THAT ADDED MODELS WORK AS EXPECTED -->
     <min_mta_version client="1.5.9-9.21125.0" server="1.5.9-9.21125.0"></min_mta_version>
@@ -35,6 +35,7 @@
 
     <script type="shared" src="_config.lua"/>
     <script type="shared" src="shared.lua"/>
+    <script type="server" src="updater_s.lua"/>
     <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
