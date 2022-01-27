@@ -158,6 +158,9 @@ function makeVehicleCmd(thePlayer, cmd, id)
 		local rx,ry,rz = getElementRotation(thePlayer)
 		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
 
+		x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
+		rz = rz + 90
+
 		local theVehicle = createVehicle(400, x,y,z)
 		if not theVehicle then
 			return outputChatBox("Error spawning vehicle", thePlayer, 255,0,0)
@@ -179,15 +182,6 @@ function makeVehicleCmd(thePlayer, cmd, id)
 		end
 
 		outputChatBox("Created vehicle with custom ID "..id, thePlayer, 0,255,0)
-		
-		setTimer(function()
-			if getPedOccupiedVehicle(thePlayer) then
-				removePedFromVehicle(thePlayer)
-				setTimer(warpPedIntoVehicle, 500, 1, thePlayer, theVehicle)
-			else
-				warpPedIntoVehicle(thePlayer, theVehicle)
-			end
-		end, 1000, 1)
 
 	elseif base_id then
 		outputChatBox("Vehicle ID "..base_id.." doesn't exist (for base ID)", thePlayer,255,0,0)
@@ -220,3 +214,12 @@ function listModsCmd(thePlayer, cmd)
 	triggerClientEvent(thePlayer, resName..":openTestWindow", resourceRoot, "listmods", "Total "..count.." Mods", modList)
 end
 addCommandHandler("listmods", listModsCmd, false, false)
+
+-- For /makevehicle
+function getPositionFromElementOffset(element,offX,offY,offZ)
+	local m = getElementMatrix ( element )  -- Get the matrix
+	local x = offX * m[1][1] + offY * m[2][1] + offZ * m[3][1] + m[4][1]  -- Apply transform
+	local y = offX * m[1][2] + offY * m[2][2] + offZ * m[3][2] + m[4][2]
+	local z = offX * m[1][3] + offY * m[2][3] + offZ * m[3][3] + m[4][3]
+	return x, y, z                               -- Return the transformed point
+end

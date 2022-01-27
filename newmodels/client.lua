@@ -259,7 +259,12 @@ end
 
 function freeElementCustomMod(id2)
 	
-	local isCustom, _, et2 = isCustomModID(id2)
+	local _, __, et2 = isCustomModID(id2)
+	if not et2 then
+		outputDebugString("["..(eventName or "?").."] freeElementCustomMod error for mod ID "..id2.." - missing element type", 1)
+		return
+	end
+
 	if isTimer(atimers[id2]) then killTimer(atimers[id2]) end
 
 	atimers[id2] = setTimer(function(id, et, en)
@@ -596,10 +601,8 @@ function receiveModList(modList)
 
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 	triggerEvent(resName..":onMapListReceived", localPlayer) -- for other resources to handle
-	-- iprint(modList)
 
 	if updateElementsInQueue() then
-
 		updateStreamedElements()
 	end
 end
@@ -608,7 +611,7 @@ addEventHandler(resName..":receiveModList", resourceRoot, receiveModList)
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)
 	for id, allocated_id in pairs(allocated_ids) do
-		freeElementCustomMod(id)
+		engineFreeModel(allocated_id)
 	end
 end)
 

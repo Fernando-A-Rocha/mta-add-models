@@ -55,10 +55,36 @@ function fetchLatestCallback(data, info)
 		end
 
 		if not foundEqual then
-			outputInfo("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-			outputInfo("["..resourceName.." UPDATER] New version available: " .. version.." (current: "..currentVersion..")")
-			outputInfo("["..resourceName.." UPDATER] Get it from: "..data.html_url)
-			outputInfo("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+
+			-- check if version is superior than currentVersion
+			local currentVersionParts = split(currentVersion, ".")
+			local currentVersionPartsCount = #currentVersionParts
+			local versionParts = split(version, ".")
+			local versionPartsCount = #versionParts
+
+			versionParts[1] = versionParts[1]:gsub("v", "")
+
+			if currentVersionPartsCount > versionPartsCount then
+				versionPartsCount = currentVersionPartsCount
+			end
+
+			-- check if version is inferior than currentVersion
+			local inferior = true
+
+			for i = 1, versionPartsCount do
+				if tonumber(currentVersionParts[i]) > tonumber(versionParts[i]) then
+					inferior = false
+					break
+				end
+			end
+
+			if inferior then
+				outputInfo("["..resourceName.." UPDATER] You are running an inferior version of this resource")
+				outputInfo("["..resourceName.." UPDATER] Get the latest from: "..data.html_url)
+				return
+			end
+
+			outputInfo("["..resourceName.." UPDATER] You are running an unknown version of this resource")
 		else
 			outputInfo("["..resourceName.." UPDATER] You are running the latest version: "..currentVersion)
 		end

@@ -1,15 +1,15 @@
 <meta>
-	<!-- DOCUMENTATION:
+    <!-- DOCUMENTATION:
         https://github.com/Fernando-A-Rocha/mta-add-models
     -->
-    <info author="Fernando" name="newmodels Example" description="implements mta-add-models library functions" version="0.0" type="script"/>
-    <include resource="newmodels"/>
-
+    <info author="Fernando" name="newmodels Example" description="implements mta-add-models library functions" version="0.0" type="script" />
+    <include resource="newmodels" />
+    
     <!-- some skins -->
-    <file src="mymodels/biker.dff"/>
-    <file src="mymodels/biker.txd"/>
-    <file src="mymodels/samoa.dff"/>
-    <file src="mymodels/samoa.txd"/>
-
-    <script type="server" src="server.lua"/>
+    <file src="mymodels/biker.dff" />
+    <file src="mymodels/biker.txd" />
+    <file src="mymodels/samoa.dff" />
+    <file src="mymodels/samoa.txd" />
+    
+    <script type="server" src="server.lua" />
 </meta>
