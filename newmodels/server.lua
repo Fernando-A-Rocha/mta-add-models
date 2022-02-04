@@ -380,6 +380,7 @@ function setCustomElementModel(element, et, id)
 
 			local dataName = dataNames[et]
 			setElementData(element, dataName, id)
+			setElementData(element, baseDataName, mod.base_id)
 		end
 		
 		return true

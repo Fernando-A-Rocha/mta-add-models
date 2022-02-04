@@ -38,15 +38,15 @@ function outputDebugString(text, mode, r,g,b)
 	end
 end
 
-dataNames = {
+dataNames = { -- [data name] = custom element model ID | saved in an element's data
 	ped = "skinID",
 	player = "skinID",
 	vehicle = "vehicleID",
-
-	-- there is currently a bug with engineFreeModel when object streamed out
-	-- it is fixed in client.lua with 'prevent_object_bug'
 	object = "objectID",
 }
+
+baseDataName = "baseID" -- saves the element's custom model's base model ID
+-- useful for getting a vehicle's original handling, etc
 
 function getDataTypeFromName(dataName)
 	for elementType, name in pairs(dataNames) do

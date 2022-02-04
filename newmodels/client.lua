@@ -100,12 +100,11 @@ function allocateNewMod(element, elementType, id)
 
 	local colpath
 	if elementType == "object" then
-		colpath = paths.col
-		if not colpath then
-			return false, "Failed to get COL path for mod ID "..id
-		end
-		if not fileExists(colpath) then
-			return false, "File doesn't exist: "..colpath
+		if paths.col then
+			colpath = paths.col
+			if not fileExists(colpath) then
+				return false, "File doesn't exist: "..colpath
+			end
 		end
 	end
 
@@ -517,6 +516,8 @@ function updateModelChangedElement(source, oldModel, newModel)
 			showElementCoords(source)
 
             setElementData(source, dataName, nil)
+            setElementData(source, baseDataName, nil)
+
         	outputDebugString("["..(eventName or "?").."] Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
 
 			if old_id and isCustomModID(old_id)
