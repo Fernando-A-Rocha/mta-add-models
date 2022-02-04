@@ -20,6 +20,8 @@ local myMods = {
 	-- this is completely a personal choice, you can have your own way of loading mods
 	-- unique ID, type, base model ID or Name, Mod Name, dff path, txd path, col path
 
+	-- https://wiki.multitheftauto.com/wiki/Vehicle_IDs
+
 	{-1, "ped", 1, "American Biker", "mymodels/biker.dff", "mymodels/biker.txd", nil},
 	{-2, "vehicle", "Rancher", "Samoa", "mymodels/samoa.dff", "mymodels/samoa.txd", nil},
 }
@@ -224,14 +226,16 @@ function checkPossibleExistingElements()
 		end
 	end
 
-	-- Reset after a certain delay (all players need to free the old bugged elements to receive the refresh)
-	print("Fixing "..count.." existing leftover modded elements in "..(fixDelay/1000).." seconds")
-	setTimer(function()
-		for element,v in pairs(fix) do
-			-- iprint("FIXED", element, v[1], v[2])
-			setElementData(element, v[1], v[2])
-		end
-	end, fixDelay, 1)
+	if count > 0 then
+		-- Reset after a certain delay (all players need to free the old bugged elements to receive the refresh)
+		print("Fixing "..count.." existing leftover modded elements in "..(fixDelay/1000).." seconds")
+		setTimer(function()
+			for element,v in pairs(fix) do
+				-- iprint("FIXED", element, v[1], v[2])
+				setElementData(element, v[1], v[2])
+			end
+		end, fixDelay, 1)
+	end
 end
 
 --[[

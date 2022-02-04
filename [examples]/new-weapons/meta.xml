@@ -1,0 +1,25 @@
+<meta>
+    <!-- DOCUMENTATION:
+        https://github.com/Fernando-A-Rocha/mta-add-models
+    -->
+    <info author="Fernando" name="New Weapons using newmodels" description="implements mta-add-models library functions" version="0.0" type="script" />
+    <include resource="newmodels" />
+    
+    <!-- https://github.com/Patrick2562/mtasa-pAttach -->
+    <include resource="pAttach" />
+    
+    <script type="client" src="shared.lua" cache="false" />
+    <script type="server" src="shared.lua" />
+    
+    <script type="client" src="client.lua" cache="false" />
+    
+    <script type="server" src="server.lua" />
+    
+    <file src="objects/empty.col"></file>
+
+    <file src="objects/Bat.dff"></file>
+    <file src="objects/Bat.txd"></file>
+
+    <file src="objects/Axe.dff"></file>
+    <file src="objects/Axe.txd"></file>
+</meta>
