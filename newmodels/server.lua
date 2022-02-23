@@ -21,12 +21,12 @@ local savedHandlings = {}
 ]]
 function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
 	if sourceResource == getThisResource() then
-		return false
+		return
 	end
 
 	local args = {...}
 	local theVehicle, property, var = unpack(args)
-	if not isCustomVehicle(theVehicle) then return false end
+	if not isCustomVehicle(theVehicle) then return end
 
 	if not savedHandlings[theVehicle] then
 		savedHandlings[theVehicle] = {}
@@ -43,12 +43,12 @@ local savedUpgrades = {}
 ]]
 function onVehicleUpgradesChanged( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
 	if sourceResource == getThisResource() then
-		return false
+		return 
 	end
 
 	local args = {...}
 	local theVehicle = unpack(args)
-	if not isCustomVehicle(theVehicle) then return false end
+	if not isCustomVehicle(theVehicle) then return end
 
 	savedUpgrades[theVehicle] = getVehicleUpgrades(theVehicle)
 end
