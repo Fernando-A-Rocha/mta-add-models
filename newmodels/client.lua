@@ -20,7 +20,7 @@ local atimers = {}
 local adelay = 5000
 
 -- Vehicle specific
-local update_handling = {} -- [element] = timer
+local update_properties = {} -- [element] = timer
 
 function isClientReady() -- [Exported]
 	return received_modlist ~= nil
@@ -243,12 +243,12 @@ function setElementCustomModel(element, elementType, id)
 		end
 
 		if getElementType(element)=="vehicle" then
-			if isTimer(update_handling[element]) then killTimer(update_handling[element]) end
-			update_handling[element] = setTimer(function()
+			if isTimer(update_properties[element]) then killTimer(update_properties[element]) end
+			update_properties[element] = setTimer(function()
 				if isElement(element) and not wasElementCreatedClientside(element) then
-					triggerServerEvent(resName..":updateVehicleHandling", resourceRoot, element)
+					triggerServerEvent(resName..":updateVehicleProperties", resourceRoot, element)
 				end
-				update_handling[element] = nil
+				update_properties[element] = nil
 			end, 1000, 1)
 		end
 	end

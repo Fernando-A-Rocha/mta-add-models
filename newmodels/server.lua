@@ -9,7 +9,7 @@
 -- Custom events:
 addEvent(resName..":requestModList", true)
 addEvent(resName..":resetElementModel", true)
-addEvent(resName..":updateVehicleHandling", true)
+addEvent(resName..":updateVehicleProperties", true)
 
 local SERVER_READY = false
 local startTickCount
@@ -21,22 +21,12 @@ local savedHandlings = {}
 ]]
 function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
 	if sourceResource == getThisResource() then
-		return
+		return false
 	end
 
-    local args = {...}
-    local theVehicle, property, var = unpack(args)
-    if not isElement(theVehicle) then return end
-    	
-    local et = getElementType(theVehicle)
-    if et ~= "vehicle" then return end
-
-	local dataName = dataNames[et]
-	local id = tonumber(getElementData(theVehicle, dataName))
-	if not id then
-		-- not a custom vehicle
-		return
-	end
+	local args = {...}
+	local theVehicle, property, var = unpack(args)
+	if not isCustomVehicle(theVehicle) then return false end
 
 	if not savedHandlings[theVehicle] then
 		savedHandlings[theVehicle] = {}
@@ -47,11 +37,31 @@ function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, lua
 end
 addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
 
+local savedUpgrades = {}
+--[[
+	Goal: solve the issue of upgrades resetting every time the vehicle's model is changed serverside/clientside
+]]
+function onVehicleUpgradesChanged( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
+	if sourceResource == getThisResource() then
+		return false
+	end
+
+	local args = {...}
+	local theVehicle = unpack(args)
+	if not isCustomVehicle(theVehicle) then return false end
+
+	savedUpgrades[theVehicle] = getVehicleUpgrades(theVehicle)
+end
+addDebugHook( "postFunction", onVehicleUpgradesChanged, { "addVehicleUpgrade", "removeVehicleUpgrade" })
+
 addEventHandler( "onElementDestroy", root, 
 function ()
 	if getElementType(source) ~= "vehicle" then return end
 	if savedHandlings[source] then
 		savedHandlings[source] = nil
+	end
+	if savedUpgrades[source] then
+		savedUpgrades[source] = nil
 	end
 end)
 
@@ -76,7 +86,21 @@ function updateVehicleHandling(element)
 		-- print(element, "Set "..count..", deleted "..count2.." handling properties")
 	end
 end
-addEventHandler(resName..":updateVehicleHandling", resourceRoot, updateVehicleHandling)
+
+function updateVehicleUpgrades(element)
+	local upgrades = savedUpgrades[element]
+	if upgrades then
+		for _, upgrade in pairs(upgrades) do
+			addVehicleUpgrade(element, upgrade)			
+		end
+	end
+end
+
+function updateVehicleProperties(element)
+	updateVehicleHandling(element)
+	updateVehicleUpgrades(element)
+end
+addEventHandler(resName..":updateVehicleProperties", resourceRoot, updateVehicleProperties)
 
 _setElementModel = setElementModel
 function setElementModel(element, id) -- force refresh
@@ -92,7 +116,7 @@ function setElementModel(element, id) -- force refresh
 	_setElementModel(element, id)
 
 	if getElementType(element) == "vehicle" then -- Vehicle specific
-		updateVehicleHandling(element)
+		updateVehicleProperties(element)
 	end
 
 	return true
@@ -123,7 +147,7 @@ function onSetElementModel( sourceResource, functionName, isAllowedByACL, luaFil
 	end
 
 	if getElementType(element) == "vehicle" then -- Vehicle specific
-		updateVehicleHandling(element)
+		updateVehicleProperties(element)
 	end
 
 end

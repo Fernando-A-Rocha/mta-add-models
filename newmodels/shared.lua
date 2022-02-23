@@ -177,3 +177,19 @@ function table.size ( tab )
     
     return length
 end
+
+function isCustomVehicle( theVehicle )	
+	if not isElement(theVehicle) then return false end
+		
+	local et = getElementType(theVehicle)
+	if et ~= "vehicle" then return false end
+
+	local dataName = dataNames[et]
+	local id = tonumber(getElementData(theVehicle, dataName))
+	if not id then
+		-- not a custom vehicle
+		return false
+	end
+
+	return true
+end
