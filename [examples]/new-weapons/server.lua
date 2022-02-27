@@ -16,6 +16,9 @@ weapList = {
     {uid=90001, baseobjid=1337, baseweapon=8, name="Axe", dff="objects/Axe.dff", txd="objects/Axe.txd", col="objects/empty.col", bone="right-hand", ds=false, scale=1,
         pos={ -0.061, 0.133, 0,   -4, -15, -90 }
     },
+    {uid=90002, baseobjid=348, baseweapon=22, name="Glock 25", dff="objects/DesertEagle50.dff", txd="objects/DesertEagle50_Gold.txd", col=nil, bone="right-hand", ds=false, scale=1,
+        pos={ -0.061, 0.133, 0,   -4, -15, -90 }
+    },
 }
 
 addEventHandler( "onResourceStart", resourceRoot, 
@@ -45,9 +48,9 @@ function (startedResource)
                 outputDebugString("Missing DFF path for mod ID "..uid, 0, 255,55,55)
             elseif type(txd)~="string" then
                 outputDebugString("Missing TXD path for mod ID "..uid, 0, 255,55,55)
-            elseif type(col)~="string" then
-                -- A collision file is mandatory for new weapons (you can use an empty one)
-                outputDebugString("Missing COL path for mod ID "..uid, 0, 255,55,55)
+            -- elseif type(col)~="string" then
+            --     -- A collision file is mandatory for new weapons (you can use an empty one)
+            --     outputDebugString("Missing COL path for mod ID "..uid, 0, 255,55,55)
             else
 
                 if type(bone) == "string" then
@@ -83,11 +86,26 @@ function (startedResource)
 	end
 end)
 
+function showWeaponsCmd(thePlayer, cmd)
+    outputChatBox("Total weapon mods: "..table.size(weapList), thePlayer, 255,126,0)
+    for k,mod in pairs(weapList) do
+
+        local uid = mod.uid
+        local baseweapon = mod.baseweapon
+        local baseobjid = mod.baseobjid
+        local name = mod.name
+
+        outputChatBox(" - #"..uid..": "..name.." (base object: #"..baseobjid..", base weapon: "..getWeaponNameFromID(baseweapon)..")", thePlayer, 255,194,14)
+    end
+end
+addCommandHandler("listweapons", showWeaponsCmd, false, false)
 
 function equipCmd(thePlayer, cmd, id)
     id = tonumber(id)
     if not id then
-        return outputChatBox("SYNTAX: /"..cmd.." [new unique weapon id]", thePlayer, 255, 255, 255)
+        outputChatBox("SYNTAX: /"..cmd.." [new unique weapon id]", thePlayer, 255, 255, 255)
+        executeCommandHandler("listweapons", thePlayer)
+        return
     end
 
     local foundWeapon
@@ -112,7 +130,9 @@ addCommandHandler("equipweapon", equipCmd, false, false)
 function unequipCmd(thePlayer, cmd, id)
     id = tonumber(id)
     if not id then
-        return outputChatBox("SYNTAX: /"..cmd.." [new unique weapon id]", thePlayer, 255, 255, 255)
+        outputChatBox("SYNTAX: /"..cmd.." [new unique weapon id]", thePlayer, 255, 255, 255)
+        executeCommandHandler("listweapons", thePlayer)
+        return
     end
 
     local foundWeapon
@@ -185,21 +205,18 @@ function unequipWeapon(player, weapUID)
 
     setElementData(player, weapDataName, weapons)
     outputChatBox("Detached: "..weap.name, player, 255, 255, 0)
-
-    local currWeap = getPedWeapon(player, getPedWeaponSlot(player))
-    if currWeap and currWeap == weap.baseid then
-        triggerEvent("new-weapons:handlePlayerWeaponSwitch", player, nil, weap.baseid)
-    end
 end
 
 function handlePlayerWeaponSwitch(prev, new)
     local tab = getElementData(source, weapDataName) or {}
     if tab then
         for weapID, v in pairs(tab) do
-            if v.weap.baseid == new then -- show the new weapon
-                setElementAlpha(v.object, 255)
-            else
-                setElementAlpha(v.object, 0)
+            if isElement(v.object) then
+                if v.weap.baseid == new then -- show the new weapon
+                    setElementAlpha(v.object, 255)
+                else
+                    setElementAlpha(v.object, 0)
+                end
             end
         end
     end

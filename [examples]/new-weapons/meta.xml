@@ -22,4 +22,7 @@
 
     <file src="objects/Axe.dff"></file>
     <file src="objects/Axe.txd"></file>
+
+    <file src="objects/DesertEagle50.dff"></file>
+    <file src="objects/DesertEagle50_Gold.txd"></file>
 </meta>
