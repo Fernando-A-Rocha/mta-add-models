@@ -123,6 +123,22 @@ function setElementModel(element, id) -- force refresh
 end
 
 --[[
+	Refreshes the player model (if custom) after spawnPlayer (which you should do with CJ skin 0)
+]]
+addEventHandler( "onPlayerSpawn", root, 
+function()
+	local data_name = dataNames[getElementType(source)]
+	if not data_name then return end
+	local skinID = tonumber(getElementData(source, data_name))
+	if skinID then
+		-- refresh it
+		removeElementData(source, data_name)
+		setElementModel(source, 0)
+		setElementData(source, data_name, skinID)
+	end
+end)
+
+--[[
 	Goal: solve the issue of element model not setting when it's already the same model serverside
 	This makes it so you don't need to use the 'refresh' element model method in any resource
 ]]

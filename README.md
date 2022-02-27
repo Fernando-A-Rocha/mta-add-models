@@ -108,7 +108,7 @@ To create elements with custom IDs **serverside**, do the following with these f
 - `createPed` (use a placeholder ID when creating, e.g. 1)
 - `createObject` (use a placeholder ID when creating, e.g. 1337)
 - `createVehicle` (use a placeholder ID when creating, e.g. 400)
-- `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 1)
+- `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 0 CJ)
 
 After creating these elements, you have to:
 - **(Important)** Check if model ID you want to set is custom or default using `isDefaultID(modelID)` and `isCustomModID(modelID)`
@@ -167,15 +167,9 @@ local skin = 20001 -- or can be default ID
 spawnPlayer(thePlayer, x,y,z, 0, 0, int, dim) -- spawns the player in the center of the map; skin ID 0 is irrelevant
 setElementRotation(thePlayer,rx,ry,rz)
 
-if exports.newmodels:isCustomModID(skin) then -- skin ID is custom
-
-   -- setElementModel(thePlayer, skin) -- wrong because custom model ID is only valid clientside
-   local data_name = exports.newmodels:getDataNameFromType("player") -- gets the correct data name
-   setElementData(thePlayer, data_name, skin) -- sets the skin ID data;
-   -- clients listening for this data will apply their corresponding allocated model ID on the player
-
-else -- skin ID is default, handled by script normally without calling newmodels functions
-   setElementModel(thePlayer, skin)
+if not (exports.newmodels:isCustomModID(skin)) then -- skin ID is not custom
+   setElementModel(thePlayer, skin) -- set the default model
+   -- custom model is handled by the script automatically on respawn
 end
 ```
 
