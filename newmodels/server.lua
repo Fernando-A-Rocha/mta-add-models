@@ -617,7 +617,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 
 	end
 
-	if (ignoreCOL ~= true) then
+	if (ignoreCOL ~= true and elementType == "object") then
 
 		if (type(path_col) ~= "string") then
 			return false, "Missing/Invalid 'path_col' passed: "..tostring(path_col)
