@@ -71,6 +71,8 @@ function allocateNewMod(element, elementType, id)
 	if not foundMod then
 		return false, "Failed to retrieve "..elementType.." mod ID "..id.." from list stored in client"
 	end
+	
+	local ignoreTXD, ignoreDFF, ignoreCOL = foundMod.ignoreTXD, foundMod.ignoreDFF, foundMod.ignoreCOL
 
 	local paths
 	local path = foundMod.path
@@ -80,32 +82,19 @@ function allocateNewMod(element, elementType, id)
 		paths = getActualModPaths(path, id)
 	end
 
-	local txdpath = paths.txd
-
-	if not txdpath then
-		return false, "Failed to get TXD path for mod ID "..id
-	end
-	if not fileExists(txdpath) then
+	local txdpath = (ignoreTXD ~= true) and paths.txd or nil
+	if (txdpath ~= nil) and not fileExists(txdpath) then
 		return false, "File doesn't exist: "..txdpath
 	end
 
-	local dffpath = paths.dff
-
-	if not dffpath then
-		return false, "Failed to get DFF path for mod ID "..id
-	end
-	if not fileExists(dffpath) then
+	local dffpath = (ignoreDFF ~= true) and paths.dff or nil
+	if (dffpath ~= nil) and not fileExists(dffpath) then
 		return false, "File doesn't exist: "..dffpath
 	end
 
-	local colpath
-	if elementType == "object" then
-		if paths.col then
-			colpath = paths.col
-			if not fileExists(colpath) then
-				return false, "File doesn't exist: "..colpath
-			end
-		end
+	local colpath = (elementType == "object" and ignoreCOL ~= true) and paths.col or nil
+	if (colpath ~= nil) and not fileExists(colpath) then
+		return false, "File doesn't exist: "..colpath
 	end
 
 	-- /!\ only this function doesn't accept 'player'
@@ -118,23 +107,35 @@ function allocateNewMod(element, elementType, id)
 		return false, "Failed: engineRequestModel('"..elementType2.."')"
 	end
 
-
+	local allgood = true
 	local txdworked,dffworked,colworked = false,false,false
 	local txdmodel,dffmodel,colmodel = nil,nil,nil
 
-	local txd = engineLoadTXD(txdpath)
-	if txd then
-		txdmodel = txd
-		if engineImportTXD(txd,allocated_id) then
-			txdworked = true
+	if txdpath then
+		local txd = engineLoadTXD(txdpath)
+		if txd then
+			txdmodel = txd
+			if engineImportTXD(txd,allocated_id) then
+				txdworked = true
+			else
+				allgood = false
+			end
+		else
+			allgood = false
 		end
 	end
 
-	local dff = engineLoadDFF(dffpath, allocated_id)
-	if dff then
-		dffmodel = dff
-		if engineReplaceModel(dff,allocated_id) then
-			dffworked = true
+	if dffpath then
+		local dff = engineLoadDFF(dffpath, allocated_id)
+		if dff then
+			dffmodel = dff
+			if engineReplaceModel(dff,allocated_id) then
+				dffworked = true
+			else
+				allgood = false
+			end
+		else
+			allgood = false
 		end
 	end
 
@@ -144,15 +145,12 @@ function allocateNewMod(element, elementType, id)
 			colmodel = col
 			if engineReplaceCOL(col, allocated_id) then
 				colworked = true
+			else
+				allgood = false
 			end
+		else
+			allgood = false
 		end
-	end
-
-	local allgood = false
-	if col then
-		allgood = txdworked and dffworked and colworked
-	else
-		allgood = txdworked and dffworked
 	end
 
 	if not (allgood) then
@@ -167,7 +165,13 @@ function allocateNewMod(element, elementType, id)
 
 	allocated_ids[id] = allocated_id
 	-- outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
-	model_elements[allocated_id] = {dffmodel,txdmodel} -- Save model elements for destroying on deallocation
+	model_elements[allocated_id] = {} -- Save model elements for destroying on deallocation
+	if isElement(dffmodel) then
+		table.insert(model_elements[allocated_id], dffmodel)
+	end
+	if isElement(txdmodel) then
+		table.insert(model_elements[allocated_id], txdmodel)
+	end
 	if isElement(colmodel) then
 		table.insert(model_elements[allocated_id], colmodel)
 	end
