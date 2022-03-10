@@ -270,12 +270,13 @@ function doModListChecks()
 			end
 
 			-- 4.  verify file exists
+			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
 			local paths = getActualModPaths(mod.path, mod.id)
 			for k, path in pairs(paths) do
 				if not fileExists(path) then
-
-					-- only check .col exists for objects which actually need it
-					if (k == "col" and elementType == "object") or (k ~= "col") then
+					if (not ignoreTXD and k == "txd")
+					or (not ignoreDFF and k == "dff")
+					or ((not ignoreCOL) and elementType == "object" and k == "col") then
 
 						return modCheckError("File does not exist: '"..tostring(path).."' for mod ID "..mod.id)
 					end
@@ -442,7 +443,7 @@ local prevent_addrem_spam = {
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path) -- [Exported]
+function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL) -- [Exported]
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -477,6 +478,15 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path) -- [Ex
 	if not (type(path) == "string") then
 		return false, "Missing/Invalid 'path' passed: "..tostring(path)
 	end
+	if (ignoreTXD ~= nil and type(ignoreTXD) ~= "boolean") then
+		return false, "ignoreTXD passed must be true/false"
+	end
+	if (ignoreDFF ~= nil and type(ignoreDFF) ~= "boolean") then
+		return false, "ignoreDFF passed must be true/false"
+	end
+	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
+		return false, "ignoreCOL passed must be true/false"
+	end
 
 	if string.sub(path, 1,1) ~= ":" then
 		path = ":"..sourceResName.."/"..path
@@ -490,7 +500,7 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path) -- [Ex
 		return false, "'base_id' passed is not a default GTA:SA ID, it needs to be!"
 	end
 
-	for elementType,mods in pairs(modList) do
+	for elementType2,mods in pairs(modList) do
 		for k,mod in pairs(mods) do
 			if mod.id == id then
 				return false, "Duplicated 'id' passed, already exists in modList"
@@ -501,10 +511,9 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path) -- [Ex
 	local paths = getActualModPaths(path, id)
 	for k, path2 in pairs(paths) do
 		if not fileExists(path2) then
-
-			-- only check .col exists for objects which actually need it
-			if (k == "col" and elementType == "object") or (k ~= "col") then
-
+			if (not ignoreTXD and k == "txd")
+			or (not ignoreDFF and k == "dff")
+			or ((not ignoreCOL) and elementType == "object" and k == "col") then
 				return false, "File does not exist: '"..tostring(path2).."', check folder: '"..path.."'"
 			end
 		end
@@ -538,7 +547,7 @@ end
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
-function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col) -- [Exported]
+function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL) -- [Exported]
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -571,25 +580,45 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 		return false, "Missing/Invalid 'name' passed: "..tostring(name)
 	end
 
+	if (ignoreTXD ~= nil and type(ignoreTXD) ~= "boolean") then
+		return false, "ignoreTXD passed must be true/false"
+	end
+	if (ignoreDFF ~= nil and type(ignoreDFF) ~= "boolean") then
+		return false, "ignoreDFF passed must be true/false"
+	end
+	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
+		return false, "ignoreCOL passed must be true/false"
+	end
+
+
 	local paths = {}
 
-	if not (type(path_dff) == "string") then
-		return false, "Missing/Invalid 'path_dff' passed: "..tostring(path_dff)
-	end
-	if string.sub(path_dff, 1,1) ~= ":" then
-		path_dff = ":"..sourceResName.."/"..path_dff
-	end
-	paths.dff = path_dff
+	if (ignoreDFF ~= true) then
 
-	if not (type(path_txd) == "string") then
-		return false, "Missing/Invalid 'path_txd' passed: "..tostring(path_txd)
-	end
-	if string.sub(path_txd, 1,1) ~= ":" then
-		path_txd = ":"..sourceResName.."/"..path_txd
-	end
-	paths.txd = path_txd
+		if not (type(path_dff) == "string") then
+			return false, "Missing/Invalid 'path_dff' passed: "..tostring(path_dff)
+		end
+		if string.sub(path_dff, 1,1) ~= ":" then
+			path_dff = ":"..sourceResName.."/"..path_dff
+		end
+		paths.dff = path_dff
 
-	if path_col then
+	end
+
+	if (ignoreTXD ~= true) then
+
+		if not (type(path_txd) == "string") then
+			return false, "Missing/Invalid 'path_txd' passed: "..tostring(path_txd)
+		end
+		if string.sub(path_txd, 1,1) ~= ":" then
+			path_txd = ":"..sourceResName.."/"..path_txd
+		end
+		paths.txd = path_txd
+
+	end
+
+	if (ignoreCOL ~= true and elementType == "object") then
+
 		if (type(path_col) ~= "string") then
 			return false, "Missing/Invalid 'path_col' passed: "..tostring(path_col)
 		end
@@ -608,7 +637,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 		return false, "'base_id' passed is not a default GTA:SA ID, it needs to be!"
 	end
 
-	for elementType,mods in pairs(modList) do
+	for elementType2,mods in pairs(modList) do
 		for k,mod in pairs(mods) do
 			if mod.id == id then
 				return false, "Duplicated 'id' passed, already exists in modList"
@@ -617,9 +646,9 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	end
 	for k, path2 in pairs(paths) do
 		if not fileExists(path2) then
-
-			-- only check .col exists for objects which actually need it
-			if (k == "col" and elementType == "object") or (k ~= "col") then
+			if (not ignoreTXD and k == "txd")
+			or (not ignoreDFF and k == "dff")
+			or ((not ignoreCOL) and elementType == "object" and k == "col") then
 
 				return false, "File does not exist: '"..tostring(path2).."'"
 			end

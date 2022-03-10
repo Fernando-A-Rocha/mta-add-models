@@ -22,17 +22,20 @@ modList = {
 	-- element type
 	ped = {
 
-		-- ID must be unique and out of the default GTA & SA-MP ID ranges
+		-- ID must be unique and out of the default GTA (& preferrably SA-MP too) ID ranges
 
 		-- Base ID is the model the mod will inherit some properties from
 		-- doesn't have much effect on peds or objects, but has on vehicles
 
-		-- file names should be ID.dff ID.txd (ID.col if it's an object)
 		-- path can be:
-		-- 		local (this resource) when it doesn't start with :
-		-- 		external (other resource) when it starts with :
+		--		a string, in which case it expects files to be named ID.dff or ID.txd in that folder
+		-- 		an array, in which case it expects an array of file names like {dff="filepath.dff", txd="filepath.txd"}
+		--
+		-- paths defined manually in this file need to be local (this resource)
+		-- 		to add a mod from another resource see the examples provided in the documentation.
 
-		-- name can be whatever you want
+		-- name can be whatever you want (string)
+
 
 		{id=20001, base_id=1, path=modsFolder, name="Mafioso 1"},
 		{id=20003, base_id=1, path=modsFolder, name="Mafioso 2"},
@@ -44,13 +47,12 @@ modList = {
 		{id=80002, base_id=489, path=modsFolder, name="02 Landstalker"},
 		{id=80003, base_id=400, path=modsFolder, name="86 Landstalker 1"},
 		{id=80004, base_id=400, path=modsFolder, name="98 Landstalker 1"},
+		{id=80005, base_id=468, path=modsFolder, name="Sanchez Test", ignoreTXD=true},
 	},
 
 	object = {
 		{id=50001, base_id=1337, path=modsFolder, name="Engine Hoist"},
 	},
-
-	-- Mods added via another resource's script will be appended to this Lua array
 }
 
 
