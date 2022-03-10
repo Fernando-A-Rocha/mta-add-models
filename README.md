@@ -45,7 +45,6 @@ SA-MP Map Loader resource for MTA: [mta-samp-maploader](https://github.com/Ferna
 
 - [newmodels](/newmodels): main library resource
 - (optional) [newmodels-example](/[examples]/newmodels-example): an example implementation to add new objects/skins/etc to your server
-- (optional) [new-weapons](/[examples]/new-weapons): a resource that lets you add weapons to your server (**!! WORK IN PROGRESS !!**)
 - (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP objects to your server
   - 👉 [Download](https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) `models.zip` containing all dff/txd/col files required
 - (optional) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
