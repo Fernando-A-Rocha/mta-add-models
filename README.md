@@ -98,8 +98,8 @@ This library lets you load mods stored within the `newmodels` resource, and also
 Check the [quick testing](#quick-testing) to understand how to load mods from within the `newmodels` resource (easier).
 
 You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua) and [example to see implementation](/[examples]/newmodels-example/server.lua):
-- `addExternalMod_IDFilenames(elementType, id, base_id, name, path)`
-- `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col)`
+- `addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL)`
+- `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL)`
 - `removeExternalMod(id)`
 
 ### Using Custom IDs
