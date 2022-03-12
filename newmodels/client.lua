@@ -202,7 +202,7 @@ function forceAllocate(id) -- [Exported]
 	return allocated_id2, reason
 end
 
-function setElementCustomModel(element, elementType, id)
+function setElementCustomModel(element, elementType, id, noRefresh)
 	local good, reason = verifySetModelArguments(element, elementType, id)
 	if not good then
 		return false, reason
@@ -226,7 +226,7 @@ function setElementCustomModel(element, elementType, id)
 
 		-- refresh model so change can actually have an effect
 		local currModel = getElementModel(element)
-		if currModel == allocated_id then
+		if (currModel == allocated_id) and not (noRefresh) then
 
 			-- some logic to refresh model
 			local diffModel = 9--ped
@@ -417,21 +417,11 @@ function updateStreamedInElement(source)
 
 	if isCustomModID(id) then
 
-		local allocated_id = allocated_ids[id]
-		if allocated_id then
-			setElementModel(source, allocated_id)
-			return
-		end
-		-- the model only needs to be set once in onClientElementDataChange
-		-- note: when an element is streamed out the model is deallocated/freed
-
-		showElementCoords(source)
-
-		local success, reason = setElementCustomModel(source, et, id)
+		local success, reason = setElementCustomModel(source, et, id, true)
 		if not success then
-			outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
+			outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id..", true): "..reason, 1)
 		else
-			-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
+			-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..", true) worked", 3)
 		end
 
 	elseif isDefaultID(et, id) then
@@ -464,8 +454,6 @@ function updateStreamedOutElement(source)
 
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
-
-		showElementCoords(source)
 
 		if not hasOtherElementsWithModel(source, id) then
 			freeElementCustomMod(id)
@@ -517,8 +505,6 @@ function updateModelChangedElement(source, oldModel, newModel)
 
 		if isElementStreamedIn(source) then
 
-			showElementCoords(source)
-
             setElementData(source, dataName, nil)
             setElementData(source, baseDataName, nil)
 
@@ -540,11 +526,6 @@ function (reason)
 		waiting_queue[source] = nil
 	end
 end)
-
-function showElementCoords(element)
-	-- local x,y,z = getElementPosition(element)
-	-- outputDebugString("["..(eventName or "?").."] "..x..", "..y..", "..z,0, 255,255,255)
-end
 
 function updateElementsInQueue()
 	for element, v in pairs(waiting_queue) do
