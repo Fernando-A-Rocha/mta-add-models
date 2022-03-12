@@ -218,7 +218,7 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 			if allocated_id2 then
 
 				-- try setting again
-				return setElementCustomModel(element, elementType, id)
+				return setElementCustomModel(element, elementType, id, noRefresh)
 			else
 				return false, reason2
 			end
