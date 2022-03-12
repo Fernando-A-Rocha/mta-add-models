@@ -191,3 +191,92 @@ function test7()
       current = current + 500
    end
 end
+
+
+
+-- Vehicle testing
+function makeVehTest(thePlayer, cmd, testType)
+	testType = tonumber(testType)
+	if not testType or not (testType == 1 or testType == 2) then
+		return outputChatBox("SYNTAX: /"..cmd.." [1: with timer | 2: without timer]", thePlayer, 255,255,255)
+	end
+
+	local x,y,z = getElementPosition(thePlayer)
+	local rx,ry,rz = getElementRotation(thePlayer)
+	local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
+
+	x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
+	rz = rz + 90
+
+	local theVehicle = createVehicle(400, x,y,z)
+	outputChatBox("Created vehicle", thePlayer, 0,255,0)
+	setElementInterior(theVehicle, int)
+	setElementDimension(theVehicle, dim)
+	setElementRotation(theVehicle, rx,ry,rz)
+
+	-- test (works)
+	-- setVehicleHeadLightColor(theVehicle, math.random(1,256)-1, math.random(1,256)-1, math.random(1,256)-1)
+	-- setVehicleOverrideLights(theVehicle, 2)
+
+	-- test (works)
+	-- setVehicleLocked(theVehicle, true)
+	-- setVehicleDoorsUndamageable(theVehicle, true)
+
+	-- test (works)
+	-- setVehicleFuelTankExplodable(theVehicle, false)
+
+	-- test (works)
+	-- for i=0,5 do
+	-- 	setVehicleDoorOpenRatio(theVehicle, i, 1)
+	-- end
+
+	-- test (works)
+	-- setVehicleWheelStates(theVehicle, 1,1,1,1)
+
+
+	-- test (not working properly)
+	for i=0,5 do
+		setVehicleDoorState(theVehicle, i, 2)
+	end
+	for i=0,6 do
+		setVehiclePanelState(theVehicle, i, 2)
+	end
+
+	if testType == 1 then
+
+		-- the vehicle will appear damaged if timer is used
+		setTimer(function()
+			local data_name = exports.newmodels:getDataNameFromType("vehicle")
+			setElementData(theVehicle, data_name, 80004)
+			outputChatBox("(timer) Applied custom ID to vehicle", thePlayer, 255,255,0)
+
+			-- these properties will be saved by the newmodels script only if custom ID is set
+			-- test (works)
+			setVehicleHandling(theVehicle, "engineAcceleration", 100)
+			addVehicleUpgrade(theVehicle, 1025)
+		end, 5000, 1)
+
+	elseif testType == 2 then
+
+		-- if timer not used (element model change happens almost instantly)
+		-- they will already appear not damaged visibly
+		local data_name = exports.newmodels:getDataNameFromType("vehicle")
+		setElementData(theVehicle, data_name, 80004)
+		outputChatBox("Applied custom ID to vehicle", thePlayer, 255,255,0)
+
+		-- these properties will be saved by the newmodels script only if custom ID is set
+		-- test (works)
+		setVehicleHandling(theVehicle, "engineAcceleration", 100)
+		addVehicleUpgrade(theVehicle, 1025)
+
+	end
+end
+addCommandHandler("makevehtest", makeVehTest, false, false)
+
+function getPositionFromElementOffset(element,offX,offY,offZ)
+	local m = getElementMatrix ( element )  -- Get the matrix
+	local x = offX * m[1][1] + offY * m[2][1] + offZ * m[3][1] + m[4][1]  -- Apply transform
+	local y = offX * m[1][2] + offY * m[2][2] + offZ * m[3][2] + m[4][2]
+	local z = offX * m[1][3] + offY * m[2][3] + offZ * m[3][3] + m[4][3]
+	return x, y, z                               -- Return the transformed point
+end

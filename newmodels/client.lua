@@ -250,6 +250,7 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 			if isTimer(update_properties[element]) then killTimer(update_properties[element]) end
 			update_properties[element] = setTimer(function()
 				if isElement(element) and not wasElementCreatedClientside(element) then
+					iprint(element, "updateVehicleProperties")
 					triggerServerEvent(resName..":updateVehicleProperties", resourceRoot, element)
 				end
 				update_properties[element] = nil

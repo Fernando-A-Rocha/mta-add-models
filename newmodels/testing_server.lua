@@ -181,35 +181,6 @@ function makeVehicleCmd(thePlayer, cmd, id)
 			return outputChatBox("Failed to set vehicle custom ID: "..reason, thePlayer, 255,0,0)
 		end
 
-		-- test (works)
-		-- setVehicleHeadLightColor(theVehicle, math.random(1,256)-1, math.random(1,256)-1, math.random(1,256)-1)
-		-- setVehicleOverrideLights(theVehicle, 2)
-
-		-- test (works)
-		-- setVehicleLocked(theVehicle, true)
-		-- setVehicleDoorsUndamageable(theVehicle, true)
-
-		-- test (works)
-		-- setVehicleFuelTankExplodable(theVehicle, false)
-
-		-- test (works)
-		-- for i=0,5 do
-		-- 	setVehicleDoorOpenRatio(theVehicle, i, 1)
-		-- end
-
-		-- test (FAIL)
-		for i=0,5 do
-			setVehicleDoorState(theVehicle, i, 2)
-		end
-
-		-- test (FAIL)
-		for i=0,6 do
-			setVehiclePanelState(theVehicle, i, 2)
-		end
-
-		-- test (works)
-		-- setVehicleWheelStates(theVehicle, 1,1,1,1)
-
 		outputChatBox("Created vehicle with custom ID "..id, thePlayer, 0,255,0)
 
 	elseif base_id then
