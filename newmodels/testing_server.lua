@@ -198,14 +198,14 @@ function makeVehicleCmd(thePlayer, cmd, id)
 		-- end
 
 		-- test (FAIL)
-		-- for i=0,5 do
-		-- 	setVehicleDoorState(theVehicle, i, 2)
-		-- end
+		for i=0,5 do
+			setVehicleDoorState(theVehicle, i, 2)
+		end
 
 		-- test (FAIL)
-		-- for i=0,6 do
-		-- 	setVehiclePanelState(theVehicle, i, 2)
-		-- end
+		for i=0,6 do
+			setVehiclePanelState(theVehicle, i, 2)
+		end
 
 		-- test (works)
 		-- setVehicleWheelStates(theVehicle, 1,1,1,1)
