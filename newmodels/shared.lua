@@ -38,16 +38,6 @@ function outputDebugString(text, mode, r,g,b)
 	end
 end
 
-dataNames = { -- [data name] = custom element model ID | saved in an element's data
-	ped = "skinID",
-	player = "skinID",
-	vehicle = "vehicleID",
-	object = "objectID",
-}
-
-baseDataName = "baseID" -- saves the element's custom model's base model ID
--- useful for getting a vehicle's original handling, etc
-
 function getDataTypeFromName(dataName)
 	for elementType, name in pairs(dataNames) do
 		if dataName == name then
