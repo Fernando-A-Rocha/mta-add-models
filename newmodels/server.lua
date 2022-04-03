@@ -273,12 +273,12 @@ function doModListChecks()
 			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
 			local paths = getActualModPaths(mod.path, mod.id)
 			for k, path in pairs(paths) do
-				if not fileExists(path) then
+				if (not fileExists(path)) and ((ENABLE_NANDOCRYPT) and not fileExists(path..NANDOCRYPT_EXT)) then
 					if (not ignoreTXD and k == "txd")
 					or (not ignoreDFF and k == "dff")
 					or ((not ignoreCOL) and elementType == "object" and k == "col") then
 
-						return modCheckError("File does not exist: '"..tostring(path).."' for mod ID "..mod.id)
+						return modCheckError("File doesn't exist: '"..tostring(path).."' for mod ID "..mod.id)
 					end
 				end
 			end
@@ -510,11 +510,11 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 
 	local paths = getActualModPaths(path, id)
 	for k, path2 in pairs(paths) do
-		if not fileExists(path2) then
+		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
 			if (not ignoreTXD and k == "txd")
 			or (not ignoreDFF and k == "dff")
 			or ((not ignoreCOL) and elementType == "object" and k == "col") then
-				return false, "File does not exist: '"..tostring(path2).."', check folder: '"..path.."'"
+				return false, "File doesn't exist: '"..tostring(path2).."', check folder: '"..path.."'"
 			end
 		end
 	end
@@ -645,12 +645,12 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 		end
 	end
 	for k, path2 in pairs(paths) do
-		if not fileExists(path2) then
+		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
 			if (not ignoreTXD and k == "txd")
 			or (not ignoreDFF and k == "dff")
 			or ((not ignoreCOL) and elementType == "object" and k == "col") then
 
-				return false, "File does not exist: '"..tostring(path2).."'"
+				return false, "File doesn't exist: '"..tostring(path2).."'"
 			end
 		end
 	end
