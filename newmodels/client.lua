@@ -224,19 +224,22 @@ function allocateNewMod(element, elementType, id)
 					if (nc_waiting[allocated_id]["count"] == nc_waiting[allocated_id]["total"]) then
 
 						for k2, v2 in pairs(paths2) do
-							local t2,_ = unpack(v2)
+							local t2,path2 = unpack(v2)
 							local data2 = nc_waiting[allocated_id][t2]
 
 							local model
-							if t == "txd" then
-								model = engineLoadTXD(data)
+							if t2 == "txd" then
+								model = engineLoadTXD(data2)
 								engineImportTXD(model,allocated_id)
-							elseif t == "dff" then
-								model = engineLoadDFF(data, allocated_id)
+								-- print("Loaded", "TXD", "Path "..path2)
+							elseif t2 == "dff" then
+								model = engineLoadDFF(data2, allocated_id)
 								engineReplaceModel(model,allocated_id)
-							elseif t == "col" then
-								model = engineLoadCOL(data)
+								-- print("Loaded", "DFF", "Path "..path2)
+							elseif t2 == "col" then
+								model = engineLoadCOL(data2)
 								engineReplaceCOL(model, allocated_id)
+								-- print("Loaded", "COL", "Path "..path2)
 							end
 							table.insert(model_elements[allocated_id], model)
 						end
