@@ -19,6 +19,9 @@ local waiting_queue = {} -- [element] = { func num, args }
 local atimers = {}
 local adelay = 5000
 
+-- Nandocrypt specific
+local nc_waiting = {}
+
 -- Vehicle specific
 local update_properties = {} -- [element] = timer
 
@@ -180,16 +183,50 @@ function allocateNewMod(element, elementType, id)
 
 	    local hasOneNandoCrypted = false
 
-	    for k, v in pairs({
-	    	{"txd", txdPath}, {"dff", dffPath}, {"col", colPath}
-	    }) do
-	    	local t,path = unpack(v)
-	    	if path ~= nil then
-	    		if getExtension(path) == NANDOCRYPT_EXT then
+	    local paths2 = {}
+	    if txdPath and getExtension(txdPath) == NANDOCRYPT_EXT then
+	    	table.insert(paths2, {"txd", txdPath})
+	    end
+	    if dffPath and getExtension(dffPath) == NANDOCRYPT_EXT  then
+	    	table.insert(paths2, {"dff", dffPath})
+	    end
+	    if colPath and getExtension(colPath) == NANDOCRYPT_EXT  then
+	    	table.insert(paths2, {"col", colPath})
+	    end
 
-		    		local worked = ncDecrypt(path,
-	                    function(data)
-	                    	-- 0 verifications, make sure ur nandocrypted models work
+	    for k, v in pairs(paths2) do
+	    	local t,path = unpack(v)
+
+			if not nc_waiting[allocated_id] then
+				nc_waiting[allocated_id] = {}
+				nc_waiting[allocated_id]["total"] = #paths2
+				nc_waiting[allocated_id]["count"] = 0
+			end
+			nc_waiting[allocated_id][t] = true
+			-- print("Staging", "A-ID "..allocated_id, "Type "..t, "Path "..path)
+
+    		local worked = ncDecrypt(path,
+    			function(data)
+	            	-- No verifications, make sure ur nandocrypted models work
+
+	            	if not allocated_ids[id] then
+	            		nc_waiting[allocated_id] = nil
+	            		return
+	            	end
+	            	if not nc_waiting[allocated_id] then
+	            		return
+	            	end
+
+					nc_waiting[allocated_id][t] = data
+					-- print("Decrypted", "A-ID "..allocated_id, "Type "..t, "Path "..path)
+
+					nc_waiting[allocated_id]["count"] = nc_waiting[allocated_id]["count"] + 1
+					if (nc_waiting[allocated_id]["count"] == nc_waiting[allocated_id]["total"]) then
+
+						for k2, v2 in pairs(paths2) do
+							local t2,_ = unpack(v2)
+							local data2 = nc_waiting[allocated_id][t2]
+
 							local model
 							if t == "txd" then
 								model = engineLoadTXD(data)
@@ -202,19 +239,22 @@ function allocateNewMod(element, elementType, id)
 								engineReplaceCOL(model, allocated_id)
 							end
 							table.insert(model_elements[allocated_id], model)
-	                    end
-	                )
-	                if not worked then
-	                    return false, "Failed: NandoCrypt failed to decrypt '"..path.."'"
-	                else
-
-						if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
-						allocated_ids[id] = allocated_id
-						
-	                	hasOneNandoCrypted = true
+						end
+						-- print("Finished", "A-AID "..allocated_id, "Total files "..nc_waiting[allocated_id]["total"])
+						nc_waiting[allocated_id] = nil
 	                end
-	            end
-	    	end
+                end
+            )
+            if not worked then
+            	nc_waiting[allocated_id] = nil
+                return false, "Failed: NandoCrypt failed to decrypt '"..path.."'"
+            else
+
+				if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
+				allocated_ids[id] = allocated_id
+				
+            	hasOneNandoCrypted = true
+            end
 	    end
 
 	    if (hasOneNandoCrypted) then
