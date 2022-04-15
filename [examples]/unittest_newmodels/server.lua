@@ -156,8 +156,8 @@ addCommandHandler("t3", function(thePlayer, cmd)
    local data_name = exports.newmodels:getDataNameFromType("ped")
    setElementData(ped, data_name, 20001)
    outputChatBox("Removing created ped skin data in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
-   setTimer(function(ped, data_name)
-      removeElementData(ped, data_name)
+   setTimer(function(ped2, data_name2)
+      removeElementData(ped2, data_name2)
    end, 3000, 1, ped, data_name)
 
 end, false, false)
@@ -165,7 +165,6 @@ end, false, false)
 
 local testPlayer
 local testVeh
-local x,y,z
 function test7()
    local startid = 90000
    local endid = startid+149
@@ -179,7 +178,7 @@ function test7()
 
    testPlayer = getRandomPlayer()
    if not testPlayer then return print("NO PLAYER") end
-   x,y,z = getElementPosition(testPlayer)
+   local x,y,z = getElementPosition(testPlayer)
    local current = 10000--wait 10 secs for mods to be properly added
    for id=startid,endid do
       setTimer(function()
@@ -201,11 +200,11 @@ function makeVehTest(thePlayer, cmd, testType)
 		return outputChatBox("SYNTAX: /"..cmd.." [1: with timer | 2: without timer]", thePlayer, 255,255,255)
 	end
 
-	local x,y,z = getElementPosition(thePlayer)
+	-- local x,y,z = getElementPosition(thePlayer)
 	local rx,ry,rz = getElementRotation(thePlayer)
 	local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
 
-	x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
+	local x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
 	rz = rz + 90
 
 	local theVehicle = createVehicle(400, x,y,z)
