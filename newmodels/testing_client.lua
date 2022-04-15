@@ -235,8 +235,13 @@ local dfontsize = 1
 local dfont = "default-bold"
 
 function drawAllocatedTable()
-	local text = inspect(allocated_ids)
-	text="Total: "..table.size(allocated_ids).."\n"..text
+	local text
+	local count = table.size(allocated_ids)
+	if count > 0 then
+		text="Total allocated models: "..table.size(allocated_ids).."\n"..inspect(allocated_ids)
+	else
+		text="Total allocated models: "..table.size(allocated_ids)
+	end
 	local width = dxGetTextWidth(text, dfontsize, dfont)
 	local x,y = sx/2 - width/2, 20
 	dxDrawText(text, x,y,x,y, "0xffffffff", dfontsize, dfont)

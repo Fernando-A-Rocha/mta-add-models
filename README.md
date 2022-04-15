@@ -226,6 +226,15 @@ for property,var in pairs(handling) do
 end
 ```
 
+# Plugins
+
+## NandoCrypt
+
+This library supports encrypted models using the [NandoCrypt](https://github.com/Fernando-A-Rocha/mta-nandocrypt) resource by default.
+
+You can configure everything related to it in the [global config file](/newmodels/_config.lua).
+
+
 # Gamemode Implementations
 
 ## [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Custom Peds

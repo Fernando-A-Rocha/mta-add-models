@@ -19,8 +19,15 @@ local waiting_queue = {} -- [element] = { func num, args }
 local atimers = {}
 local adelay = 5000
 
+-- Nandocrypt specific
+local nc_waiting = {}
+
 -- Vehicle specific
 local update_properties = {} -- [element] = timer
+
+function getExtension(fn)
+	return "."..(fn:match "[^.]+$")
+end
 
 function isClientReady() -- [Exported]
 	return received_modlist ~= nil
@@ -71,31 +78,6 @@ function allocateNewMod(element, elementType, id)
 	if not foundMod then
 		return false, "Failed to retrieve "..elementType.." mod ID "..id.." from list stored in client"
 	end
-	
-	local ignoreTXD, ignoreDFF, ignoreCOL = foundMod.ignoreTXD, foundMod.ignoreDFF, foundMod.ignoreCOL
-
-	local paths
-	local path = foundMod.path
-	if type(path)=="table" then
-		paths = path
-	else
-		paths = getActualModPaths(path, id)
-	end
-
-	local txdpath = (ignoreTXD ~= true) and paths.txd or nil
-	if (txdpath ~= nil) and not fileExists(txdpath) then
-		return false, "File doesn't exist: "..txdpath
-	end
-
-	local dffpath = (ignoreDFF ~= true) and paths.dff or nil
-	if (dffpath ~= nil) and not fileExists(dffpath) then
-		return false, "File doesn't exist: "..dffpath
-	end
-
-	local colpath = (elementType == "object" and ignoreCOL ~= true) and paths.col or nil
-	if (colpath ~= nil) and not fileExists(colpath) then
-		return false, "File doesn't exist: "..colpath
-	end
 
 	-- /!\ only this function doesn't accept 'player'
 	-- as type so we need to change that to 'ped'
@@ -107,53 +89,217 @@ function allocateNewMod(element, elementType, id)
 		return false, "Failed: engineRequestModel('"..elementType2.."')"
 	end
 
-	local allgood = true
+	
+	local ignoreTXD, ignoreDFF, ignoreCOL = foundMod.ignoreTXD, foundMod.ignoreDFF, foundMod.ignoreCOL
+
+	local paths
+	local path = foundMod.path
+	if type(path)=="table" then
+		paths = path
+	else
+		paths = getActualModPaths(path, id)
+	end
+
+	local txdPath = (ignoreTXD ~= true) and paths.txd or nil
+	local txdData
+
+	if txdPath then
+		if not fileExists(txdPath) then
+			if (ENABLE_NANDOCRYPT) then
+				if (not fileExists(txdPath..NANDOCRYPT_EXT)) then
+					return false, "File doesn't exist: "..txdPath
+				else
+					txdPath = txdPath..NANDOCRYPT_EXT
+				end
+			else
+				return false, "File doesn't exist: "..txdPath
+			end
+		end
+
+		local txdFile = fileOpen(txdPath)
+		if not txdFile then
+			return false, "Failed to open file: "..txdPath
+		end
+		txdData = fileRead(txdFile, fileGetSize(txdFile))
+		fileClose(txdFile)
+	end
+
+
+	local dffPath = (ignoreDFF ~= true) and paths.dff or nil
+	local dffData
+
+	if dffPath then
+		if not fileExists(dffPath) then
+			if (ENABLE_NANDOCRYPT) then
+				if (not fileExists(dffPath..NANDOCRYPT_EXT)) then
+					return false, "File doesn't exist: "..dffPath
+				else
+					dffPath = dffPath..NANDOCRYPT_EXT
+				end
+			else
+				return false, "File doesn't exist: "..dffPath
+			end
+		end
+
+		local dffFile = fileOpen(dffPath)
+		if not dffFile then
+			return false, "Failed to open file: "..dffPath
+		end
+		dffData = fileRead(dffFile, fileGetSize(dffFile))
+		fileClose(dffFile)
+	end
+
+
+	local colPath = (elementType == "object" and ignoreCOL ~= true) and paths.col or nil
+	local colData
+
+	if colPath then
+		if not fileExists(colPath) then
+			if (ENABLE_NANDOCRYPT) then
+				if (not fileExists(colPath..NANDOCRYPT_EXT)) then
+					return false, "File doesn't exist: "..colPath
+				else
+					colPath = colPath..NANDOCRYPT_EXT
+				end
+			else
+				return false, "File doesn't exist: "..colPath
+			end
+		end
+
+		local colFile = fileOpen(colPath)
+		if not colFile then
+			return false, "Failed to open file: "..colPath
+		end
+		colData = fileRead(colFile, fileGetSize(colFile))
+		fileClose(colFile)
+	end
+
+	if (ENABLE_NANDOCRYPT) then
+		-- Inspired by https://github.com/Fernando-A-Rocha/mta-nandocrypt/tree/main/nando_crypt-example
+
+		if type(ncDecrypt) ~= "function" then
+	        return false, "Failed: NandoCrypt decrypt function is not loaded"
+	    end
+
+	    local hasOneNandoCrypted = false
+
+	    local paths2 = {}
+	    if txdPath and getExtension(txdPath) == NANDOCRYPT_EXT then
+	    	table.insert(paths2, {"txd", txdPath})
+	    end
+	    if dffPath and getExtension(dffPath) == NANDOCRYPT_EXT  then
+	    	table.insert(paths2, {"dff", dffPath})
+	    end
+	    if colPath and getExtension(colPath) == NANDOCRYPT_EXT  then
+	    	table.insert(paths2, {"col", colPath})
+	    end
+
+	    for k, v in pairs(paths2) do
+	    	local t,path = unpack(v)
+
+			if not nc_waiting[allocated_id] then
+				nc_waiting[allocated_id] = {}
+				nc_waiting[allocated_id]["total"] = #paths2
+				nc_waiting[allocated_id]["count"] = 0
+			end
+			nc_waiting[allocated_id][t] = true
+			-- print("Staging", "A-ID "..allocated_id, "Type "..t, "Path "..path)
+
+    		local worked = ncDecrypt(path,
+    			function(data)
+	            	-- No verifications, make sure ur nandocrypted models work
+
+	            	if not allocated_ids[id] then
+	            		nc_waiting[allocated_id] = nil
+	            		return
+	            	end
+	            	if not nc_waiting[allocated_id] then
+	            		return
+	            	end
+
+					nc_waiting[allocated_id][t] = data
+					-- print("Decrypted", "A-ID "..allocated_id, "Type "..t, "Path "..path)
+
+					nc_waiting[allocated_id]["count"] = nc_waiting[allocated_id]["count"] + 1
+					if (nc_waiting[allocated_id]["count"] == nc_waiting[allocated_id]["total"]) then
+
+						for k2, v2 in pairs(paths2) do
+							local t2,path2 = unpack(v2)
+							local data2 = nc_waiting[allocated_id][t2]
+
+							local model
+							if t2 == "txd" then
+								model = engineLoadTXD(data2)
+								engineImportTXD(model,allocated_id)
+								-- print("Loaded", "TXD", "Path "..path2)
+							elseif t2 == "dff" then
+								model = engineLoadDFF(data2, allocated_id)
+								engineReplaceModel(model,allocated_id)
+								-- print("Loaded", "DFF", "Path "..path2)
+							elseif t2 == "col" then
+								model = engineLoadCOL(data2)
+								engineReplaceCOL(model, allocated_id)
+								-- print("Loaded", "COL", "Path "..path2)
+							end
+							table.insert(model_elements[allocated_id], model)
+						end
+						-- print("Finished", "A-AID "..allocated_id, "Total files "..nc_waiting[allocated_id]["total"])
+						nc_waiting[allocated_id] = nil
+	                end
+                end
+            )
+            if not worked then
+            	nc_waiting[allocated_id] = nil
+                return false, "Failed: NandoCrypt failed to decrypt '"..path.."'"
+            else
+
+				if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
+				allocated_ids[id] = allocated_id
+				
+            	hasOneNandoCrypted = true
+            end
+	    end
+
+	    if (hasOneNandoCrypted) then
+	    	return allocated_id -- loading is done async
+	    end
+	end
+	
+	return continueLoadMod(id, allocated_id, txdData, dffData, colData)
+end
+
+function continueLoadMod(id, allocated_id, txdData, dffData, colData)
+
 	local txdworked,dffworked,colworked = false,false,false
 	local txdmodel,dffmodel,colmodel = nil,nil,nil
 
-	if txdpath then
-		local txd = engineLoadTXD(txdpath)
-		if txd then
-			txdmodel = txd
-			if engineImportTXD(txd,allocated_id) then
-				txdworked = true
-			else
-				allgood = false
-			end
-		else
-			allgood = false
+	local txd = engineLoadTXD(txdData)
+	if txd then
+		txdmodel = txd
+		if engineImportTXD(txd,allocated_id) then
+			txdworked = true
 		end
 	end
 
-	if dffpath then
-		local dff = engineLoadDFF(dffpath, allocated_id)
-		if dff then
-			dffmodel = dff
-			if engineReplaceModel(dff,allocated_id) then
-				dffworked = true
-			else
-				allgood = false
-			end
-		else
-			allgood = false
+	local dff = engineLoadDFF(dffData, allocated_id)
+	if dff then
+		dffmodel = dff
+		if engineReplaceModel(dff,allocated_id) then
+			dffworked = true
 		end
 	end
 
-	if colpath then
-		local col = engineLoadCOL(colpath)
+	if colData then
+		local col = engineLoadCOL(colData)
 		if col then
 			colmodel = col
 			if engineReplaceCOL(col, allocated_id) then
 				colworked = true
-			else
-				allgood = false
 			end
-		else
-			allgood = false
 		end
 	end
 
-	if not (allgood) then
+	if not ((col and txdworked and dffworked and colworked) or ((not col) and txdworked and dffworked)) then
 		engineFreeModel(allocated_id)
 		if txdmodel then destroyElement(txdmodel) end -- free memory
 		if dffmodel then destroyElement(dffmodel) end -- free memory
@@ -177,7 +323,6 @@ function allocateNewMod(element, elementType, id)
 	end
 	return allocated_id
 end
-
 
 
 function forceAllocate(id) -- [Exported]
