@@ -154,11 +154,10 @@ function makeVehicleCmd(thePlayer, cmd, id)
 	local elementType = "vehicle"
 	if isCustomModID(id) or isDefaultID(elementType, id) then
 
-		local x,y,z = getElementPosition(thePlayer)
 		local rx,ry,rz = getElementRotation(thePlayer)
 		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
 
-		x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
+		local x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
 		rz = rz + 90
 
 		local theVehicle = createVehicle(400, x,y,z)

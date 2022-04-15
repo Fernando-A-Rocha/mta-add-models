@@ -12,6 +12,13 @@
 ---------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
 ------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
 
+local sx,sy = guiGetScreenSize()
+local win = nil
+
+local drawing = false
+local dfontsize = 1
+local dfont = "default-bold"
+
 addEvent(resName..":openTestWindow", true)
 
 addEventHandler( "onClientResourceStart", resourceRoot, 
@@ -21,9 +28,6 @@ function (startedResource)
 		togSeeAllocatedTable("-", true)
 	end
 end)
-
-local sx,sy = guiGetScreenSize()
-local win = nil
 
 function createTestWindow(version, title, data)
 	destroyTestWindow()
@@ -195,9 +199,9 @@ function createTestWindow(version, title, data)
 				end
 
 
-				local x,y,z = getElementPosition(element)
+				local ex,ey,ez = getElementPosition(element)
 				local int,dim = getElementInterior(element), getElementDimension(element)
-				local pos = "("..x..", "..y..", "..z.." | int: "..int..", dim: "..dim..")"
+				local pos = "("..ex..", "..ey..", "..ez.." | int: "..int..", dim: "..dim..")"
 				guiGridListSetItemText(grid, row, cols0.pos, pos, false, false)
 			end
 		end
@@ -214,8 +218,6 @@ function destroyTestWindow()
 	showCursor(false)
 end
 
-local drawing = false
-
 function togSeeAllocatedTable(cmd, dontspam)
 	if not drawing then
 		addEventHandler( "onClientRender", root, drawAllocatedTable)
@@ -224,15 +226,11 @@ function togSeeAllocatedTable(cmd, dontspam)
 		removeEventHandler( "onClientRender", root, drawAllocatedTable)
 		drawing = false
 	end
-	if not (type(dontspam)=="boolean") then
+	if type(dontspam) ~= "boolean" then
 		outputChatBox("Displaying allocated_ids on screen: "..(drawing and "Yes" or "No"))
 	end
 end
 addCommandHandler("allocatedids", togSeeAllocatedTable, false)
-
-local sx,sy = guiGetScreenSize()
-local dfontsize = 1
-local dfont = "default-bold"
 
 function drawAllocatedTable()
 	local text
@@ -262,25 +260,25 @@ function outputStreamedInElements(cmd)
 	end
 
 	-- outputChatBox("TOTAL: "..total,255,126,0)
-	for elementType, elements in pairs(tab) do
+	-- for elementType, elements in pairs(tab) do
 			
-		-- outputChatBox(elementType..": "..table.size(elements))
-		local dataName = dataNames[elementType]
+	-- 	outputChatBox(elementType..": "..table.size(elements))
+	-- 	local dataName = dataNames[elementType]
 
-		for k, element in pairs(elements) do
-			local id = tonumber(getElementData(element, dataName))
-			if id then
-				local extra = ""
-				local allocated_id = allocated_ids[id]
-				if allocated_id then
-					extra = " allocated to ID "..allocated_id
-				end
-				local x,y,z = getElementPosition(element)
-				local int,dim = getElementInterior(element), getElementDimension(element)
-				-- outputChatBox(" - Model ID "..id..extra.." ("..x..", "..y..", "..z.." | int: "..int..", dim: "..dim..")",255,194,14)
-			end
-		end
-	end
+	-- 	for k, element in pairs(elements) do
+	-- 		local id = tonumber(getElementData(element, dataName))
+	-- 		if id then
+	-- 			local extra = ""
+	-- 			local allocated_id = allocated_ids[id]
+	-- 			if allocated_id then
+	-- 				extra = " allocated to ID "..allocated_id
+	-- 			end
+	-- 			local x,y,z = getElementPosition(element)
+	-- 			local int,dim = getElementInterior(element), getElementDimension(element)
+	-- 			outputChatBox(" - Model ID "..id..extra.." ("..x..", "..y..", "..z.." | int: "..int..", dim: "..dim..")",255,194,14)
+	-- 		end
+	-- 	end
+	-- end
 
 	triggerEvent(resName..":openTestWindow", resourceRoot, "selements", "Total "..total.." streamed mod-compatible elements", tab)
 end

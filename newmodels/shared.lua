@@ -153,8 +153,6 @@ function verifySetModelArguments(element, elementType, id)
 	if not tonumber(id) then
 		return false, "Non-number ID passed"
 	end
-	id = tonumber(id)
-
 	return true
 end
 

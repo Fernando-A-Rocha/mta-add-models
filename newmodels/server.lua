@@ -241,7 +241,7 @@ function doModListChecks()
 					return modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be out of the default GTA:SA and SAMP ID Range, see shared.lua isDefaultID")
 				end
 
-				for k,id in pairs(used_ids) do
+				for _,id in pairs(used_ids) do
 					if id == mod.id then
 						return modCheckError("Duplicated mod ID '"..id.."'")
 					end
@@ -272,11 +272,11 @@ function doModListChecks()
 			-- 4.  verify file exists
 			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
 			local paths = getActualModPaths(mod.path, mod.id)
-			for k, path in pairs(paths) do
+			for pathType, path in pairs(paths) do
 				if (not fileExists(path)) and ((ENABLE_NANDOCRYPT) and not fileExists(path..NANDOCRYPT_EXT)) then
-					if (not ignoreTXD and k == "txd")
-					or (not ignoreDFF and k == "dff")
-					or ((not ignoreCOL) and elementType == "object" and k == "col") then
+					if (not ignoreTXD and pathType == "txd")
+					or (not ignoreDFF and pathType == "dff")
+					or ((not ignoreCOL) and elementType == "object" and pathType == "col") then
 
 						return modCheckError("File doesn't exist: '"..tostring(path).."' for mod ID "..mod.id)
 					end
@@ -450,7 +450,7 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
 
-	if not (type(elementType) == "string") then
+	if type(elementType) ~= "string" then
 		return false, "Missing/Invalid 'elementType' passed: "..tostring(elementType)
 	end
 	local sup,reason = isElementTypeSupported(elementType)
@@ -472,10 +472,10 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 	end
 	base_id = tonumber(base_id)
 
-	if not (type(name) == "string") then
+	if type(name) ~= "string" then
 		return false, "Missing/Invalid 'name' passed: "..tostring(name)
 	end
-	if not (type(path) == "string") then
+	if type(path) ~= "string" then
 		return false, "Missing/Invalid 'path' passed: "..tostring(path)
 	end
 	if (ignoreTXD ~= nil and type(ignoreTXD) ~= "boolean") then
@@ -554,7 +554,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
 
-	if not (type(elementType) == "string") then
+	if type(elementType) ~= "string" then
 		return false, "Missing/Invalid 'elementType' passed: "..tostring(elementType)
 	end
 	local sup,reason = isElementTypeSupported(elementType)
@@ -576,7 +576,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	end
 	base_id = tonumber(base_id)
 
-	if not (type(name) == "string") then
+	if type(name) ~= "string" then
 		return false, "Missing/Invalid 'name' passed: "..tostring(name)
 	end
 
@@ -595,7 +595,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 
 	if (ignoreDFF ~= true) then
 
-		if not (type(path_dff) == "string") then
+		if type(path_dff) ~= "string" then
 			return false, "Missing/Invalid 'path_dff' passed: "..tostring(path_dff)
 		end
 		if string.sub(path_dff, 1,1) ~= ":" then
@@ -607,7 +607,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 
 	if (ignoreTXD ~= true) then
 
-		if not (type(path_txd) == "string") then
+		if type(path_txd) ~= "string" then
 			return false, "Missing/Invalid 'path_txd' passed: "..tostring(path_txd)
 		end
 		if string.sub(path_txd, 1,1) ~= ":" then
@@ -619,10 +619,10 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 
 	if (ignoreCOL ~= true and elementType == "object") then
 
-		if (type(path_col) ~= "string") then
+		if type(path_col) ~= "string" then
 			return false, "Missing/Invalid 'path_col' passed: "..tostring(path_col)
 		end
-		if not string.sub(path_col, 1,1) ~= ":" then
+		if string.sub(path_col, 1,1) ~= ":" then
 			path_col = ":"..sourceResName.."/"..path_col
 		end
 
@@ -704,8 +704,8 @@ function removeExternalMod(id) -- [Exported]
 				table.insert(prevent_addrem_spam.rem[sourceResName], true)
 
 				prevent_addrem_spam.remtimer = setTimer(function()
-					for rname,mods in pairs(prevent_addrem_spam.rem) do
-						outputDebugString("Removed "..#mods.." mods from "..rname, 0, 211, 255, 89)
+					for rname,mods2 in pairs(prevent_addrem_spam.rem) do
+						outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
 						prevent_addrem_spam.rem.rname = nil
 					end
 				end, 1000, 1)

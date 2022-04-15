@@ -195,7 +195,7 @@ function allocateNewMod(element, elementType, id)
 	    end
 
 	    for k, v in pairs(paths2) do
-	    	local t,path = unpack(v)
+	    	local t,path_ = unpack(v)
 
 			if not nc_waiting[allocated_id] then
 				nc_waiting[allocated_id] = {}
@@ -203,9 +203,9 @@ function allocateNewMod(element, elementType, id)
 				nc_waiting[allocated_id]["count"] = 0
 			end
 			nc_waiting[allocated_id][t] = true
-			-- print("Staging", "A-ID "..allocated_id, "Type "..t, "Path "..path)
+			-- print("Staging", "A-ID "..allocated_id, "Type "..t, "Path "..path_)
 
-    		local worked = ncDecrypt(path,
+    		local worked = ncDecrypt(path_,
     			function(data)
 	            	-- No verifications, make sure ur nandocrypted models work
 
@@ -218,7 +218,7 @@ function allocateNewMod(element, elementType, id)
 	            	end
 
 					nc_waiting[allocated_id][t] = data
-					-- print("Decrypted", "A-ID "..allocated_id, "Type "..t, "Path "..path)
+					-- print("Decrypted", "A-ID "..allocated_id, "Type "..t, "Path "..path_)
 
 					nc_waiting[allocated_id]["count"] = nc_waiting[allocated_id]["count"] + 1
 					if (nc_waiting[allocated_id]["count"] == nc_waiting[allocated_id]["total"]) then
@@ -250,7 +250,7 @@ function allocateNewMod(element, elementType, id)
             )
             if not worked then
             	nc_waiting[allocated_id] = nil
-                return false, "Failed: NandoCrypt failed to decrypt '"..path.."'"
+                return false, "Failed: NandoCrypt failed to decrypt '"..path_.."'"
             else
 
 				if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
@@ -425,8 +425,8 @@ function freeElementCustomMod(id2)
 
 		-- check if no elements streamed in have that id
 		for k, element in ipairs(getElementsByType(et)) do
-			local id2 = tonumber(getElementData(element, dataName))
-			if id2 and id2 == id then
+			local id3 = tonumber(getElementData(element, dataName))
+			if id3 and id3 == id then
 				if isElementStreamedIn(element) then
 					oneStreamedIn = element
 					break
@@ -456,7 +456,7 @@ function freeElementCustomMod(id2)
 			end
 			model_elements[allocated_id] = nil
 			allocated_ids[id] = nil
-		else
+		-- else
 			-- outputDebugString("["..(en or "?").."] Not freeing allocated ID "..allocated_id.." for mod ID "..id, 0,227, 255, 117)
 		end
 
@@ -505,7 +505,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 				local success, reason = setElementCustomModel(source, et, id)
 				if not success then
 					outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
-				else
+				-- else
 					-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
 				end
 
@@ -565,7 +565,7 @@ function updateStreamedInElement(source)
 		local success, reason = setElementCustomModel(source, et, id, true)
 		if not success then
 			outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id..", true): "..reason, 1)
-		else
+		-- else
 			-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..", true) worked", 3)
 		end
 
