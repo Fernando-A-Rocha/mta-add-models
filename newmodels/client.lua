@@ -101,8 +101,6 @@ function allocateNewMod(element, elementType, id)
 	end
 
 	local txdPath = (ignoreTXD ~= true) and paths.txd or nil
-	local txdData
-
 	if txdPath then
 		if not fileExists(txdPath) then
 			if (ENABLE_NANDOCRYPT) then
@@ -115,19 +113,10 @@ function allocateNewMod(element, elementType, id)
 				return false, "File doesn't exist: "..txdPath
 			end
 		end
-
-		local txdFile = fileOpen(txdPath)
-		if not txdFile then
-			return false, "Failed to open file: "..txdPath
-		end
-		txdData = fileRead(txdFile, fileGetSize(txdFile))
-		fileClose(txdFile)
 	end
 
 
 	local dffPath = (ignoreDFF ~= true) and paths.dff or nil
-	local dffData
-
 	if dffPath then
 		if not fileExists(dffPath) then
 			if (ENABLE_NANDOCRYPT) then
@@ -140,19 +129,10 @@ function allocateNewMod(element, elementType, id)
 				return false, "File doesn't exist: "..dffPath
 			end
 		end
-
-		local dffFile = fileOpen(dffPath)
-		if not dffFile then
-			return false, "Failed to open file: "..dffPath
-		end
-		dffData = fileRead(dffFile, fileGetSize(dffFile))
-		fileClose(dffFile)
 	end
 
 
 	local colPath = (elementType == "object" and ignoreCOL ~= true) and paths.col or nil
-	local colData
-
 	if colPath then
 		if not fileExists(colPath) then
 			if (ENABLE_NANDOCRYPT) then
@@ -165,13 +145,6 @@ function allocateNewMod(element, elementType, id)
 				return false, "File doesn't exist: "..colPath
 			end
 		end
-
-		local colFile = fileOpen(colPath)
-		if not colFile then
-			return false, "Failed to open file: "..colPath
-		end
-		colData = fileRead(colFile, fileGetSize(colFile))
-		fileClose(colFile)
 	end
 
 	if (ENABLE_NANDOCRYPT) then
@@ -265,32 +238,32 @@ function allocateNewMod(element, elementType, id)
 	    end
 	end
 	
-	return continueLoadMod(id, allocated_id, txdData, dffData, colData)
-end
-
-function continueLoadMod(id, allocated_id, txdData, dffData, colData)
-
+	
 	local txdworked,dffworked,colworked = false,false,false
 	local txdmodel,dffmodel,colmodel = nil,nil,nil
 
-	local txd = engineLoadTXD(txdData)
-	if txd then
-		txdmodel = txd
-		if engineImportTXD(txd,allocated_id) then
-			txdworked = true
+	if txdPath then
+		local txd = engineLoadTXD(txdPath)
+		if txd then
+			txdmodel = txd
+			if engineImportTXD(txd,allocated_id) then
+				txdworked = true
+			end
 		end
 	end
 
-	local dff = engineLoadDFF(dffData, allocated_id)
-	if dff then
-		dffmodel = dff
-		if engineReplaceModel(dff,allocated_id) then
-			dffworked = true
+	if dffPath then
+		local dff = engineLoadDFF(dffPath, allocated_id)
+		if dff then
+			dffmodel = dff
+			if engineReplaceModel(dff,allocated_id) then
+				dffworked = true
+			end
 		end
 	end
 
-	if colData then
-		local col = engineLoadCOL(colData)
+	if colPath then
+		local col = engineLoadCOL(colPath)
 		if col then
 			colmodel = col
 			if engineReplaceCOL(col, allocated_id) then
@@ -299,12 +272,29 @@ function continueLoadMod(id, allocated_id, txdData, dffData, colData)
 		end
 	end
 
-	if not ((col and txdworked and dffworked and colworked) or ((not col) and txdworked and dffworked)) then
+	if (
+		((not ignoreTXD) and (not txdworked))
+		or ((not ignoreDFF) and (not dffworked))
+		or ((not ignoreCOL) and (elementType == "object") and (not colworked))
+	)
+	then
 		engineFreeModel(allocated_id)
 		if txdmodel then destroyElement(txdmodel) end -- free memory
 		if dffmodel then destroyElement(dffmodel) end -- free memory
 		if colmodel then destroyElement(colmodel) end -- free memory
-		return false, "Failed to load mod ID "..id..": dff ("..tostring(dffworked)..") txd ("..tostring(txdworked)..") "..(col and ("col ("..tostring(colworked)..")") or "")
+
+		local reason = ""
+		if (not ignoreTXD) then
+			reason = "TXD: "..(txdworked and "success" or "fail").." "
+		end
+		if (not ignoreDFF) then
+			reason = reason.."DFF: "..(dffworked and "success" or "fail").." "
+		end
+		if (not ignoreCOL) and (elementType == "object") then
+			reason = reason.."COL: "..(colworked and "success" or "fail").." "
+		end
+
+		return false, reason
 	end
 
 	if isTimer(atimers[id]) then killTimer(atimers[id]) end
