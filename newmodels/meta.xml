@@ -51,6 +51,7 @@
 
     <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>
+    <export type="shared" function="getBaseModel"/>
     <export type="shared" function="getModDataFromID"/>
     <export type="shared" function="isDefaultID"/>
     <export type="shared" function="isCustomModID"/>
