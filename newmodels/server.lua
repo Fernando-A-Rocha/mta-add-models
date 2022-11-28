@@ -690,7 +690,7 @@ function removeExternalMod(id) -- [Exported]
 		for k,mod in pairs(mods) do
 			if mod.id == id then
 				
-				outputDebugString("Removed "..elementType.." mod ID "..id.." located in: "..mod.path, 0, 211, 255, 89)
+				outputDebugString("Removed "..elementType.." mod ID "..id, 0, 211, 255, 89)
 			
 				modList[elementType][k] = nil	
 				
