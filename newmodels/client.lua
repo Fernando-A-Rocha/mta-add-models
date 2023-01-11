@@ -841,23 +841,16 @@ function receiveModList(modList)
 		for k, mod in pairs(mods) do
 
 			-- Get actual paths table and set it
-			local paths = {}
-			local path = mod.path
-			if type(path)=="table" then
-				paths = path
-			else
-				paths = getActualModPaths(path, mod.id)
-			end
-
+			local paths_ = ((type(mod.path)=="table" and mod.path) or (getActualModPaths(mod.path, mod.id)))
 			local readyPaths_ = {}
 
 			-- Ignore certain files
 			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
-			for pathType, path2 in pairs(paths) do
+			for pathType, path2 in pairs(paths_) do
 				if (pathType == "txd" and ignoreTXD)
 				or (pathType == "dff" and ignoreDFF)
 				or (pathType == "col" and (ignoreCOL or elementType ~= "object")) then
-					paths[pathType] = nil
+					paths_[pathType] = nil
 				else
 					if mod.metaDownloadFalse then
 						readyPaths_[path2] = false
@@ -867,7 +860,7 @@ function receiveModList(modList)
 				end
 			end
 
-			modList[elementType][k].paths = paths
+			modList[elementType][k].paths = paths_
 			modList[elementType][k].readyPaths = readyPaths_
 		end
 	end
