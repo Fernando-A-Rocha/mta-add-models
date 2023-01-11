@@ -14,8 +14,16 @@ addEvent(resName..":updateVehicleProperties", true)
 local SERVER_READY = false
 local startTickCount
 
+local prevent_addrem_spam = {
+	add = {},
+	addtimer = {},
+	rem = {},
+	remtimer = {},
+}
+
  -- Vehicle specific
 local savedHandlings = {}
+
 --[[
 	Goal: solve the issue of handling resetting every time the vehicle's model is changed serverside/clientside
 ]]
@@ -221,7 +229,6 @@ function doModListChecks()
 	local used_ids = {}
 	for elementType,mods in pairs(modList) do
 
-
 		-- 0. verify element type, can't be player as that's managed automatically (syncs 'ped')
 		if elementType == "player" then
 			return modCheckError("Please remove mod from modList: player = {...}, it will be added automatically to match 'ped' mods")
@@ -264,21 +271,37 @@ function doModListChecks()
 			end
 
 			-- 3.  verify path
-			if not mod.path or type(mod.path)~="string" then
+			if (not mod.path) then
 
-				return modCheckError("Missing/Invalid mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
+				return modCheckError("Missing mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
+			end
+			if not (type(mod.path)=="string" or type(mod.path)=="table") then
+
+				return modCheckError("Invalid mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
 			end
 
-			-- 4.  verify file exists
+			-- 4.  verify files exist
 			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
-			local paths = getActualModPaths(mod.path, mod.id)
-			for pathType, path in pairs(paths) do
-				if (not fileExists(path)) and ((ENABLE_NANDOCRYPT) and not fileExists(path..NANDOCRYPT_EXT)) then
+			local paths
+			local path = mod.path
+			if type(path)=="table" then
+				paths = path
+			else
+				paths = getActualModPaths(path, mod.id)
+			end
+			for pathType, path2 in pairs(paths) do
+				if type(pathType) ~= "string" then
+					return modCheckError("Invalid path type '"..tostring(pathType).."' for mod ID "..mod.id)
+				end
+				if type(path2) ~= "string" then
+					return modCheckError("Invalid file path '"..tostring(pathType).."' for mod ID "..mod.id)
+				end
+				if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
 					if (not ignoreTXD and pathType == "txd")
 					or (not ignoreDFF and pathType == "dff")
 					or ((not ignoreCOL) and elementType == "object" and pathType == "col") then
 
-						return modCheckError("File doesn't exist: '"..tostring(path).."' for mod ID "..mod.id)
+						return modCheckError("File doesn't exist: '"..tostring(path2).."' for mod ID "..mod.id)
 					end
 				end
 			end
@@ -432,18 +455,12 @@ function setCustomElementModel(element, et, id)
 end
 
 
-local prevent_addrem_spam = {
-	add = {},
-	addtimer = {},
-	rem = {},
-	remtimer = {},
-}
 
 --[[
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL) -- [Exported]
+function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -487,6 +504,12 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
 		return false, "ignoreCOL passed must be true/false"
 	end
+	if (metaDownloadFalse ~= nil) and (not (metaDownloadFalse == true or metaDownloadFalse == false)) then
+		return false, "Incorrect 'metaDownloadFalse' passed, must be true/false"
+	end
+	if not metaDownloadFalse then
+		metaDownloadFalse = false
+	end
 
 	if string.sub(path, 1,1) ~= ":" then
 		path = ":"..sourceResName.."/"..path
@@ -520,9 +543,9 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 	end
 
 	-- Save mod in list
-	table.insert(modList[elementType], {
-		id=id, base_id=base_id, path=path, name=name, srcRes=sourceResName
-	})
+	modList[elementType][#modList[elementType]+1] = {
+		id=id, base_id=base_id, path=path, name=name, metaDownloadFalse=metaDownloadFalse, srcRes=sourceResName
+	}
 
 	fixModList()
 	sendModListWhenReady_ToAllPlayers()
@@ -544,10 +567,34 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 end
 
 --[[
+	This function exists to avoid too many exports calls of the function below from
+	external resources to add mods from those
+	With this one you can just pass a table of mods and it calls that function for you
+]]
+function addExternalMods_CustomFileNames(list) -- [Exported]
+	if type(list) ~= "table" then
+		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
+	end
+	local countWorked = 0
+	for _, modInfo in ipairs(list) do
+		if type(modInfo) ~= "table" then
+			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
+		end
+		local worked, reason = addExternalMod_CustomFilenames(unpack(modInfo))
+		if worked then
+			countWorked = countWorked + 1
+		else
+			return false, "Aborting, one failed, reason: "..tostring(reason)
+		end
+	end
+	return countWorked
+end
+
+--[[
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
-function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL) -- [Exported]
+function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -588,6 +635,13 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	end
 	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
 		return false, "ignoreCOL passed must be true/false"
+	end
+
+	if (metaDownloadFalse ~= nil) and (not (metaDownloadFalse == true or metaDownloadFalse == false)) then
+		return false, "Incorrect 'metaDownloadFalse' passed, must be true/false"
+	end
+	if not metaDownloadFalse then
+		metaDownloadFalse = false
 	end
 
 
@@ -656,10 +710,10 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	end
 
 	-- Save mod in list
-	table.insert(modList[elementType], {
+	modList[elementType][#modList[elementType]+1] = {
 		-- path will be a table here, interpreted by the client differently
-		id=id, base_id=base_id, path=paths, name=name, srcRes=sourceResName
-	})
+		id=id, base_id=base_id, path=paths, name=name, metaDownloadFalse=metaDownloadFalse, srcRes=sourceResName
+	}
 
 	fixModList()
 	sendModListWhenReady_ToAllPlayers()
@@ -706,7 +760,7 @@ function removeExternalMod(id) -- [Exported]
 				prevent_addrem_spam.remtimer = setTimer(function()
 					for rname,mods2 in pairs(prevent_addrem_spam.rem) do
 						outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
-						prevent_addrem_spam.rem.rname = nil
+						prevent_addrem_spam.rem[rname] = nil
 					end
 				end, 1000, 1)
 				
