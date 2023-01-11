@@ -771,3 +771,10 @@ function removeExternalMod(id) -- [Exported]
 
 	return false, "No mod with ID "..id.." found in modList"
 end
+
+addEventHandler(resName..":kickOnDownloadsFail", resourceRoot, function(modId, path)
+	if not client then return end
+
+	outputServerLog("["..resName.."] "..getPlayerName(client).." failed to download '"..path.."' (#"..modId..") too many times (kicked).")
+	kickPlayer(client, "System", "Failed to download '"..path.."' (#"..modId..") too many times.")
+end)

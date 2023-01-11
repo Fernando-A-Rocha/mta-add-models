@@ -68,6 +68,8 @@
 
     <export type="client" function="isClientReady"/>
     <export type="client" function="forceAllocate"/>
+    <export type="client" function="forceDownloadMod"/>
+    <export type="client" function="isBusyDownloading"/>
     <!-- Main Scripts END -->
 
     <!-- testing scripts (optional - you can remove them) -->

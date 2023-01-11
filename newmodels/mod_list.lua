@@ -11,8 +11,7 @@
 	then use the commented 'modList' array below.
 ]]
 
-
-modsFolder = "models/"
+local modsFolder = "models/"
 
 modList = {
 	
@@ -66,9 +65,9 @@ modList = {
 -- NO DEFAULT MODS CONFIG:
 
 --[[
-	modList = {
-		ped = {},
-		object = {},
-		vehicle = {},
-	}
+modList = {
+	ped = {},
+	object = {},
+	vehicle = {},
+}
 ]]

@@ -10,6 +10,8 @@
 addEvent(resName..":receiveModList", true)
 addEvent(resName..":receiveVehicleHandling", true)
 -- addEvent(resName..":onMapListReceived", true) -- deprecated
+addEvent(resName..":onModListReceived", true)
+addEvent(resName..":onModFileDownloaded", true)
 
 
 allocated_ids = {} -- [new id] = allocated id
@@ -20,9 +22,11 @@ local freeIdTimers = {} -- [new id] = timer
 local FREE_ID_DELAY = 5000 -- ms
 
 -- downloadFile queue
-local awaitingSetModel = {}
 local fileDLQueue = {}
+local fileDLTries = {}
 local currDownloading -- current downloading file info
+local busyDownloading = false
+local awaitingSetModel = {}
 
 -- Nandocrypt specific
 local nc_waiting = {}
@@ -748,6 +752,10 @@ function updateStreamedElements(thisId)
 	return true
 end
 
+function isBusyDownloading() -- [Exported]
+	return (busyDownloading == true)
+end
+
 function setModFileReady(modId, path)
 	for elementType, mods in pairs(received_modlist or {}) do
 		for k, mod in pairs(mods) do
@@ -762,7 +770,11 @@ function setModFileReady(modId, path)
 					end
 				end
 				if all then
+					
 					received_modlist[elementType][k].allReady = true
+					triggerEvent(resName..":onModFileDownloaded", root, mod.id)
+					
+					-- For set element custom model waiting:
 					for element, id in pairs(awaitingSetModel) do
 						if id == modId then
 							if isElement(element) then
@@ -781,6 +793,20 @@ function setModFileReady(modId, path)
 	end
 end
 
+function onDownloadFailed(modId, path)
+
+	if (not KICK_ON_DOWNLOAD_FAILS) then return end
+
+	if not fileDLTries[path] then
+		fileDLTries[path] = 0
+	end
+	fileDLTries[path] = fileDLTries[path] + 1
+
+	if fileDLTries[path] == DOWNLOAD_MAX_TRIES then
+		triggerServerEvent(resName..":kickOnDownloadsFail", resourceRoot, modId, path)
+	end
+end
+
 function handleDownloadFinish(fileName, success, requestRes)
 	if requestRes ~= getThisResource() then return end
 	if not currDownloading then return end
@@ -789,6 +815,7 @@ function handleDownloadFinish(fileName, success, requestRes)
 	currDownloading = nil
 
 	if not success then
+		onDownloadFailed(modId, path)
 		outputDebugString("Failed to download mod file: "..tostring(fileName), 1)
 		return
 	end
@@ -797,22 +824,69 @@ function handleDownloadFinish(fileName, success, requestRes)
 
 	if #fileDLQueue >= 1 then
 		setTimer(downloadFirstInQueue, 50, 1)
+	elseif busyDownloading then
+		if (SHOW_DOWNLOADING) then removeEventHandler("onClientRender", root, showDownloadingDialog) end
+		busyDownloading = false
 	end
 end
 addEventHandler("onClientFileDownloadComplete", root, handleDownloadFinish)
 
 function downloadFirstInQueue()
 	local first = fileDLQueue[1]
+	if not first then
+		outputDebugString("Error getting first in DL queue", 1)
+		return
+	end
+
+	if (not busyDownloading) then
+		busyDownloading = true
+		if (SHOW_DOWNLOADING) then addEventHandler("onClientRender", root, showDownloadingDialog) end
+	end
+
 	table.remove(fileDLQueue, 1)
 
 	local modId, path = unpack(first)
-	
+
 	currDownloading = {modId, path}
 
 	if not downloadFile(path) then
 		currDownloading = nil
+		if busyDownloading then
+			if (SHOW_DOWNLOADING) then removeEventHandler("onClientRender", root, showDownloadingDialog) end
+			busyDownloading = false
+		end
+		onDownloadFailed(modId, path)
 		outputDebugString("Error trying to download file: "..tostring(path), 1)
 	end
+end
+
+function forceDownloadMod(id) -- [Exported]
+	id = tonumber(id)
+	if not id then return false, "id not number" end
+	local isCustom, mod, elementType2 = isCustomModID(id)
+	if not isCustom then
+		return false, id.." not a custom mod ID"
+	end
+
+	if not mod.allReady then
+		local notReady = {}
+		for path, isReady in pairs(mod.readyPaths) do
+			if not isReady then
+				notReady[#notReady+1] = path
+			end
+		end
+
+		if #notReady > 0 then
+			-- Mod not ready, download files ...
+			for i, path in ipairs(notReady) do
+				downloadModFile(id, path)
+			end
+
+			return true
+		end
+	end
+
+	return "MOD_READY"
 end
 
 function downloadModFile(modId, path)
@@ -824,8 +898,8 @@ function downloadModFile(modId, path)
 	end
 
 	fileDLQueue[#fileDLQueue+1] = {modId, path}
-	
-	if currDownloading then
+
+	if busyDownloading then
 		return
 	end
 
@@ -862,6 +936,10 @@ function receiveModList(modList)
 
 			modList[elementType][k].paths = paths_
 			modList[elementType][k].readyPaths = readyPaths_
+
+			if not mod.metaDownloadFalse then
+				modList[elementType][k].allReady = true
+			end
 		end
 	end
 
@@ -871,6 +949,7 @@ function receiveModList(modList)
 
 	-- for other resources to handle
 	-- triggerEvent(resName..":onMapListReceived", localPlayer) -- deprecated
+	triggerEvent(resName..":onModListReceived", localPlayer)
 
 	if updateElementsInQueue() then
 		updateStreamedElements()
@@ -899,3 +978,15 @@ function (startedResource)
 
 	triggerLatentServerEvent(resName..":requestModList", resourceRoot)
 end)
+
+local sw, sh = guiGetScreenSize()
+function showDownloadingDialog()
+	local queueSize = #fileDLQueue
+	local text = "Downloading... (".. (queueSize == 1 and "last one" or (queueSize.." left")) ..")\n "
+	local curr = currDownloading
+	if curr then
+		local modId, path = unpack(curr)
+		text = text..""..path.." (Mod #"..modId..")"
+	end
+	dxDrawText(text, 0, 0, sw, 45, tocolor(255, 255, 0, 255), 1.00, "default-bold", "right", "center", false, false, false, false, false)
+end
