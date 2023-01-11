@@ -1,10 +1,11 @@
-![Banner](https://i.imgur.com/bH2Yuz6.png)
+![Banner](https://i.imgur.com/OiXvEW4.png)
 
 # Introduction
 
 ## About
 
-**mta-add-models** is a MTA resource that acts as a library, making use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function to add new peds (skins), vehicles and objects
+**mta-add-models** is a MTA resource that acts as a library, making use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function to add new peds (skins), vehicles and objects:
+
 - syncs all added models with all players
 - minimalistic, optimized and bug free
 
@@ -14,7 +15,7 @@ MTA forum topic: [here](https://forum.mtasa.com/topic/133212-rel-add-new-models-
 
 Contact (author): Nando#7736 **(Discord)**
 
-## Your opinion matters!
+## Your opinion matters
 
 Click the button to check the project's feedback page:
 
@@ -24,7 +25,7 @@ Click the button to check the project's feedback page:
 
 ## Prerequisites
 
-- Required minimum MTA Server & Client version `1.5.9-9.21125.0`
+- Required minimum MTA Server & Client version `1.5.9-9.21437.0`
 - Get the installers from [nightly.mtasa.com](https://nightly.mtasa.com/)
 - ![https://i.imgur.com/BmkUosO.png](https://i.imgur.com/BmkUosO.png)
 - Client will auto-update upon joining the server
@@ -35,7 +36,7 @@ Click the button to check the project's feedback page:
 
 - [newmodels](/newmodels): main library resource
 - (optional) [newmodels-example](/[examples]/newmodels-example): an example implementation to add new objects/skins/etc to your server
-- (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP objects to your server
+- (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP object models to your server
   - 👉 [Download](https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) `models.zip` containing all dff/txd/col files required
 - (optional) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
 
@@ -50,12 +51,14 @@ Click the button to check the project's feedback page:
 
 - Place mod files [newmodels/models](/newmodels/models) (dff & txd (& col for objects))
 - List them in [newmodels/meta.xml](/newmodels/meta.xml) like the example
+- As of version 2.0, files have the `download="false"` attribute, causing newmodels to handle downloading them later only when needed
 - Define them in [newmodels/mod_list.lua](/newmodels/mod_list.lua) inside `modList` like the example
 - Use the [commands](#commands) to test, have fun!
 
 ## Commands
 
 Main testing commands in `newmodels`:
+
 - /listmods **lists all defined mods**
 - /allocatedids **shows all allocated mod IDs in realtime**
 - /selements **lists all streamed in elements for debugging purposes**
@@ -87,21 +90,26 @@ This library lets you load mods stored within the `newmodels` resource, and also
 Check the [quick testing](#quick-testing) to understand how to load mods from within the `newmodels` resource (easier).
 
 You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua) and [example to see implementation](/[examples]/newmodels-example/server.lua):
+
 - `addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL)`
 - `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL)`
+- `addExternalMods_CustomFileNames(list)` uses the function above^
 - `removeExternalMod(id)`
 
 ### Using Custom IDs
 
 To create elements with custom IDs **serverside**, do the following with these functions:
+
 - `createPed` (use a placeholder ID when creating, e.g. 1)
 - `createObject` (use a placeholder ID when creating, e.g. 1337)
 - `createVehicle` (use a placeholder ID when creating, e.g. 400)
 - `spawnPlayer` (use a placeholder ID when spawning the player, e.g. 0 CJ)
 
 After creating these elements, you have to:
+
 - **(Important)** Check if model ID you want to set is custom or default using `isDefaultID(modelID)` and `isCustomModID(modelID)`
 - If it's a custom ID then do the following:
+
   - Fetch element data name from this resouce using `getDataNameFromType(elementType)`
   - Set the element's custom model ID via element data with the name you just obtained
   - **(Optional)** You can fetch all data of the mod using `getModDataFromID(modelID)`
@@ -120,6 +128,7 @@ This resource makes the clients listen to the set element datas in order to appl
 ## Example #1
 
 (**serverside**) Spawning a ped with a new skin ID:
+
 ```lua
 local skin = 20001 -- valid modded skin ID that you defined
 local ped = createPed(0, 0,0,5) -- creates a ped in the center of the map; skin ID 0 is irrelevant
@@ -134,6 +143,7 @@ end
 ## Example #2
 
 (**serverside**) Spawning an object with a new model ID:
+
 ```lua
 local model = 50001 -- valid modded object ID that you defined
 local object = createObject(1337, 0,0,8) -- creates an object in the center of the map; model ID 1337 is irrelevant
@@ -148,6 +158,7 @@ end
 ## Example #3
 
 (**serverside**) Spawning a player after login and setting their skin ID (custom or not):
+
 ```lua
 -- you could fetch player data from database, here we use static values:
 local x,y,z, rx,ry,rz, int,dim = 0,0,5, 0,0,0, 0,0
@@ -165,6 +176,7 @@ end
 ## Example #4
 
 (**serverside**) Saving a player's skin ID on disconnect:
+
 ```lua
 addEventHandler( "onPlayerQuit", root, 
   function (quitType, reason, responsibleElement)
@@ -181,6 +193,7 @@ addEventHandler( "onPlayerQuit", root,
 ## Example #5
 
 (**serverside**) Adding a mod from your own resource:
+
 ```lua
 -- make sure the main library resource is started before executing this code
 
@@ -202,7 +215,8 @@ end
 
 ## Example #6
 
-(**serverside**) Spawning a vehicle and setting its handling
+(**serverside**) Spawning a vehicle and setting its handling:
+
 ```lua
 -- you could fetch this data from database, here we use static values:
 local x,y,z, rx,ry,rz, int,dim = 0,0,5, 0,0,0, 0,0
@@ -226,6 +240,10 @@ for property,var in pairs(handling) do
 end
 ```
 
+# Generating Collision Files
+
+There's a tool to generate a `.col` file from a given `.dff` model. Check out the tutorial [here](https://github.com/Fernando-A-Rocha/mta-samp-maploader/blob/main/TUTORIAL_COL.md).
+
 # Plugins
 
 ## NandoCrypt
@@ -234,7 +252,6 @@ This library supports encrypted models using the [NandoCrypt](https://github.com
 
 You can configure everything related to it in the [global config file](/newmodels/_config.lua).
 
-
 # Gamemode Implementations
 
 ## [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Custom Peds
@@ -242,6 +259,7 @@ You can configure everything related to it in the [global config file](/newmodel
 ### To be updated
 
 Example scripts that you need to adapt:
+
 - Clientside peds in character selection screen [account/c_characters.lua](https://github.com/OwlGamingCommunity/MTA/blob/main/mods/deathmatch/resources/account/c_characters.lua)
 - Serverside character spawning [account/s_characters.lua](https://github.com/OwlGamingCommunity/MTA/blob/main/mods/deathmatch/resources/account/s_characters.lua)
 - Serverside player skin saving [saveplayer-system/s_saveplayer_system.lua](https://github.com/OwlGamingCommunity/MTA/blob/main/mods/deathmatch/resources/saveplayer-system/s_saveplayer_system.lua)
@@ -249,13 +267,10 @@ Example scripts that you need to adapt:
 For new skin images used in the inventory, place them in [account/img](https://github.com/OwlGamingCommunity/MTA/tree/main/mods/deathmatch/resources/account/img) as ID.png with a minimum of 3 digits.
 
 You will find a lot more scripts that need to be changed if you want to use new IDs to the maximum potential, for example:
+
 - Shops/NPCs having custom skin IDs
 - Supporting custom skins in the [clothes](https://github.com/OwlGamingCommunity/MTA/tree/main/mods/deathmatch/resources/clothes) system
 - ...
-
-# Generating Collision Files
-
-There's a tool to generate a `.col` file from a given `.dff` model. Check out the tutorial [here](https://github.com/Fernando-A-Rocha/mta-samp-maploader/blob/main/TUTORIAL_COL.md).
 
 # Final Note
 
