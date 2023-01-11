@@ -1,5 +1,16 @@
 <meta>
+    <!-- This resource is available in the repository below.
+    Its version now matches the main newmodels version!
+    
+    https://github.com/Fernando-A-Rocha/mta-add-models -->
+
+	<info author="Fernando" name="Newmodels Unit Testing"
+     description="created for debugging purposes to test all functionalities of newmodels framework"
+     version="2.0"
+     type="script" />
+
 	<include resource="newmodels"/>
+
 	<script type="client" src="client.lua"/>
 	<script type="server" src="server.lua"/>
 	<script type="server" src="server_other.lua"/>

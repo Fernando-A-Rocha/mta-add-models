@@ -9,15 +9,23 @@
 -- Custom events:
 addEvent(resName..":receiveModList", true)
 addEvent(resName..":receiveVehicleHandling", true)
-addEvent(resName..":onMapListReceived", true)
+addEvent(resName..":onModListReceived", true)
+addEvent(resName..":onModFileDownloaded", true)
 
 
-allocated_ids = {} -- { [new id] = allocated id }
-local model_elements = {} -- { [allocated id] = {dff,txd[,col]} }
-local received_modlist -- will be { [element type] = {...} }
+allocated_ids = {} -- [new id] = allocated id
+local model_elements = {} -- [allocated id] = {dff,txd[,col]}
+local received_modlist -- [element type] = {...}
 local waiting_queue = {} -- [element] = { func num, args }
-local atimers = {}
-local adelay = 5000
+local freeIdTimers = {} -- [new id] = timer
+local FREE_ID_DELAY = 5000 -- ms
+
+-- downloadFile queue
+local fileDLQueue = {}
+local fileDLTries = {}
+local currDownloading -- current downloading file info
+local busyDownloading = false
+local awaitingSetModel = {}
 
 -- Nandocrypt specific
 local nc_waiting = {}
@@ -84,23 +92,22 @@ function allocateNewMod(element, elementType, id)
 	local elementType2 = elementType
 	if elementType2 == "player" then elementType2 = "ped" end
 
-	local allocated_id = engineRequestModel(elementType2, getModDataFromID(id).base_id)
+	local paths = foundMod.paths
+	if type(paths) ~= "table" then
+		return false, "Failed: paths is not a table"
+	end
+
+	local baseId = getModDataFromID(id).base_id
+
+	local allocated_id = engineRequestModel(elementType2, baseId)
 	if not allocated_id then
-		return false, "Failed: engineRequestModel('"..elementType2.."')"
+		return false, "Failed: engineRequestModel('"..elementType2.."', "..tostring(baseId)..")"
 	end
 
-	
-	local ignoreTXD, ignoreDFF, ignoreCOL = foundMod.ignoreTXD, foundMod.ignoreDFF, foundMod.ignoreCOL
+	-- Do the mod loading magic
+	local txdmodel,dffmodel,colmodel = nil,nil,nil
 
-	local paths
-	local path = foundMod.path
-	if type(path)=="table" then
-		paths = path
-	else
-		paths = getActualModPaths(path, id)
-	end
-
-	local txdPath = (ignoreTXD ~= true) and paths.txd or nil
+	local txdPath = paths.txd or nil
 	if txdPath then
 		if not fileExists(txdPath) then
 			if (ENABLE_NANDOCRYPT) then
@@ -116,7 +123,7 @@ function allocateNewMod(element, elementType, id)
 	end
 
 
-	local dffPath = (ignoreDFF ~= true) and paths.dff or nil
+	local dffPath = paths.dff or nil
 	if dffPath then
 		if not fileExists(dffPath) then
 			if (ENABLE_NANDOCRYPT) then
@@ -132,7 +139,7 @@ function allocateNewMod(element, elementType, id)
 	end
 
 
-	local colPath = (elementType == "object" and ignoreCOL ~= true) and paths.col or nil
+	local colPath = paths.col or nil
 	if colPath then
 		if not fileExists(colPath) then
 			if (ENABLE_NANDOCRYPT) then
@@ -151,24 +158,24 @@ function allocateNewMod(element, elementType, id)
 		-- Inspired by https://github.com/Fernando-A-Rocha/mta-nandocrypt/tree/main/nando_crypt-example
 
 		if type(ncDecrypt) ~= "function" then
-	        return false, "Failed: NandoCrypt decrypt function is not loaded"
-	    end
+			return false, "Failed: NandoCrypt decrypt function is not loaded"
+		end
 
-	    local hasOneNandoCrypted = false
+		local hasOneNandoCrypted = false
 
-	    local paths2 = {}
-	    if txdPath and getExtension(txdPath) == NANDOCRYPT_EXT then
-	    	table.insert(paths2, {"txd", txdPath})
-	    end
-	    if dffPath and getExtension(dffPath) == NANDOCRYPT_EXT  then
-	    	table.insert(paths2, {"dff", dffPath})
-	    end
-	    if colPath and getExtension(colPath) == NANDOCRYPT_EXT  then
-	    	table.insert(paths2, {"col", colPath})
-	    end
+		local paths2 = {}
+		if txdPath and getExtension(txdPath) == NANDOCRYPT_EXT then
+			table.insert(paths2, {"txd", txdPath})
+		end
+		if dffPath and getExtension(dffPath) == NANDOCRYPT_EXT  then
+			table.insert(paths2, {"dff", dffPath})
+		end
+		if colPath and getExtension(colPath) == NANDOCRYPT_EXT  then
+			table.insert(paths2, {"col", colPath})
+		end
 
-	    for k, v in pairs(paths2) do
-	    	local t,path_ = unpack(v)
+		for k, v in pairs(paths2) do
+			local t,path_ = unpack(v)
 
 			if not nc_waiting[allocated_id] then
 				nc_waiting[allocated_id] = {}
@@ -178,17 +185,17 @@ function allocateNewMod(element, elementType, id)
 			nc_waiting[allocated_id][t] = true
 			-- print("Staging", "A-ID "..allocated_id, "Type "..t, "Path "..path_)
 
-    		local worked = ncDecrypt(path_,
-    			function(data)
-	            	-- No verifications, make sure ur nandocrypted models work
+			local worked = ncDecrypt(path_,
+				function(data)
+					-- No verifications, make sure ur nandocrypted models work
 
-	            	if not allocated_ids[id] then
-	            		nc_waiting[allocated_id] = nil
-	            		return
-	            	end
-	            	if not nc_waiting[allocated_id] then
-	            		return
-	            	end
+					if not allocated_ids[id] then
+						nc_waiting[allocated_id] = nil
+						return
+					end
+					if not nc_waiting[allocated_id] then
+						return
+					end
 
 					nc_waiting[allocated_id][t] = data
 					-- print("Decrypted", "A-ID "..allocated_id, "Type "..t, "Path "..path_)
@@ -218,29 +225,28 @@ function allocateNewMod(element, elementType, id)
 						end
 						-- print("Finished", "A-AID "..allocated_id, "Total files "..nc_waiting[allocated_id]["total"])
 						nc_waiting[allocated_id] = nil
-	                end
-                end
-            )
-            if not worked then
-            	nc_waiting[allocated_id] = nil
-                return false, "Failed: NandoCrypt failed to decrypt '"..path_.."'"
-            else
+					end
+				end
+			)
+			if not worked then
+				nc_waiting[allocated_id] = nil
+				return false, "Failed: NandoCrypt failed to decrypt '"..path_.."'"
+			else
 
 				if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
 				allocated_ids[id] = allocated_id
 				
-            	hasOneNandoCrypted = true
-            end
-	    end
+				hasOneNandoCrypted = true
+			end
+		end
 
-	    if (hasOneNandoCrypted) then
-	    	return allocated_id -- loading is done async
-	    end
+		if (hasOneNandoCrypted) then
+			return allocated_id -- loading is done async
+		end
 	end
 	
 	
 	local txdworked,dffworked,colworked = false,false,false
-	local txdmodel,dffmodel,colmodel = nil,nil,nil
 
 	if txdPath then
 		local txd = engineLoadTXD(txdPath)
@@ -272,10 +278,9 @@ function allocateNewMod(element, elementType, id)
 		end
 	end
 
-	if (
-		((not ignoreTXD) and (not txdworked))
-		or ((not ignoreDFF) and (not dffworked))
-		or ((not ignoreCOL) and (elementType == "object") and (not colworked))
+	if(((txdPath) and (not txdworked))
+	or ((dffPath) and (not dffworked))
+	or ((colPath) and (not colworked))
 	)
 	then
 		engineFreeModel(allocated_id)
@@ -284,33 +289,37 @@ function allocateNewMod(element, elementType, id)
 		if colmodel then destroyElement(colmodel) end -- free memory
 
 		local reason = ""
-		if (not ignoreTXD) then
+		if (txdPath) then
 			reason = "TXD: "..(txdworked and "success" or "fail").." "
 		end
-		if (not ignoreDFF) then
+		if (dffPath) then
 			reason = reason.."DFF: "..(dffworked and "success" or "fail").." "
 		end
-		if (not ignoreCOL) and (elementType == "object") then
+		if (colPath) then
 			reason = reason.."COL: "..(colworked and "success" or "fail").." "
 		end
 
 		return false, reason
 	end
-
-	if isTimer(atimers[id]) then killTimer(atimers[id]) end
+	
+	if isTimer(freeIdTimers[id]) then killTimer(freeIdTimers[id]) end
 
 	allocated_ids[id] = allocated_id
+	
 	-- outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
+	
 	model_elements[allocated_id] = {} -- Save model elements for destroying on deallocation
-	if isElement(dffmodel) then
+	
+	if dffmodel and isElement(dffmodel) then
 		table.insert(model_elements[allocated_id], dffmodel)
 	end
-	if isElement(txdmodel) then
+	if txdmodel and isElement(txdmodel) then
 		table.insert(model_elements[allocated_id], txdmodel)
 	end
-	if isElement(colmodel) then
+	if colmodel and isElement(colmodel) then
 		table.insert(model_elements[allocated_id], colmodel)
 	end
+
 	return allocated_id
 end
 
@@ -349,6 +358,28 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 		-- allocate as it hasn't been done already
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then
+
+			local mod = getModDataFromID(id)
+			if not mod.allReady then
+				local notReady = {}
+				for path, isReady in pairs(mod.readyPaths) do
+					if not isReady then
+						notReady[#notReady+1] = path
+					end
+				end
+
+				if #notReady > 0 then
+					-- Mod not ready, download files ...
+
+					awaitingSetModel[element] = id
+
+					for i, path in ipairs(notReady) do
+						downloadModFile(id, path)
+					end
+					return true
+				end
+			end
+
 			local allocated_id2, reason2 = allocateNewMod(element, elementType, id)
 			if allocated_id2 then
 
@@ -395,6 +426,19 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 	return true
 end
 
+function doFreeAllocatedId(allocated_id)
+
+	local worked = engineFreeModel(allocated_id)
+	for k, element in pairs(model_elements[allocated_id] or {}) do
+		if isElement(element) then
+			destroyElement(element)
+		end
+	end
+	model_elements[allocated_id] = nil
+
+	return worked
+end
+
 function freeElementCustomMod(id2)
 	
 	local _, __, et2 = isCustomModID(id2)
@@ -403,9 +447,9 @@ function freeElementCustomMod(id2)
 		return
 	end
 
-	if isTimer(atimers[id2]) then killTimer(atimers[id2]) end
+	if isTimer(freeIdTimers[id2]) then killTimer(freeIdTimers[id2]) end
 
-	atimers[id2] = setTimer(function(id, et, en)
+	freeIdTimers[id2] = setTimer(function(id, et, en)
 
 		local dataName = dataNames[et]
 		local allocated_id = allocated_ids[id]
@@ -426,7 +470,7 @@ function freeElementCustomMod(id2)
 
 		if not oneStreamedIn then
 
-			local worked = engineFreeModel(allocated_id)
+			local worked = doFreeAllocatedId(allocated_id)
 
 			local r,g,b = 227, 255, 117
 			if not worked then
@@ -435,24 +479,12 @@ function freeElementCustomMod(id2)
 
 			outputDebugString("["..(en or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": none streamed in", 0,r,g,b)
 
-			-- local count = 0
-			for k, element in pairs(model_elements[allocated_id] or {}) do
-				if isElement(element) then
-					destroyElement(element)
-					-- if destroyElement(element) then
-						-- count = count + 1
-					-- end
-				end
-			end
-			model_elements[allocated_id] = nil
 			allocated_ids[id] = nil
-		-- else
-			-- outputDebugString("["..(en or "?").."] Not freeing allocated ID "..allocated_id.." for mod ID "..id, 0,227, 255, 117)
 		end
 
-		atimers[id] = nil
+		freeIdTimers[id] = nil
 
-	end, adelay, 1, id2, et2, eventName)
+	end, FREE_ID_DELAY, 1, id2, et2, eventName)
 end
 
 function hasOtherElementsWithModel(element, id)
@@ -685,31 +717,33 @@ function updateElementsInQueue()
 	return true
 end
 
-function updateStreamedElements()
+function updateStreamedElements(thisId)
 
 	local freed = {}
 
 	for elementType, name in pairs(dataNames) do
 		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
-			
+
 			local id = tonumber(getElementData(el, name))
 			if id and not freed[id] then
 
-				local found = false
+				if (not thisId) or (id == thisId) then
 
-				for j,mod in pairs(received_modlist[elementType]) do
-					if mod.id == id then
-						found = true
-						break
+					local found = false
+
+					for j,mod in pairs(received_modlist[elementType]) do
+						if mod.id == id then
+							found = true
+							break
+						end
 					end
-				end
+					if not found then -- means the mod was removed by a serverside script
 
-				if not found then -- means the mod was removed by a serverside script
-
-					freed[id] = true
-					freeElementCustomMod(id)
-				else
-					updateStreamedInElement(el)
+						freed[id] = true
+						freeElementCustomMod(id)
+					else
+						updateStreamedInElement(el)
+					end
 				end
 			end
 		end
@@ -717,11 +751,213 @@ function updateStreamedElements()
 	return true
 end
 
+function isBusyDownloading() -- [Exported]
+	return (busyDownloading == true)
+end
+
+function setModFileReady(modId, path)
+	for elementType, mods in pairs(received_modlist or {}) do
+		for k, mod in pairs(mods) do
+			if mod.id == modId then
+				received_modlist[elementType][k].readyPaths[path] = true
+
+				local all = true
+				for _, path2 in pairs(mod.paths) do
+					if not received_modlist[elementType][k].readyPaths[path2] then
+						all = false
+						break
+					end
+				end
+				if all then
+					
+					received_modlist[elementType][k].allReady = true
+					triggerEvent(resName..":onModFileDownloaded", root, mod.id)
+					
+					-- For set element custom model waiting:
+					for element, id in pairs(awaitingSetModel) do
+						if id == modId then
+							if isElement(element) then
+								local et = getElementType(element)
+								local worked, reason = setElementCustomModel(element, et, id)
+								if not worked then
+									outputDebugString("[setModFileReady] Failed setElementCustomModel(element, '"..et.."', "..id.."): "..reason, 1)
+								end
+							end
+							awaitingSetModel[element] = nil
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+function onDownloadFailed(modId, path)
+
+	if (not KICK_ON_DOWNLOAD_FAILS) then return end
+
+	if not fileDLTries[path] then
+		fileDLTries[path] = 0
+	end
+	fileDLTries[path] = fileDLTries[path] + 1
+
+	if fileDLTries[path] == DOWNLOAD_MAX_TRIES then
+		triggerServerEvent(resName..":kickOnDownloadsFail", resourceRoot, modId, path)
+		return true
+	end
+	return false
+end
+
+function handleDownloadFinish(fileName, success, requestRes)
+	if requestRes ~= getThisResource() then return end
+	if not currDownloading then return end
+	local modId, path = unpack(currDownloading)
+
+	currDownloading = nil
+
+	local waitDelay = 50
+
+	if not success then
+
+		outputDebugString("Failed to download mod file: "..tostring(fileName), 1)
+		if onDownloadFailed(modId, path) then
+			return -- Kicked
+		end
+
+		-- place back in queue
+		table.insert(fileDLQueue, 1, {modId, path})
+		waitDelay = 1000
+	else
+		setModFileReady(modId, path)
+	end
+
+	if #fileDLQueue >= 1 then
+		setTimer(downloadFirstInQueue, waitDelay, 1)
+	elseif busyDownloading then
+		if (SHOW_DOWNLOADING) then removeEventHandler("onClientRender", root, showDownloadingDialog) end
+		busyDownloading = false
+	end
+end
+addEventHandler("onClientFileDownloadComplete", root, handleDownloadFinish)
+
+function downloadFirstInQueue()
+	local first = fileDLQueue[1]
+	if not first then
+		outputDebugString("Error getting first in DL queue", 1)
+		return
+	end
+
+	if (not busyDownloading) then
+		busyDownloading = true
+		if (SHOW_DOWNLOADING) then addEventHandler("onClientRender", root, showDownloadingDialog) end
+	end
+
+	table.remove(fileDLQueue, 1)
+
+	local modId, path = unpack(first)
+
+	currDownloading = {modId, path}
+
+	if not downloadFile(path) then
+		outputDebugString("Error trying to download file: "..tostring(path), 1)
+		if onDownloadFailed(modId, path) then
+			return -- Kicked
+		end
+
+		-- retry after a bit:
+		setTimer(downloadFile, 1000, 1, path)
+	end
+end
+
+function forceDownloadMod(id) -- [Exported]
+	id = tonumber(id)
+	if not id then return false, "id not number" end
+	local isCustom, mod, elementType2 = isCustomModID(id)
+	if not isCustom then
+		return false, id.." not a custom mod ID"
+	end
+
+	if not mod.allReady then
+		local notReady = {}
+		for path, isReady in pairs(mod.readyPaths) do
+			if not isReady then
+				notReady[#notReady+1] = path
+			end
+		end
+
+		if #notReady > 0 then
+			-- Mod not ready, download files ...
+			for i, path in ipairs(notReady) do
+				downloadModFile(id, path)
+			end
+
+			return true
+		end
+	end
+
+	return "MOD_READY"
+end
+
+function downloadModFile(modId, path)
+
+	for _, v in ipairs(fileDLQueue) do
+		if v[1] == modId and v[2] == path then
+			return
+		end
+	end
+
+	fileDLQueue[#fileDLQueue+1] = {modId, path}
+
+	if busyDownloading then
+		return
+	end
+
+	if #fileDLQueue >= 1 then
+		downloadFirstInQueue()
+	end
+end
+
 function receiveModList(modList)
+
+	-- Clientside optimisation
+	for elementType, mods in pairs(modList) do
+		for k, mod in pairs(mods) do
+
+			-- Get actual paths table and set it
+			local paths_ = ((type(mod.path)=="table" and mod.path) or (getActualModPaths(mod.path, mod.id)))
+			local readyPaths_ = {}
+
+			-- Ignore certain files
+			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
+			for pathType, path2 in pairs(paths_) do
+				if (pathType == "txd" and ignoreTXD)
+				or (pathType == "dff" and ignoreDFF)
+				or (pathType == "col" and (ignoreCOL or elementType ~= "object")) then
+					paths_[pathType] = nil
+				else
+					if mod.metaDownloadFalse then
+						readyPaths_[path2] = false
+					else
+						readyPaths_[path2] = true
+					end
+				end
+			end
+
+			modList[elementType][k].paths = paths_
+			modList[elementType][k].readyPaths = readyPaths_
+
+			if not mod.metaDownloadFalse then
+				modList[elementType][k].allReady = true
+			end
+		end
+	end
+
 	received_modlist = modList
 
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
-	triggerEvent(resName..":onMapListReceived", localPlayer) -- for other resources to handle
+
+	-- for other resources to handle
+	triggerEvent(resName..":onModListReceived", localPlayer)
 
 	if updateElementsInQueue() then
 		updateStreamedElements()
@@ -750,3 +986,15 @@ function (startedResource)
 
 	triggerLatentServerEvent(resName..":requestModList", resourceRoot)
 end)
+
+local sw, sh = guiGetScreenSize()
+function showDownloadingDialog()
+	local queueSize = #fileDLQueue
+	local text = "Downloading... (".. (queueSize == 1 and "last one" or (queueSize.." left")) ..")\n "
+	local curr = currDownloading
+	if curr then
+		local modId, path = unpack(curr)
+		text = text..""..path.." (Mod #"..modId..")"
+	end
+	dxDrawText(text, 0, 0, sw, 45, tocolor(255, 255, 0, 255), 1.00, "default-bold", "right", "center", false, false, false, false, false)
+end

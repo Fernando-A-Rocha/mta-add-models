@@ -1,4 +1,4 @@
-All SA-MP dff,txd,col files are not included in this GitHub repository.
+All SA-MP dff,txd,col files are not included in this GitHub repository (too big).
 
 There's a download link for 'models.zip' included in the main documentation README.md
 
