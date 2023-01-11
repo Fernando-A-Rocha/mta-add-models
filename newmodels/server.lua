@@ -10,6 +10,7 @@
 addEvent(resName..":requestModList", true)
 addEvent(resName..":resetElementModel", true)
 addEvent(resName..":updateVehicleProperties", true)
+addEvent(resName..":kickOnDownloadsFail", true)
 
 local SERVER_READY = false
 local startTickCount

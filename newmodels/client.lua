@@ -9,7 +9,6 @@
 -- Custom events:
 addEvent(resName..":receiveModList", true)
 addEvent(resName..":receiveVehicleHandling", true)
--- addEvent(resName..":onMapListReceived", true) -- deprecated
 addEvent(resName..":onModListReceived", true)
 addEvent(resName..":onModFileDownloaded", true)
 
@@ -804,7 +803,9 @@ function onDownloadFailed(modId, path)
 
 	if fileDLTries[path] == DOWNLOAD_MAX_TRIES then
 		triggerServerEvent(resName..":kickOnDownloadsFail", resourceRoot, modId, path)
+		return true
 	end
+	return false
 end
 
 function handleDownloadFinish(fileName, success, requestRes)
@@ -814,16 +815,24 @@ function handleDownloadFinish(fileName, success, requestRes)
 
 	currDownloading = nil
 
+	local waitDelay = 50
+
 	if not success then
-		onDownloadFailed(modId, path)
+
 		outputDebugString("Failed to download mod file: "..tostring(fileName), 1)
-		return
+		if onDownloadFailed(modId, path) then
+			return -- Kicked
+		end
+
+		-- place back in queue
+		table.insert(fileDLQueue, 1, {modId, path})
+		waitDelay = 1000
+	else
+		setModFileReady(modId, path)
 	end
 
-	setModFileReady(modId, path)
-
 	if #fileDLQueue >= 1 then
-		setTimer(downloadFirstInQueue, 50, 1)
+		setTimer(downloadFirstInQueue, waitDelay, 1)
 	elseif busyDownloading then
 		if (SHOW_DOWNLOADING) then removeEventHandler("onClientRender", root, showDownloadingDialog) end
 		busyDownloading = false
@@ -850,13 +859,13 @@ function downloadFirstInQueue()
 	currDownloading = {modId, path}
 
 	if not downloadFile(path) then
-		currDownloading = nil
-		if busyDownloading then
-			if (SHOW_DOWNLOADING) then removeEventHandler("onClientRender", root, showDownloadingDialog) end
-			busyDownloading = false
-		end
-		onDownloadFailed(modId, path)
 		outputDebugString("Error trying to download file: "..tostring(path), 1)
+		if onDownloadFailed(modId, path) then
+			return -- Kicked
+		end
+
+		-- retry after a bit:
+		setTimer(downloadFile, 1000, 1, path)
 	end
 end
 
@@ -948,7 +957,6 @@ function receiveModList(modList)
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle
-	-- triggerEvent(resName..":onMapListReceived", localPlayer) -- deprecated
 	triggerEvent(resName..":onModListReceived", localPlayer)
 
 	if updateElementsInQueue() then
