@@ -62,6 +62,7 @@
     <export type="shared" function="isCustomModID"/>
 
     <export type="server" function="addExternalMod_IDFilenames"/>
+    <export type="server" function="addExternalMods_IDFilenames"/>
     <export type="server" function="addExternalMod_CustomFilenames"/>
     <export type="server" function="addExternalMods_CustomFileNames"/>
     <export type="server" function="removeExternalMod"/>

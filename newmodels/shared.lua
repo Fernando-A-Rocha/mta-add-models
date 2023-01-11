@@ -75,7 +75,17 @@ function isDefaultID(elementType, id) -- [Exported]
 	if not id then return end
 
 	if not elementType then -- check all IDs
-		return isDefaultID("ped", id) or isDefaultID("object", id) or isDefaultID("vehicle", id)
+		for k,id2 in pairs(pedIds) do
+			if id2 == id then
+				return true
+			end
+		end
+		for k,id2 in pairs(vehicleIds) do
+			if id2 == id then
+				return true
+			end
+		end
+		return isDefaultObjectID(id)
 	else
 		if elementType == "ped" or elementType == "player" then
 			for k,id2 in pairs(pedIds) do
