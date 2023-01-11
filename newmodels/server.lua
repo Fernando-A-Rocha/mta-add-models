@@ -543,7 +543,10 @@ end
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
+function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, usingCoroutine) -- [Exported]
+	if (usingCoroutine == true) then
+		coroutine.yield()
+	end
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
