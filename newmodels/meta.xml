@@ -1,8 +1,4 @@
 <meta>
-    <!--
-      NEWMODELS VERSION 2.0
-      Enjoy <3
-    -->
     <info author="Fernando" name="mta-add-models"
       description="minimalistic library for adding new models to your server" version="2.0.1" type="script"/>
     
@@ -51,7 +47,6 @@
     <script type="server" src="updater_s.lua"/>
     <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>
-    <script type="client" src="nando_decrypter"/>
     <script type="client" src="client.lua"/>
 
     <export type="shared" function="getModList"/>
@@ -72,6 +67,10 @@
     <export type="client" function="forceDownloadMod"/>
     <export type="client" function="isBusyDownloading"/>
     <!-- Main Scripts END -->
+
+    <!-- NandoCrypt plugin script (optional - you can remove it, and edit _config.lua) -->
+    <script type="client" src="nando_decrypter"/>
+    <!-- NandoCrypt plugin END -->
 
     <!-- testing scripts (optional - you can remove them) -->
     <script type="server" src="testing_server.lua"/>
