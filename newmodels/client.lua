@@ -631,7 +631,6 @@ function updateStreamedOutElement(source)
 	end
 end
 addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
-addEventHandler( "onClientElementDestroy", root, function () updateStreamedOutElement(source) end) -- same behavior for stream out
 
 -- (4) updateModelChangedElement
 function updateModelChangedElement(source, oldModel, newModel)
@@ -685,6 +684,30 @@ function updateModelChangedElement(source, oldModel, newModel)
 	end
 end
 addEventHandler( "onClientElementModelChange", root, function (oldModel, newModel) updateModelChangedElement(source, oldModel, newModel) end)
+
+function handleDestroyedElement()
+	if not received_modlist then return end
+	local et = getElementType(source)
+	if not isElementTypeSupported(et) then
+		return
+	end
+
+	local id = tonumber(getElementData(source, dataNames[et]))
+	if not (id) then return end -- doesn't have a custom model
+
+	if isCustomModID(id) then
+
+		local allocated_id = allocated_ids[id]
+		if not allocated_id then return end -- was not allocated
+
+		if not hasOtherElementsWithModel(source, id) then
+			freeElementCustomMod(id)
+			return
+		end
+	end
+end
+addEventHandler( "onClientElementDestroy", root, handleDestroyedElement)
+
 
 -- Free waiting_queue memory when player leaves
 addEventHandler( "onClientPlayerQuit", root, 
