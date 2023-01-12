@@ -28,10 +28,8 @@ STARTUP_VERIFICATIONS = true
 -- Usually these are resources that use newmodels and you want them to start only after newmodels,
 -- and they can be stopped when newmodels stops
 OTHER_RESOURCES = {
-	{ name = "sampobj_reloaded", start = true, stop = true}
+	-- { name = "sampobj_reloaded", start = true, stop = true}
 }
--- Empty table means no resources will be started/stopped
--- CHILD_RESOURCES = {}
 
 -- Mod file download feature
 SHOW_DOWNLOADING = true -- display the downloading progress dxDraw
