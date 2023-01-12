@@ -214,6 +214,82 @@ function modCheckError(text)
 	return false
 end
 
+function verifyOneMod(mod, elementType, used_ids)
+	coroutine.yield()
+
+	-- 1.  verify IDs
+	if not tonumber(mod.id) then
+		return modCheckError("Invalid mod ID '"..tostring(mod.id).."'")
+	else
+		if mod.id == 0 then
+			return modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be >0")
+		end
+
+		if isDefaultID(false, mod.id) then
+			return modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be out of the default GTA:SA and SAMP ID Range, see shared.lua isDefaultID")
+		end
+
+		for _,id in pairs(used_ids) do
+			if id == mod.id then
+				return modCheckError("Duplicated mod ID '"..id.."'")
+			end
+		end
+
+		table.insert(used_ids, mod.id)
+	end
+	if not tonumber(mod.base_id) then
+		return modCheckError("Invalid mod base ID '"..tostring(mod.base_id).."'")
+	else
+		if not isDefaultID(false, mod.base_id) then
+			return modCheckError("Invalid mod base ID '"..tostring(mod.base_id).."', must be a default GTA:SA ID")
+		end
+	end
+
+	-- 2.  verify name
+	if not mod.name or type(mod.name)~="string" then
+
+		return modCheckError("Missing/Invalid mod name '"..tostring(mod.name).."' for mod ID "..mod.id)
+	end
+
+	-- 3.  verify path
+	if (not mod.path) then
+
+		return modCheckError("Missing mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
+	end
+	if not (type(mod.path)=="string" or type(mod.path)=="table") then
+
+		return modCheckError("Invalid mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
+	end
+
+	-- 4.  verify files exist
+	local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
+	local paths
+	local path = mod.path
+	if type(path)=="table" then
+		paths = path
+	else
+		paths = getActualModPaths(path, mod.id)
+	end
+	for pathType, path2 in pairs(paths) do
+		if type(pathType) ~= "string" then
+			return modCheckError("Invalid path type '"..tostring(pathType).."' for mod ID "..mod.id)
+		end
+		if type(path2) ~= "string" then
+			return modCheckError("Invalid file path '"..tostring(pathType).."' for mod ID "..mod.id)
+		end
+		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
+			if (not ignoreTXD and pathType == "txd")
+			or (not ignoreDFF and pathType == "dff")
+			or ((not ignoreCOL) and elementType == "object" and pathType == "col") then
+
+				return modCheckError("File doesn't exist: '"..tostring(path2).."' for mod ID "..mod.id)
+			end
+		end
+	end
+
+	return true
+end
+
 -- verifies mapList, because people can fuck up sometimes :)
 function doModListChecks()
 
@@ -237,74 +313,12 @@ function doModListChecks()
 
 		for k,mod in pairs(mods) do
 
-			-- 1.  verify IDs
-			if not tonumber(mod.id) then
-				return modCheckError("Invalid mod ID '"..tostring(mod.id).."'")
-			else
-				if mod.id == 0 then
-					return modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be >0")
-				end
+			local co = coroutine.create(verifyOneMod)
+			coroutine.resume(co, mod, elementType, used_ids)
 
-				if isDefaultID(false, mod.id) then
-					return modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be out of the default GTA:SA and SAMP ID Range, see shared.lua isDefaultID")
-				end
-
-				for _,id in pairs(used_ids) do
-					if id == mod.id then
-						return modCheckError("Duplicated mod ID '"..id.."'")
-					end
-				end
-
-				table.insert(used_ids, mod.id)
-			end
-			if not tonumber(mod.base_id) then
-				return modCheckError("Invalid mod base ID '"..tostring(mod.base_id).."'")
-			else
-				if not isDefaultID(false, mod.base_id) then
-					return modCheckError("Invalid mod base ID '"..tostring(mod.base_id).."', must be a default GTA:SA ID")
-				end
-			end
-
-			-- 2.  verify name
-			if not mod.name or type(mod.name)~="string" then
-
-				return modCheckError("Missing/Invalid mod name '"..tostring(mod.name).."' for mod ID "..mod.id)
-			end
-
-			-- 3.  verify path
-			if (not mod.path) then
-
-				return modCheckError("Missing mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
-			end
-			if not (type(mod.path)=="string" or type(mod.path)=="table") then
-
-				return modCheckError("Invalid mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
-			end
-
-			-- 4.  verify files exist
-			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
-			local paths
-			local path = mod.path
-			if type(path)=="table" then
-				paths = path
-			else
-				paths = getActualModPaths(path, mod.id)
-			end
-			for pathType, path2 in pairs(paths) do
-				if type(pathType) ~= "string" then
-					return modCheckError("Invalid path type '"..tostring(pathType).."' for mod ID "..mod.id)
-				end
-				if type(path2) ~= "string" then
-					return modCheckError("Invalid file path '"..tostring(pathType).."' for mod ID "..mod.id)
-				end
-				if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
-					if (not ignoreTXD and pathType == "txd")
-					or (not ignoreDFF and pathType == "dff")
-					or ((not ignoreCOL) and elementType == "object" and pathType == "col") then
-
-						return modCheckError("File doesn't exist: '"..tostring(path2).."' for mod ID "..mod.id)
-					end
-				end
+			local _, result = coroutine.resume(co)
+			if not result then
+				return result
 			end
 		end
 	end
@@ -318,9 +332,29 @@ function (startedResource)
 
 	startTickCount = getTickCount()
 
-	-- STARTUP CHECKS
-	if doModListChecks() then
+	if (STARTUP_VERIFICATIONS) then
+
+		-- STARTUP CHECKS
+		if not doModListChecks() then return end
+
 		SERVER_READY = true -- all checks passed
+
+	else
+		SERVER_READY = true -- checks ignored
+	end
+		
+	for k, v in ipairs(OTHER_RESOURCES) do
+		local name, start, stop = v.name, v.start, v.stop
+		if type(name)=="string" and start == true then
+			local res = getResourceFromName(name)
+			if res and getResourceState(res) == "loaded" then
+				if not startResource(res) then
+					outputDebugString("Failed to start resource '"..name.."' on "..resName.." res-start")
+				else
+					outputDebugString("Started resource '"..name.."' on "..resName.." res-start")
+				end
+			end
+		end
 	end
 end)
 
@@ -336,13 +370,33 @@ function (stoppedResource, wasDeleted)
 		end
 	end
 
+	local willStart = {}
+	for k, v in ipairs(OTHER_RESOURCES) do
+		local name, start, stop = v.name, v.start, v.stop
+		if type(name)=="string" then
+			if start == true then
+				willStart[name] = true
+			end
+			if stop == true then
+				local res = getResourceFromName(name)
+				if res and getResourceState(res) == "running" then
+					if not stopResource(res) then
+						outputDebugString("Failed to stop resource '"..name.."' on "..resName.." res-stop")
+					else
+						outputDebugString("Stopped resource '"..name.."' on "..resName.." res-stop")
+					end
+				end
+			end
+		end
+	end
+
 	local notified = {}
 	for elementType,mods in pairs(modList) do
 		for k,mod in pairs(mods) do
 			local srcRes = mod.srcRes
 			if srcRes then
 				local res = getResourceFromName(srcRes)
-				if res and not notified[srcRes] then
+				if res and not notified[srcRes] and not willStart[srcRes] then
 
 					outputDebugString("Resource '"..srcRes.."' needs to be restarted because '"..resName.."' stopped", 0, 211, 255, 0)
 					notified[srcRes] = true
@@ -458,10 +512,41 @@ end
 
 
 --[[
+	This function exists to avoid too many exports calls of the function below from
+	external resources to add mods from those
+	With this one you can just pass a table of mods and it calls that function for you
+]]
+function addExternalMods_IDFilenames(list) -- [Exported]
+	if type(list) ~= "table" then
+		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
+	end
+	local countWorked = 0
+	for _, modInfo in ipairs(list) do
+		if type(modInfo) ~= "table" then
+			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
+		end
+		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
+		
+		local co = coroutine.create(addExternalMod_IDFilenames)
+		coroutine.resume(co, elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, true)
+		local _, worked, reason = coroutine.resume(co)
+		if worked then
+			countWorked = countWorked + 1
+		else
+			return false, "Aborting, one failed, reason: "..tostring(reason)
+		end
+	end
+	return countWorked
+end
+
+--[[
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
+function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, usingCoroutine) -- [Exported]
+	if (usingCoroutine == true) then
+		coroutine.yield()
+	end
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -581,7 +666,11 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		local worked, reason = addExternalMod_CustomFilenames(unpack(modInfo))
+		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
+		
+		local co = coroutine.create(addExternalMod_CustomFilenames)
+		coroutine.resume(co, elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, true)
+		local _, worked, reason = coroutine.resume(co)
 		if worked then
 			countWorked = countWorked + 1
 		else
@@ -595,7 +684,10 @@ end
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
-function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
+function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, usingCoroutine) -- [Exported]
+	if (usingCoroutine == true) then
+		coroutine.yield()
+	end
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then

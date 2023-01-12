@@ -19,6 +19,18 @@ dataNames = {
 -- useful for getting a vehicle's base model to fetch its original handling, etc
 baseDataName = "baseID"
 
+-- If you are 100% sure that the mods in mod_list.lua are valid, you can disable initial checks
+-- for faster startup time
+STARTUP_VERIFICATIONS = true
+
+-- Newmodels will try to start these resources (identified by their names) after newmodels has started,
+-- as well as stop them when newmodels is stopped
+-- Usually these are resources that use newmodels and you want them to start only after newmodels,
+-- and they can be stopped when newmodels stops
+OTHER_RESOURCES = {
+	-- { name = "sampobj_reloaded", start = true, stop = true}
+}
+
 -- Mod file download feature
 SHOW_DOWNLOADING = true -- display the downloading progress dxDraw
 KICK_ON_DOWNLOAD_FAILS = true -- kick player if failed to download a file more than X times
