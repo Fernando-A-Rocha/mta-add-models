@@ -338,23 +338,23 @@ function (startedResource)
 		if not doModListChecks() then return end
 
 		SERVER_READY = true -- all checks passed
-		
-		for k, v in ipairs(OTHER_RESOURCES) do
-			local name, start, stop = v.name, v.start, v.stop
-			if type(name)=="string" and start == true then
-				local res = getResourceFromName(name)
-				if res and getResourceState(res) == "loaded" then
-					if not startResource(res) then
-						outputDebugString("Failed to start resource '"..name.."' on "..resName.." res-start")
-					else
-						outputDebugString("Started resource '"..name.."' on "..resName.." res-start")
-					end
-				end
-			end
-		end
 
 	else
 		SERVER_READY = true -- checks ignored
+	end
+		
+	for k, v in ipairs(OTHER_RESOURCES) do
+		local name, start, stop = v.name, v.start, v.stop
+		if type(name)=="string" and start == true then
+			local res = getResourceFromName(name)
+			if res and getResourceState(res) == "loaded" then
+				if not startResource(res) then
+					outputDebugString("Failed to start resource '"..name.."' on "..resName.." res-start")
+				else
+					outputDebugString("Started resource '"..name.."' on "..resName.." res-start")
+				end
+			end
+		end
 	end
 end)
 
