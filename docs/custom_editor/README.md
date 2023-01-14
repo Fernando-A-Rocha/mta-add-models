@@ -23,3 +23,10 @@ To use new models in your map, the editor needs to know which models have been a
    * Do this every time you want to update the editor's new models list.
 4. Start the `editor` resource.
 5. Enjoy.
+
+You can place down new vehicles, objects and skins in your map. The editor script sets the element datas when spawning the elements.
+When saving the map, the element datas are saved in the XML file. When a map is loaded, it will set all those datas => setting the correct new model IDs.
+
+This means that the map can be loaded on any server that has the same new models in their `newmodels` resource, not requiring the custom map editor which is just for creating the maps :-)
+
+Be creative and have fun!
