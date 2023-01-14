@@ -4,7 +4,11 @@
     
     https://github.com/Fernando-A-Rocha/mta-add-models -->
     
-    <info author="Fernando" name="newmodels Example" description="implements mta-add-models library functions" version="2.0.2" type="script" />
+    <info author="Fernando"
+        name="newmodels Example"
+        description="implements mta-add-models library functions"
+        version="2.0.3"
+        type="script" />
     
     <include resource="newmodels" />
     

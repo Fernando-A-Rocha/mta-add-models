@@ -519,6 +519,15 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 	if type(list) ~= "table" then
 		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
 	end
+
+	if not sourceResource then
+		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	end
+	local sourceResName = getResourceName(sourceResource)
+	if sourceResName == resName then
+		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	end
+
 	
 	local countWorked = 0
 	
@@ -528,8 +537,10 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		
-		local worked, reason = addExternalMod_IDFilenames(unpack(modInfo))
+		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
+		local worked, reason = addExternalMod_IDFilenames(
+			elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, sourceResName
+		)
 		if worked then
 			countWorked = countWorked + 1
 		else
@@ -544,11 +555,16 @@ end
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
+function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, fromResourceName) -- [Exported]
 
-	local sourceResName = getResourceName(sourceResource)
-	if sourceResName == resName then
-		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	local sourceResName
+	if not fromResourceName then
+		local sourceResName = getResourceName(sourceResource)
+		if sourceResName == resName then
+			return false, "This command is meant to be called from outside resource '"..resName.."'"
+		end
+	else
+		sourceResName = fromResourceName
 	end
 
 	if type(elementType) ~= "string" then
@@ -659,6 +675,13 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 	if type(list) ~= "table" then
 		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
 	end
+	if not sourceResource then
+		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	end
+	local sourceResName = getResourceName(sourceResource)
+	if sourceResName == resName then
+		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	end
 	
 	local countWorked = 0
 
@@ -668,7 +691,11 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		local worked, reason = addExternalMod_CustomFilenames(unpack(modInfo))
+
+		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
+		local worked, reason = addExternalMod_CustomFilenames(
+			elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, sourceResName
+		)
 		if worked then
 			countWorked = countWorked + 1
 		else
@@ -683,11 +710,16 @@ end
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
-function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
+function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, fromResourceName) -- [Exported]
 
-	local sourceResName = getResourceName(sourceResource)
-	if sourceResName == resName then
-		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	local sourceResName
+	if not fromResourceName then
+		local sourceResName = getResourceName(sourceResource)
+		if sourceResName == resName then
+			return false, "This command is meant to be called from outside resource '"..resName.."'"
+		end
+	else
+		sourceResName = fromResourceName
 	end
 
 	if type(elementType) ~= "string" then
