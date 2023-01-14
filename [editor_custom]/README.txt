@@ -1,2 +1,3 @@
-Newmodels Custom Map Editor
-doc: https://github.com/Fernando-A-Rocha/mta-add-models
+Newmodels Custom Map Editor Project
+
+Documentation at https://github.com/Fernando-A-Rocha/mta-add-models
