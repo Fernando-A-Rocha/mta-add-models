@@ -18,7 +18,7 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
 
 3. Get **this version (*r1553*)** of the default MTA:SA Editor resources :
     * Download link: [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
-    * ⚠️ Other version of the default Map Editor resources may not be compatible with the custom changes ⚠️
+    * ⚠️ Other versions of the default Map Editor resources may not be compatible with the custom changes ⚠️
     * Extract the `[editor]` folder into your server's resources
 
 4. Drag & drop everything in the `[editor_changes]` folder downloaded to your default `[editor]` folder.
