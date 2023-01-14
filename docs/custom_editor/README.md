@@ -6,9 +6,10 @@ In this folder you will find the MTA:SA Map Editor resources customized specific
 
 Currently, you cannot install this Map Editor alongside the default Map Editor resources.
 
-1. Get the default MTA:SA Editor resources if you don't have them on your server already:
+1. Get the default MTA:SA Editor resources (if you don't have them on your server already):
     * Download all resources [https://mirror.mtasa.com/mtasa/resources/mtasa-resources-latest.zip](https://mirror.mtasa.com/mtasa/resources/mtasa-resources-latest.zip)
     * You only need the default `[editor]` folder containing all Map Editor resources
+    * Drag & drop it into your server's resources
 
 2. Drag & drop the custom `[editor]` folder into your server's resources, replacing the following resources:
     * `edf`
@@ -33,4 +34,4 @@ When saving the map, the element datas are saved in the XML file. When a map is 
 
 This means that the map can be loaded on any server that has the same new models in their `newmodels` resource, not requiring the custom map editor which is just for creating the maps :-)
 
-Be creative and have fun!
+**Happy mapping!**
