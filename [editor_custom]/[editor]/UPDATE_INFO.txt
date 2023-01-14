@@ -1,2 +1,0 @@
-MTA-ADD-MODELS CUSTOM MAP EDITOR
-Based on default resources from 14 January, 2023

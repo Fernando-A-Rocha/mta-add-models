@@ -1,17 +1,17 @@
 # Custom Map Editor
 
-In this folder you will find the MTA:SA Map Editor resources customized specifically to support new model IDs for vehicles, objects and skins using newmodels.
+We have customized the MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels.
 
 ## Installation
 
-Currently, you cannot install this Map Editor alongside the default Map Editor resources.
+Currently, you cannot install this Map Editor alongside the default Map Editor resources. It needs to be replaced.
 
-1. Get the default MTA:SA Editor resources (if you don't have them on your server already):
-    * Download all resources [https://mirror.mtasa.com/mtasa/resources/mtasa-resources-latest.zip](https://mirror.mtasa.com/mtasa/resources/mtasa-resources-latest.zip)
-    * You only need the default `[editor]` folder containing all Map Editor resources
-    * Drag & drop it into your server's resources
+1. Get the default MTA:SA Editor resources:
+    * Download **this version** (*r1553*): [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
+    * ⚠️ Other default Map Editor resources may not be compatible with the custom changes ⚠️
+    * Extract the `[editor]` folder into your server's resources
 
-2. Delete the following resources from your `[editor]` folder and drag & drop the [new ones](/\[editor_custom\]/[\editor\]):
+2. Drag & drop everything in the (/\[editor_changes\]/[\editor_changes\]) folder to your default `[editor]` folder, replacing files in the following resources:
     * `edf`
     * `editor_main`
     * `editor_gui`
