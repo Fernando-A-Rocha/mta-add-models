@@ -355,7 +355,7 @@ function (startedResource)
 		end
 	end
 
-	outputDebugString(resName.."' startup finished after "..(getTickCount() - startTickCount).."ms", 0, 255, 0, 255)
+	outputDebugString(resName.." startup finished after "..(getTickCount() - startTickCount).."ms", 0, 255, 0, 255)
 	startTickCount = nil -- clear memory
 end)
 
