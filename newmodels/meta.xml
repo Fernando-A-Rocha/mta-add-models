@@ -1,6 +1,6 @@
 <meta>
     <info author="Fernando" name="mta-add-models"
-      description="minimalistic library for adding new models to your server" version="2.0.1" type="script"/>
+      description="minimalistic library for adding new models to your server" version="2.0.2" type="script"/>
     
     <!-- DOCUMENTATION:
         https://github.com/Fernando-A-Rocha/mta-add-models
@@ -44,6 +44,7 @@
     <!-- Main Scripts START -->
     <script type="shared" src="_config.lua"/>
     <script type="shared" src="shared.lua"/>
+    <script type="server" src="async_s.lua"/>
     <script type="server" src="updater_s.lua"/>
     <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>

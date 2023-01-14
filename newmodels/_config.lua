@@ -47,3 +47,12 @@ START_STOP_MESSAGES = true -- enable resouce start/stop automatic chat messages
 SEE_ALLOCATED_TABLE = true -- automatically executes /allocatedids on startup
 ENABLE_DEBUG_MESSAGES = true -- toggle all debug console messages
 CHAT_DEBUG_MESSAGES = true -- make debug console messages to go chatbox (better readability imo)
+
+--[[
+	MTA:SA Async library Settings
+
+	Async:setPriority("low");    -- better fps
+	Async:setPriority("normal"); -- medium
+	Async:setPriority("high");   -- better perfomance
+]]
+ASYNC_PRIORITY = "normal"

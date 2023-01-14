@@ -31,6 +31,8 @@ function (startedResource)
 
     if not startUpChecks() then return end
 
+	local listToAdd = {}
+
 	for k,mod in pairs(myMods) do
 
 		local uid = mod[1]
@@ -48,16 +50,17 @@ function (startedResource)
         if not baseid then
 			outputDebugString("Failed to get vehicle model from name: "..tostring(mod[2]), 0, 255,55,55)
         else
-			local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
-				et, uid, baseid, name,
-				dff, txd, col
-			)
-
-			if not worked then
-				outputDebugString(reason or "Unknown error", 0, 255,110,61)
-			end
+			-- ARGS: elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse
+			listToAdd[#listToAdd+1] = {et, uid, baseid, name, dff, txd, col, false, false, false, false}
 		end
 	end
+
+	local count, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
+	if not count then
+		outputDebugString("[newmodels-example] Failed to add models: "..tostring(reason), 0, 255,110,61)
+		return
+	end
+
 
 	checkPossibleExistingElements()
 end)
@@ -320,7 +323,7 @@ function testVehiclesCmd(thePlayer, cmd)
 	for elementType, mods in pairs(modList) do
 		if elementType == elementType2 then
 			for k,mod in pairs(mods) do
-				local veh = createVehicle(400, x,y,z,rx,ry,rz)
+				local veh = createVehicle(mod.base_id, x,y,z,rx,ry,rz)
 				if veh then
 					setElementData(veh, data_name, mod.id)
 					table.insert(spawned_vehs, veh)
