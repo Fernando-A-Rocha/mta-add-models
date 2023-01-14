@@ -529,8 +529,6 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 	end
 
 	
-	local countWorked = 0
-	
 	-- for _, modInfo in ipairs(list) do
 	Async:foreach(list, function(modInfo)
 
@@ -541,14 +539,14 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 		local worked, reason = addExternalMod_IDFilenames(
 			elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, sourceResName
 		)
-		if worked then
-			countWorked = countWorked + 1
-		else
+		if not worked then
 			return false, "Aborting, one failed, reason: "..tostring(reason)
 		end
 	-- end
 	end)
-	return countWorked
+
+	-- can't rely on count because Async is not thread safe
+	return true
 end
 
 --[[
@@ -683,8 +681,6 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
 	
-	local countWorked = 0
-
 	-- for _, modInfo in ipairs(list) do
 	Async:foreach(list, function(modInfo)
 
@@ -696,14 +692,14 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 		local worked, reason = addExternalMod_CustomFilenames(
 			elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, sourceResName
 		)
-		if worked then
-			countWorked = countWorked + 1
-		else
+		if not worked then
 			return false, "Aborting, one failed, reason: "..tostring(reason)
 		end
 	-- end
 	end)
-	return countWorked
+
+	-- can't rely on count because Async is not thread safe
+	return true
 end
 
 --[[
