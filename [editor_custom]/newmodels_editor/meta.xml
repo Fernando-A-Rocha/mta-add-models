@@ -1,0 +1,13 @@
+<meta>
+    <info author="Fernando" name="newmodels Editor Tool"
+      description="Add-Models Map Editor Tool" version="1.0.0" type="script"/>
+    
+    <!-- DOCUMENTATION:
+        todo
+    -->
+    <include resource="newmodels"/>
+
+    <script type="shared" src="_config.lua"/>
+    <script type="client" src="client.lua" cache="false"/>
+    <script type="server" src="server.lua"/>
+</meta>
