@@ -43,7 +43,7 @@ Example resources:
 
 Other resources:
 
-- (optional) [editor_custom](/[editor_custom]): modified MTA:SA Map Editor resources to support using new model IDs
+- (optional) [editor_custom](/docs/custom_editor#readme): modified MTA:SA Map Editor resources to support using new model IDs
 
 ### Install
 
