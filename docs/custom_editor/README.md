@@ -13,17 +13,27 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
 1. [Download the latest release](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) containing newmodels, the custom Map Editor & other resources.
     * Extract the `[editor_custom]` folder to your Desktop, for example, and open it.
 
-2. Get the default MTA:SA Editor resources:
-    * Download **this version** (*r1553*): [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
+2. Make sure you've installed `newmodels` in your server properly (this is a requirement).
+    * Check the tutorial [here](/README.md#install).
+
+3. Get **this version (*r1553*)** of the default MTA:SA Editor resources :
+    * Download link: [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
     * ⚠️ Other default Map Editor resources may not be compatible with the custom changes ⚠️
     * Extract the `[editor]` folder into your server's resources
 
-3. Drag & drop everything in the (/\[editor_changes\]/[\editor_changes\]) folder to your default `[editor]` folder, replacing files in the following resources:
+4. Drag & drop everything in the (/\[editor_changes\]/[\editor_changes\]) folder to your default `[editor]` folder, replacing files in the following resources:
     * `edf`
     * `editor_main`
     * `editor_gui`
 
-4. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
+5. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
+
+6. You should added a resource called `newmodels_editor` and modified the following resources:
+    * `edf`
+    * `editor_main`
+    * `editor_gui`
+
+7. Use **/refresh** command in your server to find the changes.
 
 **Watch the video tutorial for a visual guide.**
 
