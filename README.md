@@ -7,9 +7,11 @@
 
 In simpler terms, with this resource you can make scripts/change your scripts to add new skins, vehicles and objects to your server! For example we can now add all SA-MP objects whilst keeping their IDs.
 
-MTA forum topic: [here](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
+MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
 
-Contact (author): Nando#7736 **(Discord)**
+## Support/Help
+
+If you need help with anything related to this project, please read the corresponding section on the MTA forum thread linked above.
 
 ## Your opinion matters
 

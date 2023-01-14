@@ -2,6 +2,12 @@
 
 The Newmodels Map Editor Project consits of customized MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels.
 
+MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
+
+## Support/Help
+
+If you need help with anything related to this project, please read the corresponding section on the MTA forum thread linked above.
+
 ## Tutorial Video
 
 Coming soon!
