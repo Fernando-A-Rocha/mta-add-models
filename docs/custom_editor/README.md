@@ -54,6 +54,6 @@ This means that the map can be loaded on any server that has the same new models
 
 ## Credits
 
-* [Fernando A. Rocha](https://github.com/Fernando-A-Rocha)
+* [Fernando](https://github.com/Fernando-A-Rocha)
 * [Rick](https://github.com/httpRick)
 * MTA:SA Resources Contributors
