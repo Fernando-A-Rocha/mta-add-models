@@ -68,6 +68,7 @@
 		<data name="frozen" type="selection:false,true" description="Frozen" required="false" default="false" />
 		<data name="collisions" type="selection:true,false" description="Ped collisions" required="false" default="true" />
 		<data name="health" type="integer" description="Ped health" default="100" />
+		<data name="armor" type="integer" description="Ped armor" default="0" />
 		<data name="alpha" type="integer" description="Alpha level" default="255" />
 	</element>
 </def>

@@ -1,4 +1,3 @@
-local isClient = isElement(localPlayer)
 newmodelsKey = {}
 newmodelsKey['vehicle'] = exports.newmodels:getDataNameFromType('vehicle')
 newmodelsKey['object'] = exports.newmodels:getDataNameFromType('object')

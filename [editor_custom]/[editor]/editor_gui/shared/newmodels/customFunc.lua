@@ -60,7 +60,7 @@ function createObject(modelid, x, y, z, rot, synced)
 		return _createObject(modelid, x, y, z, rot, synced)
 	elseif isCustomModID('object', modelid) then
 		local object = _createObject(1343, x, y, z, rot, synced)
-		setElementData(ped, newmodelsKey['object'], modelid, not isClient)
+		setElementData(object, newmodelsKey['object'], modelid, not isClient)
 		return object
 	else
 		return  _createObject(1343, x, y, z, rot, synced)

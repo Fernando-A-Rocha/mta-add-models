@@ -183,7 +183,7 @@ propertySetters = {
 			return setElementData(element, "collisions", state == "false" and "false" or "true")
 		end,
 		health = setElementHealth,
-		armor = setPedArmor,
+		armor = setPedArmor
 	},
 	vehicle = {
 		model = setElementModel,
