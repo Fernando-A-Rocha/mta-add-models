@@ -18,22 +18,15 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
 
 3. Get **this version (*r1553*)** of the default MTA:SA Editor resources :
     * Download link: [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
-    * ⚠️ Other default Map Editor resources may not be compatible with the custom changes ⚠️
+    * ⚠️ Other version of the default Map Editor resources may not be compatible with the custom changes ⚠️
     * Extract the `[editor]` folder into your server's resources
 
-4. Drag & drop everything in the (/\[editor_changes\]/[\editor_changes\]) folder to your default `[editor]` folder, replacing files in the following resources:
-    * `edf`
-    * `editor_main`
-    * `editor_gui`
+4. Drag & drop everything in the `[editor_changes]` folder downloaded to your default `[editor]` folder.
+    * This will replace files in the following resources: `edf`, `editor_main` & `editor_gui`
 
 5. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
 
-6. You should added a resource called `newmodels_editor` and modified the following resources:
-    * `edf`
-    * `editor_main`
-    * `editor_gui`
-
-7. Use **/refresh** command in your server to find the changes.
+6. Use **/refresh** command in your server to find the changes.
 
 **Watch the video tutorial for a visual guide.**
 
