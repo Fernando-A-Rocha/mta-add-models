@@ -7,9 +7,9 @@ In this folder you will find the MTA:SA Map Editor resources customized specific
 Currently, you cannot install this Map Editor alongside the default Map Editor resources.
 
 1. Drag & drop the `[editor]` folder into your server's resources, replacing the following resources:
-    * `[edf]`
-    * `[editor_main]`
-    * `[editor_gui]`
+    * `edf`
+    * `editor_main`
+    * `editor_gui`
 
 2. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
 
