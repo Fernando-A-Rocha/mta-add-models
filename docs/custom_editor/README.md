@@ -2,21 +2,30 @@
 
 We have customized the MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels.
 
+## Tutorial Video
+
+Coming soon!
+
 ## Installation
 
 Currently, you cannot install this Map Editor alongside the default Map Editor resources. It needs to be replaced.
 
-1. Get the default MTA:SA Editor resources:
+1. [Download the latest release](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) containing newmodels, the custom Map Editor & other resources.
+    * Extract the `[editor_custom]` folder to your Desktop, for example, and open it.
+
+2. Get the default MTA:SA Editor resources:
     * Download **this version** (*r1553*): [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
     * ⚠️ Other default Map Editor resources may not be compatible with the custom changes ⚠️
     * Extract the `[editor]` folder into your server's resources
 
-2. Drag & drop everything in the (/\[editor_changes\]/[\editor_changes\]) folder to your default `[editor]` folder, replacing files in the following resources:
+3. Drag & drop everything in the (/\[editor_changes\]/[\editor_changes\]) folder to your default `[editor]` folder, replacing files in the following resources:
     * `edf`
     * `editor_main`
     * `editor_gui`
 
-3. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
+4. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
+
+**Watch the video tutorial for a visual guide.**
 
 ## Usage
 
