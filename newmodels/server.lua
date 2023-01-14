@@ -215,8 +215,6 @@ function modCheckError(text)
 end
 
 function verifyOneMod(mod, elementType, used_ids)
-	coroutine.yield()
-
 	-- 1.  verify IDs
 	if not tonumber(mod.id) then
 		return modCheckError("Invalid mod ID '"..tostring(mod.id).."'")
@@ -311,16 +309,14 @@ function doModListChecks()
 			return modCheckError("Please remove mod from modList: player = {...}, it will be added automatically to match 'ped' mods")
 		end
 
-		for k,mod in pairs(mods) do
-
-			local co = coroutine.create(verifyOneMod)
-			coroutine.resume(co, mod, elementType, used_ids)
-
-			local _, result = coroutine.resume(co)
+		-- for _,mod in ipairs(mods) do
+		Async:foreach(mods, function(mod)
+			local result = verifyOneMod(mod, elementType, used_ids)
 			if not result then
 				return result
 			end
-		end
+		-- end
+		end)
 	end
 	
 	fixModList()
@@ -331,6 +327,8 @@ addEventHandler( "onResourceStart", resourceRoot,
 function (startedResource)
 
 	startTickCount = getTickCount()
+
+	Async:setPriority(ASYNC_PRIORITY)
 
 	if (STARTUP_VERIFICATIONS) then
 
@@ -356,6 +354,9 @@ function (startedResource)
 			end
 		end
 	end
+
+	outputDebugString(resName.."' startup finished after "..(getTickCount() - startTickCount).."ms", 0, 255, 0, 255)
+	startTickCount = nil -- clear memory
 end)
 
 addEventHandler( "onResourceStop", resourceRoot, 
@@ -448,7 +449,6 @@ function sendModListWhenReady(player)
 		return
 	end
 
-	startTickCount = nil -- free memory
 	if isTimer(dontspamPlayers[player]) then killTimer(dontspamPlayers[player]) end
 	dontspamPlayers[player] = setTimer(function()
 		if isElement(player) then
@@ -510,7 +510,6 @@ function setCustomElementModel(element, et, id)
 end
 
 
-
 --[[
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
@@ -520,22 +519,24 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 	if type(list) ~= "table" then
 		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
 	end
+	
 	local countWorked = 0
-	for _, modInfo in ipairs(list) do
+	
+	-- for _, modInfo in ipairs(list) do
+	Async:foreach(list, function(modInfo)
+
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
 		
-		local co = coroutine.create(addExternalMod_IDFilenames)
-		coroutine.resume(co, elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, true)
-		local _, worked, reason = coroutine.resume(co)
+		local worked, reason = addExternalMod_IDFilenames(unpack(modInfo))
 		if worked then
 			countWorked = countWorked + 1
 		else
 			return false, "Aborting, one failed, reason: "..tostring(reason)
 		end
-	end
+	-- end
+	end)
 	return countWorked
 end
 
@@ -543,10 +544,7 @@ end
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, usingCoroutine) -- [Exported]
-	if (usingCoroutine == true) then
-		coroutine.yield()
-	end
+function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -661,22 +659,23 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 	if type(list) ~= "table" then
 		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
 	end
+	
 	local countWorked = 0
-	for _, modInfo in ipairs(list) do
+
+	-- for _, modInfo in ipairs(list) do
+	Async:foreach(list, function(modInfo)
+
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
-		
-		local co = coroutine.create(addExternalMod_CustomFilenames)
-		coroutine.resume(co, elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, true)
-		local _, worked, reason = coroutine.resume(co)
+		local worked, reason = addExternalMod_CustomFilenames(unpack(modInfo))
 		if worked then
 			countWorked = countWorked + 1
 		else
 			return false, "Aborting, one failed, reason: "..tostring(reason)
 		end
-	end
+	-- end
+	end)
 	return countWorked
 end
 
@@ -684,10 +683,7 @@ end
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
-function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, usingCoroutine) -- [Exported]
-	if (usingCoroutine == true) then
-		coroutine.yield()
-	end
+function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse) -- [Exported]
 
 	local sourceResName = getResourceName(sourceResource)
 	if sourceResName == resName then
@@ -836,28 +832,33 @@ function removeExternalMod(id) -- [Exported]
 	for elementType,mods in pairs(modList) do
 		for k,mod in pairs(mods) do
 			if mod.id == id then
+				local sourceResName = mod.srcRes
+				if sourceResName then
 				
-				outputDebugString("Removed "..elementType.." mod ID "..id, 0, 211, 255, 89)
-			
-				modList[elementType][k] = nil	
+					outputDebugString("Removed "..elementType.." mod ID "..id, 0, 211, 255, 89)
 				
-				fixModList()
-				sendModListWhenReady_ToAllPlayers()
+					modList[elementType][k] = nil	
+					
+					fixModList()
+					sendModListWhenReady_ToAllPlayers()
 
-				-- Don't spam chat/debug when mass adding/removing mods
-				if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
-				
-				if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
-				table.insert(prevent_addrem_spam.rem[sourceResName], true)
+					-- Don't spam chat/debug when mass adding/removing mods
+					if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
+					
+					if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
+					table.insert(prevent_addrem_spam.rem[sourceResName], true)
 
-				prevent_addrem_spam.remtimer = setTimer(function()
-					for rname,mods2 in pairs(prevent_addrem_spam.rem) do
-						outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
-						prevent_addrem_spam.rem[rname] = nil
-					end
-				end, 1000, 1)
-				
-				return true
+					prevent_addrem_spam.remtimer = setTimer(function()
+						for rname,mods2 in pairs(prevent_addrem_spam.rem) do
+							outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
+							prevent_addrem_spam.rem[rname] = nil
+						end
+					end, 1000, 1)
+					
+					return true
+				else
+					return false, "Mod with ID "..id.." doesn't have a source resource"
+				end
 			end
 		end
 	end
