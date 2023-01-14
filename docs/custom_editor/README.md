@@ -2,13 +2,12 @@
 
 The Newmodels Map Editor Project consits of customized MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels.
 
-## Tutorial Video
+## Showcase Video
 
 Coming soon!
 
 ## Installation
 
-You can watch the video tutorial for a visual guide.
 Currently, you cannot install this Map Editor alongside the default Map Editor resources. It needs to be replaced.
 
 1. [Download the latest release](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) containing newmodels, the custom Map Editor & other resources.
