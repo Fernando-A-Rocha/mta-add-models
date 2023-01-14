@@ -12,9 +12,9 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
 
 1. [Download the latest release](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) containing newmodels, the custom Map Editor & other resources.
     * Extract the `[editor_custom]` folder to your Desktop, for example, and open it.
+    * You should see the folders `[editor_changes]` & `newmodels_editor`.
 
-2. Make sure you've installed `newmodels` in your server properly (this is a requirement).
-    * Check the tutorial [here](/README.md#install).
+2. Make sure you've installed `newmodels` in your server properly (tutorial [here](/README.md#install)).
 
 3. Get **this version (*r1553*)** of the default MTA:SA Editor resources :
     * Download link: [https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip](https://mirror-cdn.multitheftauto.com/mtasa/resources/mtasa-resources-r1553.zip)
