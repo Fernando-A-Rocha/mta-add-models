@@ -1,6 +1,6 @@
 ![Newmodels Map Editor Banner](https://i.imgur.com/ln6mrLr.png)
 
-We have customized the MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels.
+The Newmodels Map Editor Project consits of customized MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels.
 
 ## Tutorial Video
 
