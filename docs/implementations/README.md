@@ -49,10 +49,6 @@ This resource makes the clients listen to the set element datas in order to appl
 - Clientside: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
 - Serverside: `getElementModel` will return always return base model of any element.
 
-## Lua Code Examples
-
-For a more detailed explanation, check the [examples](/\[examples\]) folder.
-
 ## Known Implementations
 
 Feel free to add your own implementations to this list by contributing to the repository via pull requests.

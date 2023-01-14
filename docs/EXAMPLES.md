@@ -17,7 +17,8 @@ if isCustom then
     -- for example, the ID is valid for a ped but we want to check it for an object
     -- or the ID is valid for an object but we want to check it for a ped
     -- in this case, we can't use the ID
-    return false
+    baseModel = 1
+    outputDebugString("Trying to set ID ".. theID .." (type: "..customElementType..") on object!", 1)
   end
   -- the ID is valid for the element type that we want to check it for
   -- we can use the ID
@@ -94,7 +95,7 @@ addEventHandler( "onPlayerQuit", root,
 
 ## Adding a mod from your own resource
 
-(**serverside**) :
+**Serverside code:**
 
 ```lua
 -- make sure the main library resource is started before executing this code

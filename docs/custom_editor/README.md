@@ -11,7 +11,7 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
     * `[editor_main]`
     * `[editor_gui]`
 
-2. Drag & drop the `newmodels_editor` resource folder into your server's resources.
+2. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
 
 ## Usage
 
