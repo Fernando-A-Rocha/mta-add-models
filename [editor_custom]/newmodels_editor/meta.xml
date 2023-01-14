@@ -1,0 +1,16 @@
+<meta>
+    <!-- This resource is available in the repository below.
+    Its version now matches the main newmodels version!
+    
+    https://github.com/Fernando-A-Rocha/mta-add-models -->
+    <info author="Fernando" name="newmodels Editor Tool"
+      description="Add-Models Map Editor Tool"
+      version="2.0.2"
+      type="script"/>
+    
+    <include resource="newmodels"/>
+
+    <script type="shared" src="_config.lua"/>
+    <script type="client" src="client.lua" cache="false"/>
+    <script type="server" src="server.lua"/>
+</meta>

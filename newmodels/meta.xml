@@ -1,6 +1,8 @@
 <meta>
     <info author="Fernando" name="mta-add-models"
-      description="minimalistic library for adding new models to your server" version="2.0.2" type="script"/>
+      description="minimalistic library for adding new models to your server"
+      version="2.0.2"
+      type="script"/>
     
     <!-- DOCUMENTATION:
         https://github.com/Fernando-A-Rocha/mta-add-models

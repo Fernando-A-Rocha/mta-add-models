@@ -1,5 +1,5 @@
 --[[
-	Author: Fernando
+	Author: https://github.com/Fernando-A-Rocha
 
 	updater_s.lua
 
