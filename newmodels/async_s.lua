@@ -1,3 +1,4 @@
+-- Used in https://github.com/Fernando-A-Rocha/mta-add-models
 -- https://github.com/inlife/mta-lua-async
 
 local function loadClass()
