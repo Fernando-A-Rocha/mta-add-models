@@ -79,8 +79,8 @@ function updateEditorGUIFiles()
         return false, "The resource 'newmodels' is not running."
     end
 
-    local mods = exports.newmodels:getModList()
-    if not mods then
+    local allMods = exports.newmodels:getModList()
+    if not allMods then
         return false, "Failed to get the newmodels mod list."
     end
 
@@ -90,7 +90,7 @@ function updateEditorGUIFiles()
         ["skins"] = {}
     }
 
-    for elementType, mods in pairs(mods) do
+    for elementType, mods in pairs(allMods) do
         if type(elementType) ~= "string" or type(mods) ~= "table" then
             return false, "The newmodels mod list is not valid."
         end

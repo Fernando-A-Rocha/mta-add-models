@@ -300,7 +300,7 @@ local pedNames = {
 }
 
 function getPedNameFromModel(id, element )
-    local id = getElementData(element, newmodelsKey['ped']) or id
+    id = getElementData(element, newmodelsKey['ped']) or id
     local isCustom, mod = exports.newmodels:isCustomModID(id)
     if isCustom then
         return mod.name

@@ -14260,7 +14260,7 @@ local objectNames = {
 }
 
 function getObjectNameFromModel ( id, element )
-	local id = getElementData(element, newmodelsKey['object']) or id
+	id = getElementData(element, newmodelsKey['object']) or id
 	local isCustom, mod = exports.newmodels:isCustomModID(id)
 	if isCustom then
 		return mod.name

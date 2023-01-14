@@ -88,5 +88,4 @@ function createVehicle(modelid, x, y, z, rx, ry, rz, numberplate, bDirection, va
 	else
 		return _createVehicle(400, x, y, z, rx, ry, rz, numberplate, bDirection, variant1, variant2)
 	end
-	return false
 end

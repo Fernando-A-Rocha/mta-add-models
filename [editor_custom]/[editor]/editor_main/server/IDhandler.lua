@@ -1,20 +1,19 @@
-local getVehicleNameFromModelMTA = getVehicleNameFromModel
 local trailers = {
 	[606]="Baggage Trailer (Covered)", [607]="Baggage Trailer (Uncovered)", [610]="Farm Trailer", [611]="Street Clean - Trailer",
 	[584]="Petrol Trailer", [608]="Stairs", [435]="Cargo Trailer 1", [450]="Cargo Trailer 2", [591]="Cargo Trailer 3"
 }
 
--- Editing for newmodels
-function getVehicleNameFromModel(ID, element)
-	local ID = getElementData(element, newmodelsKey['vehicle']) or ID
-	if not ID then return "" end
-	local isCustom, mod, customElementType = exports.newmodels:isCustomModID(ID)
+local getVehicleNameFromModelMTA = getVehicleNameFromModel
+function getVehicleNameFromModel(id, element)
+	id = getElementData(element, newmodelsKey['vehicle']) or id
+	if not id then return "" end
+	local isCustom, mod, customElementType = exports.newmodels:isCustomModID(id)
 	if isCustom then
 		return mod.name
 	end
-	local name = getVehicleNameFromModelMTA(ID) or ""
+	local name = getVehicleNameFromModelMTA(id) or ""
 	if #name > 0 then return name end
-	return trailers[ID] or ""
+	return trailers[id] or ""
 end
 
 -- gets a friendly name from a category ID
