@@ -557,7 +557,7 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 
 	local sourceResName
 	if not fromResourceName then
-		local sourceResName = getResourceName(sourceResource)
+		sourceResName = getResourceName(sourceResource)
 		if sourceResName == resName then
 			return false, "This command is meant to be called from outside resource '"..resName.."'"
 		end
@@ -710,7 +710,7 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 
 	local sourceResName
 	if not fromResourceName then
-		local sourceResName = getResourceName(sourceResource)
+		sourceResName = getResourceName(sourceResource)
 		if sourceResName == resName then
 			return false, "This command is meant to be called from outside resource '"..resName.."'"
 		end
