@@ -8,6 +8,7 @@ Coming soon!
 
 ## Installation
 
+You can watch the video tutorial for a visual guide.
 Currently, you cannot install this Map Editor alongside the default Map Editor resources. It needs to be replaced.
 
 1. [Download the latest release](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) containing newmodels, the custom Map Editor & other resources.
@@ -27,8 +28,6 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
 5. Drag & drop the `newmodels_editor` resource folder into your server's resources. This is a required toolkit.
 
 6. Use **/refresh** command in your server to find the changes.
-
-**Watch the video tutorial for a visual guide.**
 
 ## Usage
 
