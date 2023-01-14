@@ -1450,7 +1450,7 @@ function (startedResource)
 	local folder = "models/"
 	local listToAdd = {}
 	
-	for k, id in pairs(ids) do
+	for _, id in ipairs(ids) do
 		local dff = folder..id..".dff"
 		local txd = folder..id..".txd"
 		local col = folder..id..".col"
@@ -1466,12 +1466,10 @@ function (startedResource)
 		listToAdd[#listToAdd+1] = {"object", id, 1337, name, dff, txd, col, false, false, false, metaDownloadFalse}
 	end
 
-	local count, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
-	if not count then
+	local worked, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
+	if not worked then
 		outputDebugString("[sampobj_reloaded] Failed to add models: "..tostring(reason), 1)
 		return
 	end
-
-	outputDebugString("[sampobj_reloaded] Added "..count.." new models successfully", 4, 22,255,255)
 end)
 

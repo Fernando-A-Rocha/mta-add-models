@@ -55,12 +55,11 @@ function (startedResource)
 		end
 	end
 
-	local count, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
-	if not count then
+	local worked, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
+	if not worked then
 		outputDebugString("[newmodels-example] Failed to add models: "..tostring(reason), 0, 255,110,61)
 		return
 	end
-
 
 	checkPossibleExistingElements()
 end)
