@@ -11,7 +11,7 @@ Currently, you cannot install this Map Editor alongside the default Map Editor r
     * You only need the default `[editor]` folder containing all Map Editor resources
     * Drag & drop it into your server's resources
 
-2. Drag & drop the custom `[editor]` folder into your server's resources, replacing the following resources:
+2. Delete the following resources from your `[editor]` folder and replace them with the [new ones](/\[editor_custom\]/[\editor\]):
     * `edf`
     * `editor_main`
     * `editor_gui`
