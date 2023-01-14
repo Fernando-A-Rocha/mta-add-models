@@ -51,3 +51,9 @@ When saving the map, the element datas are saved in the XML file. When a map is 
 This means that the map can be loaded on any server that has the same new models in their `newmodels` resource, not requiring the custom map editor which is just for creating the maps :-)
 
 **Happy mapping!**
+
+## Credits
+
+* [Fernando A. Rocha](https://github.com/Fernando-A-Rocha)
+* [Rick](https://github.com/httpRick)
+* MTA:SA Resources Contributors
