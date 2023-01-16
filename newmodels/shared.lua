@@ -159,11 +159,6 @@ function verifySetModelArguments(element, elementType, id)
 		return false, reason
 	end
 
-	local dataName = dataNames[et]
-	if not dataName then
-		return false, et.." mods yet supported"
-	end
-
 	if not tonumber(id) then
 		return false, "Non-number ID passed"
 	end

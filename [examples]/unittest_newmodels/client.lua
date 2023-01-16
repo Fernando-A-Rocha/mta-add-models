@@ -3,6 +3,7 @@ local temp_datas = {
 	player = exports.newmodels:getDataNameFromType("player"),
 	ped = exports.newmodels:getDataNameFromType("ped"),
 	object = exports.newmodels:getDataNameFromType("object"),
+	pickup = exports.newmodels:getDataNameFromType("pickup"),
 }
 
 addEventHandler( "onClientRender", root, 

@@ -91,6 +91,7 @@ function allocateNewMod(element, elementType, id)
 	-- as type so we need to change that to 'ped'
 	local elementType2 = elementType
 	if elementType2 == "player" then elementType2 = "ped" end
+	if elementType2 == "pickup" then elementType2 = "object" end
 
 	local paths = foundMod.paths
 	if type(paths) ~= "table" then
@@ -390,26 +391,32 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 			end
 		end
 
-		-- refresh model so change can actually have an effect
-		local currModel = getElementModel(element)
-		if (currModel == allocated_id) and not (noRefresh) then
+		if getElementType(element) == "pickup" then
+			setPickupType(element, 3, allocated_id)
+			print("set pickup type to 3, "..allocated_id)
+		else
 
-			-- some logic to refresh model
-			local diffModel = 9--ped
-			if elementType == "vehicle" then
-				diffModel = 400
-			elseif elementType == "object" then
-				diffModel = 1337
-			end
-			if currModel == diffModel then
-				diffModel = diffModel + 1
-			end
+			-- refresh model so change can actually have an effect
+			local currModel = getElementModel(element)
+			if (currModel == allocated_id) and not (noRefresh) then
 
-			if setElementModel(element, diffModel) then
+				-- some logic to refresh model
+				local diffModel = 9--ped
+				if elementType == "vehicle" then
+					diffModel = 400
+				elseif elementType == "object" then
+					diffModel = 1337
+				end
+				if currModel == diffModel then
+					diffModel = diffModel + 1
+				end
+
+				if setElementModel(element, diffModel) then
+					setElementModel(element, allocated_id)
+				end
+			else
 				setElementModel(element, allocated_id)
 			end
-		else
-			setElementModel(element, allocated_id)
 		end
 
 		if getElementType(element)=="vehicle" then
@@ -508,6 +515,8 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 	local et = getElementType(source)
 	if et == "player" and data_et == "ped" then data_et = "player" end
 	if et == "ped" and data_et == "player" then data_et = "ped" end
+	if et == "pickup" and data_et == "object" then data_et = "pickup" end
+	if et == "object" and data_et == "pickup" then data_et = "object" end
 
 	if data_et ~= et then return end
 

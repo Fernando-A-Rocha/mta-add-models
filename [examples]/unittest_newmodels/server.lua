@@ -17,6 +17,7 @@ function (startedResource)
    -- test5()
    -- test6()
    -- test7()
+   -- test8()
 
 end)
 
@@ -191,6 +192,20 @@ function test7()
    end
 end
 
+-- Custom pickups
+function test8()
+   local thePlayer = getRandomPlayer()
+   if not thePlayer then return end
+   local samp = getResourceFromName("sampobj_reloaded")
+   if not (samp and getResourceState(samp)=="running") then
+      return ptin("test8: sampobj_reloaded is not running")
+   end
+   local customID = 18749 -- SAMPLogoSmall
+   local pickup = createPickup(0,0,3, 3, 1239)
+   addEventHandler("onPickupHit", pickup, function() cancelEvent() end)
+   setElementData(pickup, "objectID", customID)
+   print("Created custom pickup with ID "..customID)
+end
 
 
 -- Vehicle testing
