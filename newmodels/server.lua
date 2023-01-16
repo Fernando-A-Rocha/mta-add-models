@@ -206,6 +206,7 @@ end
 function fixModList()
 	-- because ped mods can be applied on players too
 	modList.player = modList.ped
+	modList.pickup = modList.object
 	return true
 end
 
@@ -293,7 +294,10 @@ function doModListChecks()
 
 	for elementType, name in pairs(dataNames) do
 		
-		if elementType ~= "player" then -- exception
+		if not (
+			elementType == "player"
+			or elementType == "pickup"
+		) then -- exceptions
 			local mods1 = modList[elementType]
 			if not mods1 then
 				return modCheckError("Missing from modList: "..elementType.." = {},")
@@ -307,6 +311,9 @@ function doModListChecks()
 		-- 0. verify element type, can't be player as that's managed automatically (syncs 'ped')
 		if elementType == "player" then
 			return modCheckError("Please remove mod from modList: player = {...}, it will be added automatically to match 'ped' mods")
+		end
+		if elementType == "pickup" then
+			return modCheckError("Please remove mod from modList: pickup = {...}, it will be added automatically to match 'object' mods")
 		end
 
 		-- for _,mod in ipairs(mods) do

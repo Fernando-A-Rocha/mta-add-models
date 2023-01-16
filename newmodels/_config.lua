@@ -10,10 +10,15 @@
 
 -- saves custom element model ID in its element data under the following names
 dataNames = {
-	ped = "skinID", player = "skinID", -- must be the same
+	ped = "skinID",
 	vehicle = "vehicleID",
 	object = "objectID",
 }
+
+dataNames.player = dataNames.ped -- must be the same
+
+-- support pickups with custom object models
+dataNames.pickup = dataNames.object -- must be the same
 
 -- saves the element's custom model's base model ID
 -- useful for getting a vehicle's base model to fetch its original handling, etc
