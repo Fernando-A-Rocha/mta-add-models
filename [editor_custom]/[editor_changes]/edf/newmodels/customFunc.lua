@@ -98,7 +98,7 @@ function createVehicle(modelid, x, y, z, rx, ry, rz, numberplate, bDirection, va
 	end
 end
 
-function createPickup(x, y, z, theType, model, respawnTime, ammo)
+function createPickup(x, y, z, theType, modelid, respawnTime, ammo)
 	if theType == 3 then -- Custom Pickup
 		if exports.newmodels:isDefaultID('pickup', modelid) then
 			return _createPickup(x, y, z, theType, modelid, respawnTime, ammo)
