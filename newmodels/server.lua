@@ -203,10 +203,54 @@ function getModDataFromID(id) -- [Exported - Server Version]
 	end
 end
 
+
+function table.copy(tab, recursive)
+    local ret = {}
+    for key, value in pairs(tab) do
+        if (type(value) == "table") and recursive then ret[key] = table.copy(value)
+        else ret[key] = value end
+    end
+    return ret
+end
+
 function fixModList()
-	-- because ped mods can be applied on players too
-	modList.player = modList.ped
-	modList.pickup = modList.object
+	
+	for elementType, mods in pairs(modList) do
+		for k, mod in pairs(mods) do
+
+			local paths_ = ((type(mod.path)=="table" and mod.path) or (getActualModPaths(mod.path, mod.id)))
+			
+			modList[elementType][k].paths = {}
+			modList[elementType][k].readyPaths = {}
+
+			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
+
+			for pathType, path2 in pairs(paths_) do
+				
+				if (pathType == "txd" and ignoreTXD)
+				or (pathType == "dff" and ignoreDFF)
+				or (pathType == "col" and (ignoreCOL or elementType ~= "object")) then
+					
+					modList[elementType][k].paths[pathType] = nil
+				else
+					modList[elementType][k].paths[pathType] = path2
+
+					if mod.metaDownloadFalse then
+						modList[elementType][k].readyPaths[path2] = false
+					else
+						modList[elementType][k].readyPaths[path2] = true
+					end
+				end
+			end
+
+			if not mod.metaDownloadFalse then
+				modList[elementType][k].allReady = true
+			end
+		end
+	end
+
+	modList.player = table.copy(modList.ped, true)
+	modList.pickup = table.copy(modList.object, true)
 	return true
 end
 

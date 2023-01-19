@@ -307,8 +307,6 @@ function allocateNewMod(element, elementType, id)
 
 	allocated_ids[id] = allocated_id
 	
-	-- outputDebugString("["..(eventName or "?").."] New "..elementType.." model ID "..id.." allocated to ID "..allocated_id)
-	
 	model_elements[allocated_id] = {} -- Save model elements for destroying on deallocation
 	
 	if dffmodel and isElement(dffmodel) then
@@ -950,39 +948,6 @@ function downloadModFile(modId, path)
 end
 
 function receiveModList(modList)
-
-	-- Clientside optimisation
-	for elementType, mods in pairs(modList) do
-		for k, mod in pairs(mods) do
-
-			-- Get actual paths table and set it
-			local paths_ = ((type(mod.path)=="table" and mod.path) or (getActualModPaths(mod.path, mod.id)))
-			local readyPaths_ = {}
-
-			-- Ignore certain files
-			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
-			for pathType, path2 in pairs(paths_) do
-				if (pathType == "txd" and ignoreTXD)
-				or (pathType == "dff" and ignoreDFF)
-				or (pathType == "col" and (ignoreCOL or elementType ~= "object")) then
-					paths_[pathType] = nil
-				else
-					if mod.metaDownloadFalse then
-						readyPaths_[path2] = false
-					else
-						readyPaths_[path2] = true
-					end
-				end
-			end
-
-			modList[elementType][k].paths = paths_
-			modList[elementType][k].readyPaths = readyPaths_
-
-			if not mod.metaDownloadFalse then
-				modList[elementType][k].allReady = true
-			end
-		end
-	end
 
 	received_modlist = modList
 
