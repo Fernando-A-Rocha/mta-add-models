@@ -1,6 +1,7 @@
 local isClient = isElement(localPlayer)
 
 _createObject = createObject
+_createPickup = createPickup
 _createPed = createPed
 _createVehicle = createVehicle
 _getElementModel = getElementModel
@@ -9,6 +10,7 @@ _setElementModel = setElementModel
 newmodelsKey = {}
 newmodelsKey['vehicle'] = exports.newmodels:getDataNameFromType('vehicle')
 newmodelsKey['object'] = exports.newmodels:getDataNameFromType('object')
+newmodelsKey['pickup'] = exports.newmodels:getDataNameFromType('pickup')
 newmodelsKey['ped'] = exports.newmodels:getDataNameFromType('ped')
 
 function isCustomModID(elementType, modelid)
@@ -93,5 +95,24 @@ function createVehicle(modelid, x, y, z, rx, ry, rz, numberplate, bDirection, va
 		else
 			return _createVehicle(400, x, y, z, rx, ry, rz, numberplate, bDirection, variant1, variant2)
 		end
+	end
+end
+
+function createPickup(x, y, z, theType, model, respawnTime, ammo)
+	if theType == 3 then -- Custom Pickup
+		if exports.newmodels:isDefaultID('pickup', modelid) then
+			return _createPickup(x, y, z, theType, modelid, respawnTime, ammo)
+		else
+			local isCustom, mod = isCustomModID('pickup', modelid)
+			if isCustom and mod then
+				local pickup = _createPickup(x, y, z, theType, mod.base_id or 1274, respawnTime, ammo)
+				setElementData(pickup, newmodelsKey['pickup'], modelid, not isClient)
+				return pickup
+			else
+				return _createPickup(x, y, z, theType, 1274, respawnTime, ammo)
+			end
+		end
+	else
+		return _createPickup(x, y, z, theType, modelid, respawnTime, ammo)
 	end
 end
