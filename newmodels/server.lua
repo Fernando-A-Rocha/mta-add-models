@@ -22,30 +22,6 @@ local prevent_addrem_spam = {
 	remtimer = {},
 }
 
- -- Vehicle specific
-local savedHandlings = {}
-
---[[
-	Goal: solve the issue of handling resetting every time the vehicle's model is changed serverside/clientside
-]]
-function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
-	if sourceResource == getThisResource() then
-		return
-	end
-
-	local args = {...}
-	local theVehicle, property, var = unpack(args)
-	if not isCustomVehicle(theVehicle) then return end
-
-	if not savedHandlings[theVehicle] then
-		savedHandlings[theVehicle] = {}
-	end
-	table.insert(savedHandlings[theVehicle], {property, var})
-	-- print(theVehicle, "Added handling: ", tostring(property), tostring(var))
-
-end
-addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
-
 local savedUpgrades = {}
 --[[
 	Goal: solve the issue of upgrades resetting every time the vehicle's model is changed serverside/clientside
@@ -66,35 +42,10 @@ addDebugHook( "postFunction", onVehicleUpgradesChanged, { "addVehicleUpgrade", "
 addEventHandler( "onElementDestroy", root, 
 function ()
 	if getElementType(source) ~= "vehicle" then return end
-	if savedHandlings[source] then
-		savedHandlings[source] = nil
-	end
 	if savedUpgrades[source] then
 		savedUpgrades[source] = nil
 	end
 end)
-
-function updateVehicleHandling(element)
-	local handling = savedHandlings[element]
-	if handling then
-	-- Only saves for custom vehicles because those are the ones that get model changed all the time,
-	-- which ends up resetting the handling (everytime on setElementModel)
-
-		local count = 0
-		local count2 = 0
-		for k,v in pairs(handling) do
-			local property,var = unpack(v)
-			if setVehicleHandling(element, property, var) then
-				count = count + 1
-			else
-				handling[k] = nil
-				count2 = count2 + 1
-			end
-		end
-
-		-- print(element, "Set "..count..", deleted "..count2.." handling properties")
-	end
-end
 
 function updateVehicleUpgrades(element)
 	local upgrades = savedUpgrades[element]
@@ -106,7 +57,6 @@ function updateVehicleUpgrades(element)
 end
 
 function updateVehicleProperties(element)
-	updateVehicleHandling(element)
 	updateVehicleUpgrades(element)
 end
 addEventHandler(resName..":updateVehicleProperties", resourceRoot, updateVehicleProperties)

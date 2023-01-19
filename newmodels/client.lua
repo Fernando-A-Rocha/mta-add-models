@@ -8,7 +8,6 @@
 
 -- Custom events:
 addEvent(resName..":receiveModList", true)
-addEvent(resName..":receiveVehicleHandling", true)
 addEvent(resName..":onModListReceived", true)
 addEvent(resName..":onModFileDownloaded", true)
 
