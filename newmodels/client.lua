@@ -338,8 +338,9 @@ function forceAllocate(id) -- [Exported]
 	-- allocate as it hasn't been done already
 	local allocated_id2, reason = allocateNewMod(nil, elementType2, id)
 
+	-- free instantly if it was allocated
 	if allocated_id2 then
-		freeElementCustomMod(id)
+		freeAllocatedID(allocated_id2, id, "forceAllocate")
 	end
 
 	return allocated_id2, reason
@@ -431,7 +432,7 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 	return true
 end
 
-local function doFreeAllocatedId(allocated_id)
+function freeAllocatedID(allocated_id, id, theEvent)
 
 	local worked = engineFreeModel(allocated_id)
 	for k, element in pairs(model_elements[allocated_id] or {}) do
@@ -440,18 +441,14 @@ local function doFreeAllocatedId(allocated_id)
 		end
 	end
 	model_elements[allocated_id] = nil
+	allocated_ids[id] = nil
 
+	outputDebugString("["..theEvent.."] Freed allocated ID "..allocated_id.." (engineFreeModel '"..tostring(worked).."') for mod ID "..id, 3)
 	return worked
 end
 
-function freeElementCustomMod(id2)
-
-	local mod, et2 = getModDataFromID(id2)
-	if mod and mod.disableAutoFree == true then
-		outputDebugString("["..(eventName or "?").."] Not freeing mod "..id2.." as it has disableAutoFree set to true", 0, r,g,b)
-		return
-	end
-
+function startFreeingMod(id2, checkStreamedIn, theEvent)
+	
 	if isTimer(freeIdTimers[id2]) then killTimer(freeIdTimers[id2]) end
 
 	freeIdTimers[id2] = setTimer(function(id, en)
@@ -459,34 +456,66 @@ function freeElementCustomMod(id2)
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end
 	
-		local oneStreamedIn = false
+		if (checkStreamedIn == true) then
 
-		for elementType, name in pairs(dataNames) do
-			for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
-				if getElementData(el, name) == id then
-					oneStreamedIn = true
-					break
+			local oneStreamedIn = false
+			for elementType, name in pairs(dataNames) do
+				for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
+					if getElementData(el, name) == id then
+						oneStreamedIn = true
+						break
+					end
 				end
 			end
-		end
-
-		if not oneStreamedIn then
-
-			local worked = doFreeAllocatedId(allocated_id)
-
-			local r,g,b = 227, 255, 117
-			if not worked then
-				r,g,b = 252, 44, 3
+			if not oneStreamedIn then
+				freeAllocatedID(allocated_id, id, en)
 			end
-
-			outputDebugString("["..(en or "?").."] Freed allocated ID "..allocated_id.." for mod ID "..id..": none streamed in", 0,r,g,b)
-
-			allocated_ids[id] = nil
+		else
+			freeAllocatedID(allocated_id, id, en)
 		end
 
 		freeIdTimers[id] = nil
 
-	end, FREE_ID_DELAY, 1, id2, eventName)
+	end, FREE_ID_DELAY, 1, id2, theEvent)
+end
+
+function freeModIfUnused(id2)
+
+	local mod, et2 = getModDataFromID(id2)
+	if mod and mod.disableAutoFree == true then
+		outputDebugString("["..(eventName or "?").."] Not freeing mod "..id2.." as it has disableAutoFree set to true", 2)
+		return
+	end
+
+	startFreeingMod(id2, true, "freeModIfUnused")
+end
+
+-- [Exported]
+function isModAllocated(id)
+	id = tonumber(id)
+	if not id then
+		return false
+	end
+	return allocated_ids[id] and true or false
+end
+
+-- [Exported]
+function forceFreeAllocated(id, immediate)
+	id = tonumber(id)
+	if not id then
+		return "INVALID_ID"
+	end
+	local allocated_id = allocated_ids[id]
+	if not allocated_id then
+		return "NOT_ALLOCATED"
+	end
+
+	if (immediate) == true then
+		return "FREED", freeAllocatedID(allocated_id, id, "forceFreeAllocated")
+	end
+
+	startFreeingMod(id, false, "forceFreeAllocated")
+	return "FREED_LATER"
 end
 
 -- (1) updateElementOnDataChange
@@ -543,7 +572,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 			local old_allocated_id = allocated_ids[old_id]
 			if not old_allocated_id then return end -- was not allocated
 
-			freeElementCustomMod(old_id)
+			freeModIfUnused(old_id)
 		end
 	end
 end
@@ -606,7 +635,7 @@ function updateStreamedOutElement(source)
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
 
-		freeElementCustomMod(id)
+		freeModIfUnused(id)
 	end
 end
 addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
@@ -656,7 +685,7 @@ function updateModelChangedElement(source, oldModel, newModel)
         	outputDebugString("["..(eventName or "?").."] Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
 
 			if old_id and isCustomModID(old_id) then
-				freeElementCustomMod(old_id)
+				freeModIfUnused(old_id)
 			end
         end
 	end
@@ -678,7 +707,7 @@ function handleDestroyedElement()
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
 
-		freeElementCustomMod(id)
+		freeModIfUnused(id)
 	end
 end
 addEventHandler( "onClientElementDestroy", root, handleDestroyedElement)
@@ -738,7 +767,7 @@ function updateStreamedElements(thisId)
 					if not found then -- means the mod was removed by a serverside script
 
 						freed[id] = true
-						freeElementCustomMod(id)
+						startFreeingMod(id, false, "updateStreamedElements => mod gone")
 					else
 						updateStreamedInElement(el)
 					end
