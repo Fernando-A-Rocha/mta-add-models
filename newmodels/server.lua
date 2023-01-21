@@ -891,27 +891,19 @@ end)
 ]]
 -- [Exported]
 function setElementModelSafe(element, id)
-	assert(isElement(element), "Invalid element passed")
 	assert(tonumber(id), "Non-number ID passed")
+	assert(isElement(element), "Invalid element passed: "..tostring(element))
 	local elementType = getElementType(element)
 	assert((elementType == "ped" or elementType == "player" or elementType == "object" or elementType == "vehicle"),
 		"Invalid element type passed: "..tostring(elementType))
 	local dataName = dataNames[elementType]
 	assert(dataName, "No data name for element type: "..tostring(elementType))
 
-	local baseModel
-	local isCustom, mod, modType = isCustomModID(id)
-	if isCustom then
-		if not isRightModType(elementType, modType) then
-			return "WRONG_MOD"
-		end
-		baseModel = mod.base_id
-	elseif isDefaultID(elementType, id) then
-		baseModel = id
-	else
-		return "INVALID_MODEL"
+	local baseModel, isCustom = checkModelID(id, elementType)
+	if not tonumber(baseModel) then
+		return baseModel
 	end
-
+	
 	local currModel = getElementModel(element)
 	-- will only work if changing to a different model
 	if currModel ~= baseModel then
@@ -931,55 +923,4 @@ function setElementModelSafe(element, id)
 	end
 
 	return true
-end
---[[
-	Useful function: creates an element any given model ID
-	by doing the appropriate checks
-
-	Three possible return values:
-		- Element: the element which was successfully created
-		- false: failed to create the element for unknown reasons
-		- "INVALID_MODEL": invalid model ID
-		- "WRONG_MOD": the mod is not for the element type
-]]
--- [Exported]
-function createModelSafe(elementType, id, ...)
-	assert(tonumber(id), "Non-number ID passed")
-	assert((elementType == "ped" or elementType == "player" or elementType == "object" or elementType == "vehicle"),
-		"Invalid element type passed: "..tostring(elementType))
-	local dataName = dataNames[elementType]
-	assert(dataName, "No data name for element type: "..tostring(elementType))
-	
-	local baseModel
-	local isCustom, mod, modType = isCustomModID(id)
-	if isCustom then
-		if not isRightModType(elementType, modType) then
-			return "WRONG_MOD"
-		end
-		baseModel = mod.base_id
-	elseif isDefaultID(elementType, id) then
-		baseModel = id
-	else
-		return "INVALID_MODEL"
-	end
-
-	local element
-	if elementType == "ped" then
-		element = createPed(baseModel, ...)
-	elseif elementType == "object" then
-		element = createObject(baseModel, ...)
-	elseif elementType == "vehicle" then
-		element = createVehicle(baseModel, ...)
-	end
-
-	if not element then
-		return false
-	end
-
-	if isCustom then
-		setElementData(element, baseDataName, mod.base_id)
-		setElementData(element, dataName, id)
-	end
-
-	return element
 end

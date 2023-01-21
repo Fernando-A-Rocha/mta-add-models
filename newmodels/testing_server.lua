@@ -52,19 +52,38 @@ function mySkinCmd(thePlayer, cmd, id)
 end
 addCommandHandler("myskin", mySkinCmd, false, false)
 
+local function createModelSafe(elementType, modelid, ...)
+	if elementType == "object" then
+		return createObject(modelid, ...)
+	elseif elementType == "vehicle" then
+		return createVehicle(modelid, ...)
+	elseif elementType == "ped" then
+		return createPed(modelid, ...)
+	end
+	return false
+end
+
 function createTestElement(thePlayer, elementType, id, ...)
 
-	local element = createModelSafe(elementType, id, ...)
-	if isElement(element) then
+	local baseModel, isCustom = checkModelID(id, elementType)
+	if tonumber(baseModel) then
+		
+		local element = createModelSafe(elementType, baseModel, ...)
+		if not isElement(element) then
+			outputChatBox("Error spawning "..elementType.."", thePlayer, 255,0,0)
+		end
+
+		if isCustom then
+			setElementData(element, dataNames[elementType], id)
+			setElementData(element, baseDataName, baseModel)
+		end
+		
 		outputChatBox("Created "..elementType.." with ID "..id..(isCustom and " (custom)" or ""), thePlayer, 0,255,0)
 		return element
-	end
 
-	if result == false then
-		outputChatBox("Error spawning "..elementType.."", thePlayer, 255,0,0)
-	elseif result == "INVALID_MODEL" then
+	elseif baseModel == "INVALID_MODEL" then
 		outputChatBox("ID "..id.." doesn't exist", thePlayer,255,0,0)
-	elseif result == "WRONG_MOD" then
+	elseif baseModel == "WRONG_MOD" then
 		outputChatBox("Mod ID "..id.." is not a "..elementType.." skin", thePlayer,255,0,0)
 	end
 	return nil

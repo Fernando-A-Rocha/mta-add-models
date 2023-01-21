@@ -1,45 +1,30 @@
 
 # New-Models Lua Examples
 
-## Spawning an object with any ID
+## Spawning an object with any ID outside of newmodels
 
 **Client/Server code:**
 
 ```lua
 local theID = 50001
-
-local baseModel -- the base model that we will obtain
-
-local isCustom, mod, customElementType = exports.newmodels:isCustomModID(theID)
-if isCustom then
-  if customElementType ~= "object" then
-    -- the ID is valid but it's not for the element type that we want to check it for
-    -- for example, the ID is valid for a ped but we want to check it for an object
-    -- or the ID is valid for an object but we want to check it for a ped
-    -- in this case, we can't use the ID
-    baseModel = 1
-    outputDebugString("Trying to set ID ".. theID .." (type: "..customElementType..") on object!", 1)
+local baseModel, isCustom, dataName, baseDataName = exports.newmodels:checkModelID("object", theID)
+if tonumber(baseModel) then
+  local obj = createObject(baseModel, 0,0,3)
+  if not isElement(obj) then
+    outputDebugString("Error spawning object", 1)
+  else
+    if isCustom then
+      setElementData(obj, dataName, theID)
+      setElementData(obj, baseDataName, baseModel)
+    end
+    outputDebugString("Created object with ID "..theID..(isCustom and " (custom)" or ""), 3)
   end
-  -- the ID is valid for the element type that we want to check it for
-  -- we can use the ID
-  baseModel = mod.base_id
-
-elseif exports.newmodels:isDefaultID(theID, "object") then
-  -- the ID is valid for the element type that we want to check it for
-  -- we can use the ID
-  baseModel = theID
-
+elseif obj == "INVALID_MODEL" then
+  outputDebugString("Invalid model ID", 1)
+elseif obj == "WRONG_MOD" then
+  outputDebugString("Mod ID is not a valid object model", 1)
 else
-  -- the ID is invalid
-  -- we can't use the ID
-  baseModel = 1
-  outputDebugString("Invalid object ID ".. theID .." found!", 1)
-end
-
-local obj = createObject(baseModel, 0,0,5)
-if isCustom then
-  local data_name = exports.newmodels:getDataNameFromType("object")
-  setElementData(obj, data_name, theID)
+  outputDebugString("Error calling newmodels:checkModelID", 1)
 end
 ```
 
@@ -58,7 +43,7 @@ else
 end
 ```
 
-## Getting a vehicle's base model ID
+## Getting any element's base model ID (custom or default)
 
 **Client/Server code:**
 

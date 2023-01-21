@@ -202,7 +202,6 @@ function isCustomVehicle( theVehicle )
 	return true
 end
 
-
 function setElementModelRefreshed(element, currModel, newModel)
 	-- element types: player, ped, vehicle, object
 	if currModel ~= newModel then
@@ -225,3 +224,35 @@ function setElementModelRefreshed(element, currModel, newModel)
 	return setElementModel(element, diffModel) and setElementModel(element, newModel)
 end
 
+--[[
+	Useful function: checks if any given ID is valid
+	by doing the appropriate checks
+
+	Three possible return values:
+		- "INVALID_MODEL": invalid model ID
+		- "WRONG_MOD": the mod is not for the element type
+		- baseModel, isCustom, dataName, baseDataName: model ID ok for element type
+]]
+-- [Exported]
+function checkModelID(id, elementType)
+	assert(tonumber(id), "Non-number ID passed")
+	assert((elementType == "ped" or elementType == "player" or elementType == "object" or elementType == "vehicle"),
+		"Invalid element type passed: "..tostring(elementType))
+	local dataName = dataNames[elementType]
+	assert(dataName, "No data name for element type: "..tostring(elementType))
+
+	local baseModel
+	local isCustom, mod, modType = isCustomModID(id)
+	if isCustom then
+		if not isRightModType(elementType, modType) then
+			return "WRONG_MOD"
+		end
+		baseModel = mod.base_id
+	elseif isDefaultID(elementType, id) then
+		baseModel = id
+	else
+		return "INVALID_MODEL"
+	end
+
+	return baseModel, isCustom, dataName, baseDataName
+end
