@@ -431,7 +431,7 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 	return true
 end
 
-function doFreeAllocatedId(allocated_id)
+local function doFreeAllocatedId(allocated_id)
 
 	local worked = engineFreeModel(allocated_id)
 	for k, element in pairs(model_elements[allocated_id] or {}) do
@@ -445,29 +445,26 @@ function doFreeAllocatedId(allocated_id)
 end
 
 function freeElementCustomMod(id2)
-	
-	local _, __, et2 = isCustomModID(id2)
-	if not et2 then
-		outputDebugString("["..(eventName or "?").."] freeElementCustomMod error for mod ID "..id2.." - missing element type", 1)
+
+	local mod, et2 = getModDataFromID(id2)
+	if mod and mod.disableAutoFree == true then
+		outputDebugString("["..(eventName or "?").."] Not freeing mod "..id2.." as it has disableAutoFree set to true", 0, r,g,b)
 		return
 	end
 
 	if isTimer(freeIdTimers[id2]) then killTimer(freeIdTimers[id2]) end
 
-	freeIdTimers[id2] = setTimer(function(id, et, en)
+	freeIdTimers[id2] = setTimer(function(id, en)
 
-		local dataName = dataNames[et]
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end
 	
 		local oneStreamedIn = false
 
-		-- check if no elements streamed in have that id
-		for k, element in ipairs(getElementsByType(et)) do
-			local id3 = tonumber(getElementData(element, dataName))
-			if id3 and id3 == id then
-				if isElementStreamedIn(element) then
-					oneStreamedIn = element
+		for elementType, name in pairs(dataNames) do
+			for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
+				if getElementData(el, name) == id then
+					oneStreamedIn = true
 					break
 				end
 			end
@@ -489,20 +486,7 @@ function freeElementCustomMod(id2)
 
 		freeIdTimers[id] = nil
 
-	end, FREE_ID_DELAY, 1, id2, et2, eventName)
-end
-
-function hasOtherElementsWithModel(element, id)
-	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
-			if el ~= element then
-				if getElementData(el, name) == id then
-					return true
-				end
-			end
-		end
-	end
-	return false
+	end, FREE_ID_DELAY, 1, id2, eventName)
 end
 
 -- (1) updateElementOnDataChange
@@ -559,12 +543,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 			local old_allocated_id = allocated_ids[old_id]
 			if not old_allocated_id then return end -- was not allocated
 
-			if not hasOtherElementsWithModel(source, old_id) then
-				freeElementCustomMod(old_id)
-			else
-				-- outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..old_allocated_id.." for new "..et.." model ID "..old_id,3)
-				return
-			end
+			freeElementCustomMod(old_id)
 		end
 	end
 end
@@ -594,8 +573,6 @@ function updateStreamedInElement(source)
 		local success, reason = setElementCustomModel(source, et, id, true)
 		if not success then
 			outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id..", true): "..reason, 1)
-		-- else
-			-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..", true) worked", 3)
 		end
 
 	elseif isDefaultID(et, id) then
@@ -629,12 +606,7 @@ function updateStreamedOutElement(source)
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
 
-		if not hasOtherElementsWithModel(source, id) then
-			freeElementCustomMod(id)
-		else
-			-- outputDebugString("["..(eventName or "?").."] Not freeing allocated ID "..allocated_id.." for new "..et.." model ID "..id,3)
-			return
-		end
+		freeElementCustomMod(id)
 	end
 end
 addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
@@ -683,8 +655,7 @@ function updateModelChangedElement(source, oldModel, newModel)
 
         	outputDebugString("["..(eventName or "?").."] Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
 
-			if old_id and isCustomModID(old_id)
-			and not hasOtherElementsWithModel(source, old_id) then
+			if old_id and isCustomModID(old_id) then
 				freeElementCustomMod(old_id)
 			end
         end
@@ -707,10 +678,7 @@ function handleDestroyedElement()
 		local allocated_id = allocated_ids[id]
 		if not allocated_id then return end -- was not allocated
 
-		if not hasOtherElementsWithModel(source, id) then
-			freeElementCustomMod(id)
-			return
-		end
+		freeElementCustomMod(id)
 	end
 end
 addEventHandler( "onClientElementDestroy", root, handleDestroyedElement)

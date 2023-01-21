@@ -38,6 +38,8 @@ modList = {
 		-- + optional parameters:
 		-- 		ignoreTXD, ignoreDFF, ignoreCOL : if true, the script won't try to load TXD/DFF/COL for the mod
 		--		metaDownloadFalse : if true, the mod will be only be downloaded when needed (when trying to set model)
+		-- 		disableAutoFree: if true, the allocated mod ID will not be freed when no element streamed in is no longer using the mod ID
+		--  		This causes the mod to stay in memory, be careful when enabling for big mods
 
 
 		{id=20001, base_id=1, path=modsFolder, name="Mafioso 1"},
@@ -46,7 +48,7 @@ modList = {
 	},
 
 	vehicle = {
-		{id=80001, base_id=507, path=modsFolder, name="Schafter"},
+		{id=80001, base_id=507, path=modsFolder, name="Schafter", disableAutoFree=true},
 		{id=80002, base_id=489, path=modsFolder, name="02 Landstalker"},
 		{id=80003, base_id=400, path=modsFolder, name="86 Landstalker 1"},
 		{id=80004, base_id=400, path=modsFolder, name="98 Landstalker 1"},
