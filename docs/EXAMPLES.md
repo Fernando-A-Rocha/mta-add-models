@@ -1,7 +1,7 @@
 
 # New-Models Lua Examples
 
-## Spawning an object with any ID outside of newmodels
+## Spawning an object outside of newmodels (any ID)
 
 ****Serverside code:**
  code:**
@@ -34,7 +34,7 @@ end
 **Serverside code:**
 
 ```lua
-local theID = 50001
+local theID = 20001
 local result = exports.newmodels:setElementModelSafe(thePlayer, theID)
 if result == true then
   outputDebugString("Set player's skin to "..theID, 3)
@@ -47,7 +47,7 @@ else
 end
 ```
 
-## Getting an object's model ID
+## Check if an object has a custom ID
 
 **Client/Server code:**
 
@@ -55,10 +55,9 @@ end
 local data_name = exports.newmodels:getDataNameFromType("object")
 local theID = getElementData(theObject, data_name)
 if theID then
-  -- the object has a custom model ID
+  print("the object has a custom model ID")
 else
-  -- the object has a default model ID
-  theID = getElementModel(theObject)
+  print("the object has a default model ID")
 end
 ```
 
@@ -67,7 +66,12 @@ end
 **Client/Server code:**
 
 ```lua
-exports.newmodels:getBaseModel(theVehicle)
+local baseModel = exports.newmodels:getBaseModel(theVehicle)
+print(baseModel)
+
+-- ALTERNATIVE:
+local baseDN = exports.newmodels:getBaseModelDataName()
+local baseModel = getElementData(theVehicle, baseDN) or getElementModel(theVehicle)
 ```
 
 ## Fetching a mod's information by ID
