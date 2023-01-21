@@ -1,7 +1,7 @@
 
 # New-Models Lua Examples
 
-Remember to check [Example Resources/Scripts](/[examples]). You can also check the [implementations](/docs/implementations/README.md) to see how this library is used in other projects.
+Remember to check [Example Resources/Scripts](/[examples]) and the [implementations README](/docs/implementations/README.md).
 
 ## Spawning an object outside of newmodels (any ID)
 
