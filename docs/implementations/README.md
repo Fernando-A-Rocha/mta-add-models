@@ -6,6 +6,8 @@ This library was created with the goal of being usable in any server without bre
 
 Below is some general information to help you start using this library. It is strongly encouraged to explode the scripts and read the code to understand how it works.
 
+Remember to check [Lua Examples](/docs/EXAMPLES.md).
+
 ### (❗) Adding/Removing Mods
 
 This library lets you load mods stored within the `newmodels` resource, and also add mods stored in other resources to the `modList` that it will load from.
