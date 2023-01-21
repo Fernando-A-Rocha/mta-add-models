@@ -394,25 +394,11 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 			setPickupType(element, 3, allocated_id)
 			print("set pickup type to 3, "..allocated_id)
 		else
-
 			-- refresh model so change can actually have an effect
 			local currModel = getElementModel(element)
-			if (currModel == allocated_id) and not (noRefresh) then
+			if not noRefresh then
 
-				-- some logic to refresh model
-				local diffModel = 9--ped
-				if elementType == "vehicle" then
-					diffModel = 400
-				elseif elementType == "object" then
-					diffModel = 1337
-				end
-				if currModel == diffModel then
-					diffModel = diffModel + 1
-				end
-
-				if setElementModel(element, diffModel) then
-					setElementModel(element, allocated_id)
-				end
+				setElementModelRefreshed(element, currModel, allocated_id)
 			else
 				setElementModel(element, allocated_id)
 			end

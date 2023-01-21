@@ -190,3 +190,26 @@ function isCustomVehicle( theVehicle )
 
 	return true
 end
+
+
+function setElementModelRefreshed(element, currModel, newModel)
+	-- element types: player, ped, vehicle, object
+	if currModel ~= newModel then
+		return setElementModel(element, newModel)
+	end
+			
+	local elementType = getElementType(element)
+	local diffModel
+	if elementType == "player" or elementType == "ped" then
+		diffModel = 0
+	elseif elementType == "vehicle" then
+		diffModel = 400
+	elseif elementType == "object" then
+		diffModel = 1337
+	end
+	if diffModel == currModel then
+		diffModel = diffModel + 1
+	end
+
+	return setElementModel(element, diffModel) and setElementModel(element, newModel)
+end

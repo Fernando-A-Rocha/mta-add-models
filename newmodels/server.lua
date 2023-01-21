@@ -111,28 +111,8 @@ function updateVehicleProperties(element)
 end
 addEventHandler(resName..":updateVehicleProperties", resourceRoot, updateVehicleProperties)
 
-_setElementModel = setElementModel
-function setElementModel(element, id) -- force refresh
-	local currModel = getElementModel(element)
-	local data_name = dataNames[getElementType(element)]
-	if currModel == id and not getElementData(element, data_name) then
-		local diffModel = 1
-		if currModel == 1 then diffModel = 0 end
-		_setElementModel(element, diffModel)
-		outputDebugString("refresh setElementModel("..tostring(element)..", "..tostring(id)..")", 3)
-	end
-
-	_setElementModel(element, id)
-
-	if getElementType(element) == "vehicle" then -- Vehicle specific
-		updateVehicleProperties(element)
-	end
-
-	return true
-end
-
 --[[
-	Refreshes the player model (if custom) after spawnPlayer (which you should do with CJ skin 0)
+	Refreshes the player model (if custom) after spawnPlayer
 ]]
 addEventHandler( "onPlayerSpawn", root, 
 function()
@@ -141,8 +121,9 @@ function()
 	local skinID = tonumber(getElementData(source, data_name))
 	if skinID then
 		-- refresh it
+		local currModel = getElementModel(source)
 		removeElementData(source, data_name)
-		setElementModel(source, 0)
+		setElementModel(source, currModel == 0 and 1 or 0)
 		setElementData(source, data_name, skinID)
 	end
 end)
@@ -160,21 +141,16 @@ function onSetElementModel( sourceResource, functionName, isAllowedByACL, luaFil
     if not isElement(element) then return end
     if not tonumber(newModel) then return end
     newModel = tonumber(newModel)
-    
+
     oldModel = getElementModel(element)
-	if oldModel and newModel and oldModel == newModel then -- force refresh
-		local diffModel = 1
-		if newModel == 1 then diffModel = 0 end
-		if _setElementModel(element, diffModel) then
-			outputDebugString("[ext] refresh setElementModel("..tostring(element)..", "..tostring(newModel)..")", 3)
-			_setElementModel(element, newModel)
-		end
-	end
+
+	setElementModelRefreshed(element, oldModel, newModel)
 
 	if getElementType(element) == "vehicle" then -- Vehicle specific
 		updateVehicleProperties(element)
 	end
 
+	return "skip"
 end
 addDebugHook( "preFunction", onSetElementModel, { "setElementModel" })
 
@@ -521,44 +497,13 @@ function requestModList()
 end
 addEventHandler(resName..":requestModList", resourceRoot, requestModList)
 
-
 function resetElementModel(element, old_id)
 	if not isElement(element) then return end
 	local currModel = getElementModel(element)
-	setElementModel(element, currModel)
+	setElementModelRefreshed(element, currModel, currModel)
 	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..currModel.." (previous ID: "..tostring(old_id)..")",0, 59, 160, 255)
 end
 addEventHandler(resName..":resetElementModel", resourceRoot, resetElementModel)
-
-function setCustomElementModel(element, et, id)
-
-	local good, reason = verifySetModelArguments(element, et, id)
-	if not good then
-		return false, reason
-	end
-
-	local elementType = getElementType(element)
-
-	local isCustom, mod, elementType2 = isCustomModID(id)
-	if isCustom then
-
-		if elementType ~= elementType2 then
-			return false, "Mod ID "..id.." is not a "..elementType.." mod"
-		end
-
-		if setElementModel(element, mod.base_id) then
-
-			local dataName = dataNames[et]
-			setElementData(element, dataName, id)
-			setElementData(element, baseDataName, mod.base_id)
-		end
-		
-		return true
-	
-	else
-		return false, "Not a custom model ID: "..id
-	end
-end
 
 
 --[[
