@@ -3,7 +3,8 @@
 
 ## Spawning an object with any ID outside of newmodels
 
-**Client/Server code:**
+****Serverside code:**
+ code:**
 
 ```lua
 local theID = 50001
@@ -25,6 +26,24 @@ elseif obj == "WRONG_MOD" then
   outputDebugString("Mod ID is not a valid object model", 1)
 else
   outputDebugString("Error calling newmodels:checkModelID", 1)
+end
+```
+
+## Setting a player's skin (any ID)
+
+**Serverside code:**
+
+```lua
+local theID = 50001
+local result = exports.newmodels:setElementModelSafe(thePlayer, theID)
+if result == true then
+  outputDebugString("Set player's skin to "..theID, 3)
+elseif result == "INVALID_MODEL" then
+  outputDebugString("Invalid model ID", 1)
+elseif result == "WRONG_MOD" then
+  outputDebugString("Mod ID is not a valid player skin", 1)
+else
+  outputDebugString("Error calling newmodels:setElementModelSafe", 1)
 end
 ```
 
