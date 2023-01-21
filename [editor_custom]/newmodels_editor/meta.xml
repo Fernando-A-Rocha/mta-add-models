@@ -5,7 +5,7 @@
     https://github.com/Fernando-A-Rocha/mta-add-models -->
     <info author="Fernando" name="newmodels Editor Tool"
       description="Add-Models Map Editor Tool"
-      version="2.0.5"
+      version="2.1.0"
       type="script"/>
     
     <include resource="newmodels"/>
