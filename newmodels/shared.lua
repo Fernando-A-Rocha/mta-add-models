@@ -42,6 +42,10 @@ function getBaseModel(element) -- [Exported]
 	return (getElementData(element, baseDataName) or getElementModel(element))
 end
 
+function getBaseModelDataName()
+	return baseDataName
+end
+
 function getDataNameFromType(elementType) -- [Exported]
 	if not elementType then return end
 	return dataNames[elementType]

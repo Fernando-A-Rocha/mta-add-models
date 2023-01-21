@@ -54,6 +54,7 @@
 
     <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>
+    <export type="shared" function="getBaseModelDataName"/>
     <export type="shared" function="getBaseModel"/>
     <export type="shared" function="getModDataFromID"/>
     <export type="shared" function="isDefaultID"/>
@@ -65,6 +66,7 @@
     <export type="server" function="addExternalMods_CustomFileNames"/>
     <export type="server" function="removeExternalMod"/>
     <export type="server" function="setElementModelSafe"/>
+    <export type="server" function="createModelSafe"/>
 
     <export type="client" function="isClientReady"/>
     <export type="client" function="isModAllocated"/>
