@@ -112,23 +112,6 @@ end
 addEventHandler(resName..":updateVehicleProperties", resourceRoot, updateVehicleProperties)
 
 --[[
-	Refreshes the player model (if custom) after spawnPlayer
-]]
-addEventHandler( "onPlayerSpawn", root, 
-function()
-	local data_name = dataNames[getElementType(source)]
-	if not data_name then return end
-	local skinID = tonumber(getElementData(source, data_name))
-	if skinID then
-		-- refresh it
-		local currModel = getElementModel(source)
-		removeElementData(source, data_name)
-		setElementModel(source, currModel == 0 and 1 or 0)
-		setElementData(source, data_name, skinID)
-	end
-end)
-
---[[
 	Goal: solve the issue of element model not setting when it's already the same model serverside
 	This makes it so you don't need to use the 'refresh' element model method in any resource
 ]]
@@ -498,7 +481,6 @@ end
 addEventHandler(resName..":requestModList", resourceRoot, requestModList)
 
 function resetElementModel(element, old_id)
-	if not isElement(element) then return end
 	local currModel = getElementModel(element)
 	setElementModelRefreshed(element, currModel, currModel)
 	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..currModel.." (previous ID: "..tostring(old_id)..")",0, 59, 160, 255)
@@ -896,3 +878,55 @@ addEventHandler(resName..":kickOnDownloadsFail", resourceRoot, function(modId, p
 	outputServerLog("["..resName.."] "..getPlayerName(client).." failed to download '"..path.."' (#"..modId..") too many times (kicked).")
 	kickPlayer(client, "System", "Failed to download '"..path.."' (#"..modId..") too many times.")
 end)
+
+
+--[[
+	Useful function: sets an element's model with any given ID
+	by doing the appropriate checks
+
+	Three possible return values:
+		- true: model set successfully
+		- "INVALID_MODEL": invalid model ID
+		- "WRONG_MOD": the mod is not for the element type
+]]
+-- [Exported]
+function setElementModelSafe(element, id)
+	assert(isElement(element), "Invalid element passed")
+	assert(tonumber(id), "Non-number ID passed")
+	local elementType = getElementType(element)
+	local dataName = dataNames[elementType]
+	assert(dataName, "Non-supported element type")
+
+	local baseModel = id
+	local isCustom, mod, modType = isCustomModID(id)
+	if isCustom then
+		if not isRightModType(elementType, modType) then
+			return "WRONG_MOD"
+		end
+		baseModel = mod.base_id
+	elseif isDefaultID(elementType, id) then
+		baseModel = id
+	else
+		return "INVALID_MODEL"
+	end
+
+	local currModel = getElementModel(element)
+	-- will only work if changing to a different model
+	if currModel ~= baseModel then
+		setElementModel(element, baseModel)
+	end
+
+	if isCustom then
+		setElementData(element, baseDataName, mod.base_id)
+		setElementData(element, dataName, id)
+	
+	elseif currModel == baseModel then
+		-- not custom ID, but same model
+		-- it will set the correct default model ID serverside (client triggers server reset event)
+		print("force remove data", getElementModel(element), baseModel)
+		setElementData(element, baseDataName, nil)
+		setElementData(element, dataName, nil)
+	end
+
+	return true
+end

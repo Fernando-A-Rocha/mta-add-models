@@ -38,14 +38,6 @@ function outputDebugString(text, mode, r,g,b)
 	end
 end
 
-function getDataTypeFromName(dataName)
-	for elementType, name in pairs(dataNames) do
-		if dataName == name then
-			return elementType
-		end
-	end
-end
-
 function getBaseModel(element) -- [Exported]
 	return (getElementData(element, baseDataName) or getElementModel(element))
 end
@@ -131,6 +123,21 @@ function isCustomModID(id) -- [Exported]
 	return true, mod, elementType
 end
 
+function isRightModType(et, modEt)
+
+	if et == modEt then
+		return true
+	end
+
+	if (et == "player" or et == "ped") and (dataName == "player" or dataName == "ped") then
+		return true
+	end
+	if (et == "pickup" or et == "object") and (dataName == "pickup" or dataName == "object") then
+		return true
+	end
+	
+	return false
+end
 
 function isElementTypeSupported(et)
 	local found
@@ -213,3 +220,4 @@ function setElementModelRefreshed(element, currModel, newModel)
 
 	return setElementModel(element, diffModel) and setElementModel(element, newModel)
 end
+

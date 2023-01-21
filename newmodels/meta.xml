@@ -64,6 +64,7 @@
     <export type="server" function="addExternalMod_CustomFilenames"/>
     <export type="server" function="addExternalMods_CustomFileNames"/>
     <export type="server" function="removeExternalMod"/>
+    <export type="server" function="setElementModelSafe"/>
 
     <export type="client" function="isClientReady"/>
     <export type="client" function="isModAllocated"/>

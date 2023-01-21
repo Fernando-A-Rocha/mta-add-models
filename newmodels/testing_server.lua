@@ -41,30 +41,14 @@ function mySkinCmd(thePlayer, cmd, id)
 	end
 	id = tonumber(id)
 
-	local elementType = "ped"
-
-	local baseModel = id
-	local isCustom, mod, modType = isCustomModID(id)
-	if isCustom then
-		if not (modType == "ped" or modType == "player") then
-			return outputChatBox("Mod ID "..id.." is not a ped skin", thePlayer,255,0,0)
-		end
-		baseModel = mod.base_id
-	elseif isDefaultID(elementType, id) then
-		baseModel = id
-	else
-		return outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
+	local result = setElementModelSafe(thePlayer, id)
+	if result == true then
+		outputChatBox("Set your skin to ID "..id..(isCustom and " (custom)" or ""), thePlayer, 0,255,0)
+	elseif result == "INVALID_MODEL" then
+		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
+	elseif result == "WRONG_MOD" then
+		outputChatBox("Skin ID "..id.." is not a player skin", thePlayer,255,0,0)
 	end
-
-	setElementModel(thePlayer, baseModel)
-
-	if isCustom then
-
-		setElementData(thePlayer, dataNames[elementType], id)
-		setElementData(thePlayer, baseDataName, mod.base_id)
-	end
-
-	outputChatBox("Set your skin to ID "..id..(isCustom and " (custom)" or ""), thePlayer, 0,255,0)
 end
 addCommandHandler("myskin", mySkinCmd, false, false)
 

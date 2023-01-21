@@ -158,7 +158,7 @@ addCommandHandler("t3", function(thePlayer, cmd)
    setElementData(ped, data_name, 20001)
    outputChatBox("Removing created ped skin data in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
    setTimer(function(ped2, data_name2)
-      removeElementData(ped2, data_name2)
+      setElementData(ped2, data_name2, nil)
    end, 3000, 1, ped, data_name)
 
 end, false, false)

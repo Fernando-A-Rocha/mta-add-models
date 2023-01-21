@@ -507,59 +507,65 @@ end
 -- (1) updateElementOnDataChange
 function updateElementOnDataChange(source, theKey, oldValue, newValue)
 	if not isElement(source) then return end
-
-	local data_et = getDataTypeFromName(theKey)
+	
 	local et = getElementType(source)
-	if et == "player" and data_et == "ped" then data_et = "player" end
-	if et == "ped" and data_et == "player" then data_et = "ped" end
-	if et == "pickup" and data_et == "object" then data_et = "pickup" end
-	if et == "object" and data_et == "pickup" then data_et = "object" end
 
-	if data_et ~= et then return end
-
-	if isElementTypeSupported(et) then
-		
-		local id = tonumber(newValue)
-
-		if id then -- setting a new model id
-
-			if not received_modlist then
-				waiting_queue[source] = {num=1, args={theKey, oldValue, newValue}}
-				return
-			end
-
-			if isCustomModID( id) then
-
-				local success, reason = setElementCustomModel(source, et, id)
-				if not success then
-					outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
-				-- else
-					-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
-				end
-
-			elseif isDefaultID(et, id) then
-				outputDebugString("["..(eventName or "?").."] Warning: trying to set "..et.." default ID: "..id, 2)
-			else
-				outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
-			end
-		
-		elseif newValue == nil or newValue == false then
-
-			if tonumber(oldValue) then
-				-- removing new model id
-				if not wasElementCreatedClientside(source) then
-					triggerServerEvent(resName..":resetElementModel", resourceRoot, source, tonumber(oldValue))
-				end
-			end
+	local modEt
+	for modEt2, dataName2 in pairs(dataNames) do
+		if dataName2 == theKey then
+			modEt = modEt2
+			break
 		end
+	end
+	if not modEt then
+		-- Invalid data name
+		return
+	end
+	
+	if not isRightModType(et, modEt) then
+		outputDebugString("["..(eventName or "?").."] updateElementOnDataChange: "..et.." is not a valid mod type for "..theKey, 1)
+		return
+	end
+
+	local id = tonumber(newValue)
+	if id then -- setting a new model id
+
+		if not received_modlist then
+			waiting_queue[source] = {num=1, args={theKey, oldValue, newValue}}
+			return
+		end
+
+		if isCustomModID( id) then
+
+			local success, reason = setElementCustomModel(source, et, id)
+			if not success then
+				outputDebugString("["..(eventName or "?").."] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
+			-- else
+				-- outputDebugString("["..(eventName or "?").."] setElementCustomModel(source, '"..et.."', "..id..") worked", 3)
+			end
+
+		elseif isDefaultID(et, id) then
+			outputDebugString("["..(eventName or "?").."] Warning: trying to set "..et.." default ID: "..id, 2)
+		else
+			outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
+		end
+	
+	elseif newValue == nil or newValue == false then
 
 		if tonumber(oldValue) then
-			local old_id = tonumber(oldValue)
-			local old_allocated_id = allocated_ids[old_id]
-			if not old_allocated_id then return end -- was not allocated
-
-			freeModIfUnused(old_id)
+			-- removing new model id
+			if not wasElementCreatedClientside(source) then
+				triggerServerEvent(resName..":resetElementModel", resourceRoot, source, tonumber(oldValue))
+			end
 		end
+	end
+
+	if tonumber(oldValue) then
+		local old_id = tonumber(oldValue)
+		local old_allocated_id = allocated_ids[old_id]
+		if not old_allocated_id then return end -- was not allocated
+
+		freeModIfUnused(old_id)
 	end
 end
 addEventHandler( "onClientElementDataChange", root, function (theKey, oldValue, newValue) updateElementOnDataChange(source, theKey, oldValue, newValue) end)
@@ -626,58 +632,6 @@ function updateStreamedOutElement(source)
 end
 addEventHandler( "onClientElementStreamOut", root, function () updateStreamedOutElement(source) end)
 
--- (4) updateModelChangedElement
-function updateModelChangedElement(source, oldModel, newModel)
-	if not isElement(source) then return end
-	
-	local et = getElementType(source)
-	if not isElementTypeSupported(et) then
-		return
-	end
-
-	if not received_modlist then
-		waiting_queue[source] = {num=4, args={oldModel,newModel}}
-		return
-	end
-
-	-- outputDebugString("MODEL CHANGE: "..tostring(oldModel).." => "..tostring(newModel), 0, 187,187,187)
-
-	local id
-	for id2, allocated_id in pairs(allocated_ids) do
-		if allocated_id == tonumber(newModel) then
-			id = id2
-			break
-		end
-	end
-
-	local old_id
-	for id2, allocated_id in pairs(allocated_ids) do
-		if tonumber(oldModel) == allocated_id then
-			old_id = id2
-			break
-		end
-	end
-
-
-	id = id or newModel
-	local dataName = dataNames[et]
-	if getElementData(source, dataName) and not isCustomModID(id) then
-
-		if isElementStreamedIn(source) then
-
-            setElementData(source, dataName, nil)
-            setElementData(source, baseDataName, nil)
-
-        	outputDebugString("["..(eventName or "?").."] Clearing model data for "..et.." because ID "..id.." is not custom (previous ID: "..tostring(old_id or oldModel)..")",0,238, 255, 156)
-
-			if old_id and isCustomModID(old_id) then
-				freeModIfUnused(old_id)
-			end
-        end
-	end
-end
-addEventHandler( "onClientElementModelChange", root, function (oldModel, newModel) updateModelChangedElement(source, oldModel, newModel) end)
-
 function handleDestroyedElement()
 	if not received_modlist then return end
 	local et = getElementType(source)
@@ -719,9 +673,6 @@ function updateElementsInQueue()
 			updateStreamedInElement(element)
 		elseif num == 3 then
 			updateStreamedOutElement(element)
-		elseif num == 4 then
-			local oldModel, newModel = unpack(args)
-			updateModelChangedElement(element, oldModel, newModel)
 		end
 
 		waiting_queue[element] = nil

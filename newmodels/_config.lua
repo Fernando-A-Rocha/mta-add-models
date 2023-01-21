@@ -33,7 +33,7 @@ STARTUP_VERIFICATIONS = true
 -- Usually these are resources that use newmodels and you want them to start only after newmodels,
 -- and they can be stopped when newmodels stops
 OTHER_RESOURCES = {
-	{ name = "sampobj_reloaded", start = true, stop = true}
+	-- { name = "sampobj_reloaded", start = true, stop = true}
 }
 
 -- Mod file download feature
