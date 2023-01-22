@@ -15,6 +15,7 @@
     <oop>true</oop>
 
     <script src="shared.lua" type="shared" cache="false"/>
+    <script src="testing_server.lua" type="server"/>
 
 	<export function="createObject" type="shared"/>
 	<export function="createVehicle" type="shared"/>	

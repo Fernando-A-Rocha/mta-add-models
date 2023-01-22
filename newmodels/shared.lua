@@ -133,10 +133,10 @@ function isRightModType(et, modEt)
 		return true
 	end
 
-	if (et == "player" or et == "ped") and (dataName == "player" or dataName == "ped") then
+	if (et == "player" or et == "ped") and (modEt == "player" or modEt == "ped") then
 		return true
 	end
-	if (et == "pickup" or et == "object") and (dataName == "pickup" or dataName == "object") then
+	if (et == "pickup" or et == "object") and (modEt == "pickup" or modEt == "object") then
 		return true
 	end
 	
@@ -236,10 +236,14 @@ end
 -- [Exported]
 function checkModelID(id, elementType)
 	assert(tonumber(id), "Non-number ID passed")
-	assert((elementType == "ped" or elementType == "player" or elementType == "object" or elementType == "vehicle"),
+	assert((elementType == "ped" or elementType == "player" or elementType == "object" or elementType == "vehicle" or elementType == "pickup"),
 		"Invalid element type passed: "..tostring(elementType))
 	local dataName = dataNames[elementType]
 	assert(dataName, "No data name for element type: "..tostring(elementType))
+
+	if elementType == "pickup" then
+		elementType = "object"
+	end
 
 	local baseModel
 	local isCustom, mod, modType = isCustomModID(id)

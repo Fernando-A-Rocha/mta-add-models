@@ -53,7 +53,7 @@ local function setElementModelSafe(element, id)
 		setElementData(element, baseDataName, mod.base_id)
 		setElementData(element, dataName, id)
 	
-	elseif currModel == baseModel then
+	else
 		setElementData(element, baseDataName, nil)
 		setElementData(element, dataName, nil)
 	end

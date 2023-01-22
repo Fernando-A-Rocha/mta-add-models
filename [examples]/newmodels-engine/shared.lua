@@ -3,7 +3,8 @@
 
 	shared.lua
 
-	TODO
+	Useful functions that make use of newmodels
+		e.g. creating objects, vehicles, peds, pickups with custom models and changing their model
 ]]
 
 _getElementModel = getElementModel
@@ -36,7 +37,7 @@ function setElementResource(element, resource)
 	end
 end
 
-local function outputCustomError(errorCode)
+local function outputCustomError(errorCode, id, elementType)
 	if errorCode == "INVALID_MODEL" then
 		outputDebugString("[newmodels-engine] ID "..id.." doesn't exist", 4, 255,200,0)
 	elseif errorCode == "WRONG_MOD" then
@@ -79,7 +80,7 @@ local function createElementSafe(elementType, id, ...)
 		return element
 	end
 
-	outputCustomError(baseModel)
+	outputCustomError(baseModel, id, elementType)
 	return false
 end
 
@@ -105,7 +106,6 @@ function createPed(id, ...)
 end
 
 -- Special behavior for pickups
--- PS. You can't set & get element model on a pickup
 function createPickup(x, y, z, theType, id, respawnTime, ammo)
 	local pickup
 	theType = tonumber(theType)
@@ -120,7 +120,7 @@ function createPickup(x, y, z, theType, id, respawnTime, ammo)
 end
 
 -- Special behavior for pickups
--- PS. You can't set & get element model on a pickup
+-- PS. You can't set element model on a pickup
 function setPickupType(thePickup, theType, id, ammo)
     assert(isElement(thePickup), "Invalid element passed: "..tostring(thePickup))
     local elementType = getElementType(thePickup)
@@ -139,16 +139,15 @@ function setPickupType(thePickup, theType, id, ammo)
 end
 
 -- Returns a custom model ID (if custom) or a default model ID (if default)
--- PS. You can't set & get element model on a pickup
 function getElementModel(element)
 	assert(isElement(element), "Invalid element passed: "..tostring(element))
 	local et = getElementType(element)
-	assert((et == "object" or et == "vehicle" or et == "ped" or et == "player"),
+	assert((et == "object" or et == "vehicle" or et == "ped" or et == "player" or et == "pickup"),
 		"Invalid element type passed: "..tostring(et))
 	return getElementData(element, dataNames[getElementType(element)]) or _getElementModel(element)
 end
 
--- PS. You can't set & get element model on a pickup
+-- PS. You can't set element model on a pickup
 function setElementModel(element, id)
 	assert(isElement(element), "Invalid element passed: "..tostring(element))
 	local elementType = getElementType(element)
@@ -159,7 +158,7 @@ function setElementModel(element, id)
 
 	local baseModel, isCustom = exports.newmodels:checkModelID(id, elementType)
 	if not tonumber(baseModel) then
-		outputCustomError(baseModel)
+		outputCustomError(baseModel, id, elementType)
 		return false
 	end
 	
@@ -174,7 +173,7 @@ function setElementModel(element, id)
 		setElementData(element, baseDataName, mod.base_id, syncData)
 		setElementData(element, dataName, id, syncData)
 	
-	elseif currModel == baseModel then
+	else
 		setElementData(element, baseDataName, nil, syncData)
 		setElementData(element, dataName, nil, syncData)
 	end
