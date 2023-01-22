@@ -35,6 +35,32 @@ addCommandHandler("newmodels", function(thePlayer)
 		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175is loaded", thePlayer, 255, 255, 255, true)
 end, false,false)
 
+local function setElementModelSafe(element, id)
+	local elementType = getElementType(element)
+	local dataName = dataNames[elementType]
+
+	local baseModel, isCustom = checkModelID(id, elementType)
+	if not tonumber(baseModel) then
+		return baseModel
+	end
+	
+	local currModel = getElementModel(element)
+	if currModel ~= baseModel then
+		setElementModel(element, baseModel)
+	end
+
+	if isCustom then
+		setElementData(element, baseDataName, mod.base_id)
+		setElementData(element, dataName, id)
+	
+	elseif currModel == baseModel then
+		setElementData(element, baseDataName, nil)
+		setElementData(element, dataName, nil)
+	end
+
+	return "OK"
+end
+
 function mySkinCmd(thePlayer, cmd, id)
 	if not tonumber(id) then
 		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
