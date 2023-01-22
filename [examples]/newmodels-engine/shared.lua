@@ -107,7 +107,7 @@ end
 -- Special behavior for pickups
 -- PS. You can't set & get element model on a pickup
 function createPickup(x, y, z, theType, id, respawnTime, ammo)
-	local pickup = false
+	local pickup
 	theType = tonumber(theType)
 	if theType and theType == 3 then
 		assert(type(id)=="number", "Invalid model ID passed: "..tostring(id))
