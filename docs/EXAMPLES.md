@@ -3,6 +3,29 @@
 
 Remember to check [Example Resources/Scripts](/[examples]) and the [implementations README](/docs/implementations/README.md).
 
+## Adding a mod from your own resource
+
+**Serverside code:**
+
+```lua
+-- make sure the main library resource is started before executing this code
+
+-- (you could fetch the values from a table or database)
+-- we suppose that you have a script with the following files in the root of your resource:
+--     mymod.dff and mymod.txd
+
+-- we assign custom ID 90001 to this skin mod by calling:
+local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
+  "ped", 90001, 1, "My skin mod", "mymod.dff", "mymod.txd" )
+
+if not worked then -- show why it failed to add
+  return outputDebugString(reason, 0,255, 110, 61)
+else
+  -- it means you can now use this ID to spawn custom peds or set custom player skins
+  -- like showcased in Example #1
+end
+```
+
 ## Spawning an object outside of newmodels (any ID)
 
 ****Serverside code:**
@@ -38,7 +61,7 @@ end
 ```lua
 local theID = 20001
 local result = exports.newmodels:setElementModelSafe(thePlayer, theID)
-if result == true then
+if result == "OK" then
   outputDebugString("Set player's skin to "..theID, 3)
 elseif result == "INVALID_MODEL" then
   outputDebugString("Invalid model ID", 1)
@@ -101,27 +124,4 @@ addEventHandler( "onPlayerQuit", root,
     end
   end
 )
-```
-
-## Adding a mod from your own resource
-
-**Serverside code:**
-
-```lua
--- make sure the main library resource is started before executing this code
-
--- (you could fetch the values from a table or database)
--- we suppose that you have a script with the following files in the root of your resource:
---     mymod.dff and mymod.txd
-
--- we assign custom ID 90001 to this skin mod by calling:
-local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
-  "ped", 90001, 1, "My skin mod", "mymod.dff", "mymod.txd" )
-
-if not worked then -- show why it failed to add
-  return outputDebugString(reason, 0,255, 110, 61)
-else
-  -- it means you can now use this ID to spawn custom peds or set custom player skins
-  -- like showcased in Example #1
-end
 ```

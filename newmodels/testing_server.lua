@@ -42,7 +42,7 @@ function mySkinCmd(thePlayer, cmd, id)
 	id = tonumber(id)
 
 	local result = setElementModelSafe(thePlayer, id)
-	if result == true then
+	if result == "OK" then
 		outputChatBox("Set your skin to ID "..id..(isCustom and " (custom)" or ""), thePlayer, 0,255,0)
 	elseif result == "INVALID_MODEL" then
 		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)

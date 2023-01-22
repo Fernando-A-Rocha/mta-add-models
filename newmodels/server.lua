@@ -885,7 +885,7 @@ end)
 	by doing the appropriate checks
 
 	Three possible return values:
-		- true: model set successfully
+		- "OK": model set successfully
 		- "INVALID_MODEL": invalid model ID
 		- "WRONG_MOD": the mod is not for the element type
 ]]
@@ -922,5 +922,5 @@ function setElementModelSafe(element, id)
 		setElementData(element, dataName, nil)
 	end
 
-	return true
+	return "OK"
 end
