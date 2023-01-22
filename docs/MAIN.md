@@ -46,10 +46,9 @@ Before creating the element, it's important to follow the following steps:
 
 This resource makes the clients listen to the set element datas in order to apply custom model IDs accordingly on their game (automatic sync).
 
-**Remember**: You cannot `setElementModel` a custom ID, and `getElementModel` will never return a non-original model ID.
-
-- Clientside: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
-- Serverside: `getElementModel` will return always return base model of any element.
+- You cannot `setElementModel` a custom ID.
+- **Clientside**: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
+- **Serverside**: `getElementModel` will return always return base model of any element.
 
 ## Known Implementations
 

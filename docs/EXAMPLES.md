@@ -1,75 +1,79 @@
 
 # New-Models Lua Examples
 
-Remember to check [Example Resources/Scripts](/[examples]) and the [implementations README](/docs/implementations/README.md).
+Remember to check [Example Resources/Scripts](/[examples]) and the [General Information/Guide](/docs/MAIN.md).
+
+Recommended: use resource [newmodels-engine](/[examples]/newmodels-engine) to use some of the functions below.
+
+For more advanced developers, check the [newmodels exported functions](/newmodels/meta.xml).
 
 ## Adding a mod from your own resource
 
-**Serverside code:**
+**Server code:**
 
 ```lua
--- make sure the main library resource is started before executing this code
-
--- (you could fetch the values from a table or database)
--- we suppose that you have a script with the following files in the root of your resource:
+-- (You could fetch the values from a table or database)
+-- We suppose that you have a script with the following files in the root of your resource:
 --     mymod.dff and mymod.txd
 
--- we assign custom ID 90001 to this skin mod by calling:
+-- We assign custom ID 90001 to this skin mod by calling:
 local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
   "ped", 90001, 1, "My skin mod", "mymod.dff", "mymod.txd" )
 
 if not worked then -- show why it failed to add
   return outputDebugString(reason, 0,255, 110, 61)
 else
-  -- it means you can now use this ID to spawn custom peds or set custom player skins
-  -- like showcased in Example #1
+  -- You can now use this ID to spawn custom peds or set custom player skins
 end
 ```
 
 ## Spawning an object outside of newmodels (any ID)
 
-****Serverside code:**
- code:**
+**Server code:**
 
 ```lua
+-- Use resource newmodels-engine
 local theID = 50001
-local baseModel, isCustom, dataName, baseDataName = exports.newmodels:checkModelID("object", theID)
-if tonumber(baseModel) then
-  local obj = createObject(baseModel, 0,0,3)
-  if not isElement(obj) then
-    outputDebugString("Error spawning object", 1)
-  else
-    if isCustom then
-      setElementData(obj, dataName, theID)
-      setElementData(obj, baseDataName, baseModel)
-    end
-    outputDebugString("Created object with ID "..theID..(isCustom and " (custom)" or ""), 3)
-  end
-elseif obj == "INVALID_MODEL" then
-  outputDebugString("Invalid model ID", 1)
-elseif obj == "WRONG_MOD" then
-  outputDebugString("Mod ID is not a valid object model", 1)
-else
-  outputDebugString("Error calling newmodels:checkModelID", 1)
+local object = exports["newmodels-engine"]:createObject(theID, 0,0,3)
+if object then
+  -- Continue
 end
 ```
 
 ## Setting a player's skin (any ID)
 
-**Serverside code:**
+**Server code:**
 
 ```lua
+-- Use resource newmodels-engine
 local theID = 20001
-local result = exports.newmodels:setElementModelSafe(thePlayer, theID)
-if result == "OK" then
-  outputDebugString("Set player's skin to "..theID, 3)
-elseif result == "INVALID_MODEL" then
-  outputDebugString("Invalid model ID", 1)
-elseif result == "WRONG_MOD" then
-  outputDebugString("Mod ID is not a valid player skin", 1)
-else
-  outputDebugString("Error calling newmodels:setElementModelSafe", 1)
+local result = exports["newmodels-engine"]:setElementModel(thePlayer, theID)
+if result then
+  -- Continue
 end
+```
+
+## Getting a vehicle's model ID (custom or default)
+
+**Client/Server code:**
+
+```lua
+-- Use resource newmodels-engine
+local theID = exports["newmodels-engine"]:getElementModel(theVehicle)
+print(theID)
+```
+
+## Getting any element's base model ID (custom or default)
+
+**Client/Server code:**
+
+```lua
+local baseModel = exports.newmodels:getBaseModel(theVehicle)
+print(baseModel)
+
+-- ALTERNATIVE:
+local baseDN = exports.newmodels:getBaseModelDataName()
+local baseModel = getElementData(theVehicle, baseDN) or getElementModel(theVehicle)
 ```
 
 ## Check if an object has a custom ID
@@ -86,19 +90,6 @@ else
 end
 ```
 
-## Getting any element's base model ID (custom or default)
-
-**Client/Server code:**
-
-```lua
-local baseModel = exports.newmodels:getBaseModel(theVehicle)
-print(baseModel)
-
--- ALTERNATIVE:
-local baseDN = exports.newmodels:getBaseModelDataName()
-local baseModel = getElementData(theVehicle, baseDN) or getElementModel(theVehicle)
-```
-
 ## Fetching a mod's information by ID
 
 **Client/Server code:**
@@ -107,21 +98,4 @@ Disclaimer: The client only loads the mod list from the server a few seconds aft
 
 ```lua
 local mod = exports.newmodels:getModDataFromID(theID)
-```
-
-## Saving a player's skin ID on disconnect
-
-**Serverside code:**
-
-```lua
-addEventHandler( "onPlayerQuit", root, 
-  function (quitType, reason, responsibleElement)
-    -- get the custom skin ID (if any) or the default skin ID defined serverside
-    local data_name = exports.newmodels:getDataNameFromType("player")
-    local skin = getElementData(source, data_name) or getElementModel(source)
-    if skin then
-      print("save skin ID in the database here")
-    end
-  end
-)
 ```

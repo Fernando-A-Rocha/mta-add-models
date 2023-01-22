@@ -392,7 +392,6 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 
 		if getElementType(element) == "pickup" then
 			setPickupType(element, 3, allocated_id)
-			print("set pickup type to 3, "..allocated_id)
 		else
 			-- refresh model so change can actually have an effect
 			local currModel = getElementModel(element)
@@ -554,7 +553,7 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 
 		if tonumber(oldValue) then
 			-- removing new model id
-			if not wasElementCreatedClientside(source) then
+			if (not wasElementCreatedClientside(source)) and (et ~= "pickup") then
 				triggerServerEvent(resName..":resetElementModel", resourceRoot, source, tonumber(oldValue))
 			end
 		end

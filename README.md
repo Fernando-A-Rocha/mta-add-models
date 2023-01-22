@@ -25,8 +25,7 @@ Click the button to check the project's feedback page:
 
 - Required minimum MTA Server & Client version `1.5.9-9.21437.0`
 - Get the installers from [nightly.mtasa.com](https://nightly.mtasa.com/)
-- ![https://i.imgur.com/BmkUosO.png](https://i.imgur.com/BmkUosO.png)
-- Client will auto-update upon joining the server
+- Client should auto-update upon joining the server
 - *Find out what the build numbers mean here: [buildinfo.mtasa.com](https://buildinfo.mtasa.com/)*
 - **If you don't have the right version these resources will not work correctly**
 
@@ -34,15 +33,11 @@ Click the button to check the project's feedback page:
 
 [newmodels](/newmodels): main library resource
 
-Example resources:
-
-- (optional) [newmodels-example](/[examples]/newmodels-example): an example implementation to add new objects/skins/etc to your server
+- (recommended) [newmodels-engine](/[examples]/newmodels-engine): a resource that uses the main scripts (useful)
 - (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP object models to your server
   - 👉 [Download](https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) `models.zip` containing all dff/txd/col files required
-- (optional) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
-
-Other resources:
-
+- (optional) [newmodels-example](/[examples]/newmodels-example): a basic resource that adds some models to your server
+- (debugging) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
 - (optional) [editor_custom](/docs/custom_editor/README.md): modified MTA:SA Map Editor resources to support using new model IDs
 
 ### Install
@@ -72,15 +67,9 @@ Main testing commands in `newmodels`:
 - /makeobject [ID] **creates an object and sets its model to a default or new ID**
 - /makevehicle [ID] **creates a vehicle and sets its model to a default or new ID**
 
-Testing command(s) in `newmodels-example`: [here](/[examples]/newmodels-example/server.lua)
-
-Testing command(s) in `sampobj_reloaded`: [here](/[examples]/sampobj_reloaded/server.lua)
-
-Testing command(s) in `unittest_newmodels`: [here](/[examples]/unittest_newmodels/server.lua)
-
 ## How to Use
 
-- [General Information/Guide](/docs/implementations/README.md)
+- [General Information/Guide](/docs/MAIN.md)
 - [Lua Code Examples](/docs/EXAMPLES.md)
 - [Newmodels in Map Editor](/docs/custom_editor/README.md)
 
