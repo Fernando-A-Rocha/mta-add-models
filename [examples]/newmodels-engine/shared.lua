@@ -130,12 +130,19 @@ function setPickupType(thePickup, theType, id, ammo)
 	local dataName = dataNames["pickup"]
 	theType = tonumber(theType)
 	if theType and theType == 3 then
-		setElementData(thePickup, dataName, id, not isClientFile)
-		return true
-	else
-		setElementData(element, dataName, nil, not isClientFile)
-		return _setPickupType(thePickup, theType, id, ammo)
+		local baseModel, isCustom = exports.newmodels:checkModelID(id, elementType)
+		if not tonumber(baseModel) then
+			outputCustomError(baseModel, id, elementType)
+			return false
+		end
+		if isCustom then
+			setElementData(thePickup, dataName, id, not isClientFile)
+			return true
+		end
 	end
+
+	setElementData(thePickup, dataName, nil, not isClientFile)
+	return _setPickupType(thePickup, theType, id, ammo)
 end
 
 -- Returns a custom model ID (if custom) or a default model ID (if default)
