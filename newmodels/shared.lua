@@ -89,7 +89,7 @@ function isDefaultID(elementType, id) -- [Exported]
 					return true
 				end
 			end
-		elseif elementType == "object" then
+		elseif elementType == "object" or elementType == "pickup" then
 			return isDefaultObjectID(id)
 		elseif elementType == "vehicle" then
 			for k,id2 in pairs(vehicleIds) do

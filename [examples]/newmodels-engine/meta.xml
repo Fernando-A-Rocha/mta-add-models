@@ -12,18 +12,18 @@
     
     <include resource="newmodels" />
     
-    <oop>true</oop>
-
     <script src="shared.lua" type="shared" cache="false"/>
+
+    <!-- Testing script (optional - you can remove it) -->
     <script src="testing_server.lua" type="server"/>
 
-	<export function="createObject" type="shared"/>
-	<export function="createVehicle" type="shared"/>	
-	<export function="createPed" type="shared"/>
-    
-	<export function="createPickup" type="shared"/>
-	<export function="setPickupType" type="shared"/>
+    <export function="createObject" type="shared"/>
+    <export function="createVehicle" type="shared"/>	
+    <export function="createPed" type="shared"/>
 
-	<export function="setElementModel" type="shared"/>
-	<export function="getElementModel" type="shared"/>
+    <export function="createPickup" type="shared"/>
+    <export function="setPickupType" type="shared"/>
+
+    <export function="setElementModel" type="shared"/>
+    <export function="getElementModel" type="shared"/>
 </meta>
