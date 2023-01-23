@@ -68,4 +68,4 @@ It provides you with the following functions that you can use in your server (e.
 
 Feel free to add your own implementations to this list by contributing to the repository via pull requests.
 
-- [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - [Custom Peds](./OWL_PEDS.md)
+- [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Guide for [Custom Ped Models (Skins)](/docs/implementations/OWL_PEDS.md)
