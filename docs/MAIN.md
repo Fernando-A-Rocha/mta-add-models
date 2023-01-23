@@ -50,6 +50,20 @@ This resource makes the clients listen to the set element datas in order to appl
 - **Clientside**: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
 - **Serverside**: `getElementModel` will return always return base model of any element.
 
+### Simplified Usage
+
+If you don't want to code your own functions to manage elements with custom model IDs, use the `newmodels-engine` resource.
+
+It provides you with the following functions that you can use in your server (e.g. in a vehicle system):
+
+- `createObject` -- safely create an object with custom/normal model ID
+- `createVehicle` -- safely create a vehicle with custom/normal model ID
+- `createPed` -- safely create a ped with custom/normal model ID
+- `createPickup` -- safely create a pickup with custom/normal model ID (type 3 is the one that supports object models)
+- `setElementModel` -- safely set a custom/normal model ID on an element
+- `setPickupType` -- safely change a pickup type 3's model ID to a custom/normal model ID
+- `getElementModel` -- safely get a custom/normal model ID from an element
+
 ## Known Implementations
 
 Feel free to add your own implementations to this list by contributing to the repository via pull requests.
