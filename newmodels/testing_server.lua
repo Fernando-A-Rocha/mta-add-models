@@ -35,157 +35,133 @@ addCommandHandler("newmodels", function(thePlayer)
 		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175is loaded", thePlayer, 255, 255, 255, true)
 end, false,false)
 
+local function setElementModelSafe(element, id)
+	local elementType = getElementType(element)
+	local dataName = dataNames[elementType]
+
+	local baseModel, isCustom = checkModelID(id, elementType)
+	if not tonumber(baseModel) then
+		return baseModel
+	end
+	
+	local currModel = getElementModel(element)
+	if currModel ~= baseModel then
+		setElementModel(element, baseModel)
+	end
+
+	if isCustom then
+		setElementData(element, baseDataName, mod.base_id)
+		setElementData(element, dataName, id)
+	
+	else
+		setElementData(element, baseDataName, nil)
+		setElementData(element, dataName, nil)
+	end
+
+	return "OK"
+end
+
 function mySkinCmd(thePlayer, cmd, id)
 	if not tonumber(id) then
 		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
 	end
 	id = tonumber(id)
 
-	local elementType = "player"
-	if isCustomModID(id) then
-
-		local success, reason = setCustomElementModel(thePlayer, elementType, id)
-		if not success then
-			outputChatBox("Failed to set your custom skin: "..reason, thePlayer, 255,0,0)
-		else
-			outputChatBox("Set your skin to custom ID "..id, thePlayer, 0,255,0)
-		end
-
-	elseif isDefaultID(elementType, id) then
-		outputChatBox("Set your skin to default ID "..id, thePlayer, 0,255,0)
-		setElementModel(thePlayer, id)
-	else
+	local result = setElementModelSafe(thePlayer, id)
+	if result == "OK" then
+		outputChatBox("Set your skin to ID "..id..(isCustom and " (custom)" or ""), thePlayer, 0,255,0)
+	elseif result == "INVALID_MODEL" then
 		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
+	elseif result == "WRONG_MOD" then
+		outputChatBox("Mod ID "..id.." is not a player skin", thePlayer,255,0,0)
 	end
 end
 addCommandHandler("myskin", mySkinCmd, false, false)
 
-function pedSkinCmd(thePlayer, cmd, id)
-
-	if not tonumber(id) then
-		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
+local function createElementWithModel(elementType, modelid, ...)
+	if elementType == "object" then
+		return createObject(modelid, ...)
+	elseif elementType == "vehicle" then
+		return createVehicle(modelid, ...)
+	elseif elementType == "ped" then
+		return createPed(modelid, ...)
 	end
-	id = tonumber(id)
+	return false
+end
 
-	local elementType = "ped"
-	if isCustomModID(id) or isDefaultID(elementType, id) then
+function createTestElement(thePlayer, elementType, id, ...)
 
-
-		local x,y,z = getElementPosition(thePlayer)
-		local rx,ry,rz = getElementRotation(thePlayer)
-		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
-
-		local thePed = createPed(1, x,y,z)
-		if not thePed then
-			return outputChatBox("Error spawning ped", thePlayer, 255,0,0)
-		end
-		setElementInterior(thePed, int)
-		setElementDimension(thePed, dim)
-		setElementRotation(thePed, rx,ry,rz, "default",true)
-
-		if isDefaultID(elementType, id) then
-			outputChatBox("Created ped with default ID "..id, thePlayer, 0,255,0)
-			setElementModel(thePed, id)
+	local baseModel, isCustom = checkModelID(id, elementType)
+	if tonumber(baseModel) then
+		
+		local element = createElementWithModel(elementType, baseModel, ...)
+		if not isElement(element) then
+			outputChatBox("Error spawning "..elementType.."", thePlayer, 255,0,0)
 			return
 		end
 
-		local success, reason = setCustomElementModel(thePed, elementType, id)
-		if not success then
-			destroyElement(thePed)
-			return outputChatBox("Failed to set ped custom skin: "..reason, thePlayer, 255,0,0)
+		if isCustom then
+			setElementData(element, dataNames[elementType], id)
+			setElementData(element, baseDataName, baseModel)
 		end
+		
+		outputChatBox("Created "..elementType.." with ID "..id..(isCustom and " (custom)" or ""), thePlayer, 0,255,0)
+		return element
 
-		outputChatBox("Created ped with custom ID "..id, thePlayer, 0,255,0)
-	else
-		outputChatBox("Skin ID "..id.." doesn't exist", thePlayer,255,0,0)
+	elseif baseModel == "INVALID_MODEL" then
+		outputChatBox("ID "..id.." doesn't exist", thePlayer,255,0,0)
+	elseif baseModel == "WRONG_MOD" then
+		outputChatBox("Mod ID "..id.." is not a "..elementType.." model", thePlayer,255,0,0)
+	end
+end
+
+function pedSkinCmd(thePlayer, cmd, id)
+	id = tonumber(id)
+	if not id then
+		return outputChatBox("SYNTAX: /"..cmd.." [Skin ID]", thePlayer, 255,194,14)
+	end
+
+	local x,y,z = getElementPosition(thePlayer)
+	local rx,ry,rz = getElementRotation(thePlayer)
+	local element = createTestElement(thePlayer, "ped", id, x,y,z, rz)
+	if element then
+		setElementPosition(thePlayer, x+1,y+1,z)
+		setElementInterior(element, getElementInterior(thePlayer))
+		setElementDimension(element, getElementDimension(thePlayer))
 	end
 end
 addCommandHandler("makeped", pedSkinCmd, false, false)
 
 function objectModelCmd(thePlayer, cmd, id)
-	if not tonumber(id) then
+	id = tonumber(id)
+	if not id then
 		return outputChatBox("SYNTAX: /"..cmd.." [Object ID]", thePlayer, 255,194,14)
 	end
-	id = tonumber(id)
-
-	local elementType = "object"
-	if isCustomModID(id) or isDefaultID(elementType, id) then
-
-		local x,y,z = getElementPosition(thePlayer)
-		local rx,ry,rz = getElementRotation(thePlayer)
-		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
-
-		local theObject = createObject(1337, x,y,z)
-		if not theObject then
-			return outputChatBox("Error spawning object", thePlayer, 255,0,0)
-		end
-		setElementInterior(theObject, int)
-		setElementDimension(theObject, dim)
-		setElementRotation(theObject, rx,ry,rz)
-
-		if isDefaultID(elementType, id) then
-			outputChatBox("Created object with default ID "..id, thePlayer, 0,255,0)
-			setElementModel(theObject, id)
-			return
-		end
-
-		local success, reason = setCustomElementModel(theObject, elementType, id)
-		if not success then
-			destroyElement(theObject)
-			return outputChatBox("Failed to set object custom ID: "..reason, thePlayer, 255,0,0)
-		end
-
-		outputChatBox("Created object with custom ID "..id, thePlayer, 0,255,0)
-		setElementPosition(thePlayer, x,y,z+4)
-	else
-		outputChatBox("Object ID "..id.." doesn't exist", thePlayer,255,0,0)
+	local x,y,z = getElementPosition(thePlayer)
+	local rx,ry,rz = getElementRotation(thePlayer)
+	local element = createTestElement(thePlayer, "object", id, x,y,z, rx,ry,rz)
+	if element then
+		setElementPosition(thePlayer, x+1,y+1,z+4)
+		setElementInterior(element, getElementInterior(thePlayer))
+		setElementDimension(element, getElementDimension(thePlayer))
 	end
 end
 addCommandHandler("makeobject", objectModelCmd, false, false)
 
 
 function makeVehicleCmd(thePlayer, cmd, id)
-	if not tonumber(id) then
+	id = tonumber(id)
+	if not id then
 		return outputChatBox("SYNTAX: /"..cmd.." [Vehicle ID]", thePlayer, 255,194,14)
 	end
 	
-	id = tonumber(id)
-
-	local elementType = "vehicle"
-	if isCustomModID(id) or isDefaultID(elementType, id) then
-
-		local rx,ry,rz = getElementRotation(thePlayer)
-		local int,dim = getElementInterior(thePlayer), getElementDimension(thePlayer)
-
-		local x,y,z = getPositionFromElementOffset(thePlayer, 0,4,0.5)
-		rz = rz + 90
-
-		local theVehicle = createVehicle(400, x,y,z)
-		if not theVehicle then
-			return outputChatBox("Error spawning vehicle", thePlayer, 255,0,0)
-		end
-		setElementInterior(theVehicle, int)
-		setElementDimension(theVehicle, dim)
-		setElementRotation(theVehicle, rx,ry,rz)
-
-		if isDefaultID(elementType, id) then
-			outputChatBox("Created vehicle with default ID "..id, thePlayer, 0,255,0)
-			setElementModel(theVehicle, id)
-			return
-		end
-
-		local success, reason = setCustomElementModel(theVehicle, elementType, id)
-		if not success then
-			destroyElement(theVehicle)
-			return outputChatBox("Failed to set vehicle custom ID: "..reason, thePlayer, 255,0,0)
-		end
-
-		outputChatBox("Created vehicle with custom ID "..id, thePlayer, 0,255,0)
-
-	elseif base_id then
-		outputChatBox("Vehicle ID "..base_id.." doesn't exist (for base ID)", thePlayer,255,0,0)
-	else
-		outputChatBox("Vehicle ID "..id.." doesn't exist", thePlayer,255,0,0)
+	local x,y,z = getElementPosition(thePlayer)
+	local rx,ry,rz = getElementRotation(thePlayer)
+	local element = createTestElement(thePlayer, "vehicle", id, x,y,z, rx,ry,rz)
+	if element then
+		setElementPosition(thePlayer, x,y,z+3)
+		setElementInterior(element, getElementInterior(thePlayer))
+		setElementDimension(element, getElementDimension(thePlayer))
 	end
 end
 addCommandHandler("makevehicle", makeVehicleCmd, false, false)

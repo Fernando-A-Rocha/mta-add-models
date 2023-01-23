@@ -6,6 +6,8 @@ This library was created with the goal of being usable in any server without bre
 
 Below is some general information to help you start using this library. It is strongly encouraged to explode the scripts and read the code to understand how it works.
 
+Remember to check [Lua Examples](/docs/EXAMPLES.md).
+
 ### (❗) Adding/Removing Mods
 
 This library lets you load mods stored within the `newmodels` resource, and also add mods stored in other resources to the `modList` that it will load from.
@@ -44,10 +46,23 @@ Before creating the element, it's important to follow the following steps:
 
 This resource makes the clients listen to the set element datas in order to apply custom model IDs accordingly on their game (automatic sync).
 
-**Remember**: You cannot `setElementModel` a custom ID, and `getElementModel` will never return a non-original model ID.
+- You cannot `setElementModel` a custom ID.
+- **Clientside**: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
+- **Serverside**: `getElementModel` will return always return base model of any element.
 
-- Clientside: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
-- Serverside: `getElementModel` will return always return base model of any element.
+### Simplified Usage
+
+If you don't want to code your own functions to manage elements with custom model IDs, use the `newmodels-engine` resource.
+
+It provides you with the following functions that you can use in your server (e.g. in a vehicle system):
+
+- `createObject` -- safely create an object with custom/normal model ID
+- `createVehicle` -- safely create a vehicle with custom/normal model ID
+- `createPed` -- safely create a ped with custom/normal model ID
+- `createPickup` -- safely create a pickup with custom/normal model ID (type 3 is the one that supports object models)
+- `setElementModel` -- safely set a custom/normal model ID on an element
+- `setPickupType` -- safely change a pickup type 3's model ID to a custom/normal model ID
+- `getElementModel` -- safely get a custom/normal model ID from an element
 
 ## Known Implementations
 

@@ -38,16 +38,12 @@ function outputDebugString(text, mode, r,g,b)
 	end
 end
 
-function getDataTypeFromName(dataName)
-	for elementType, name in pairs(dataNames) do
-		if dataName == name then
-			return elementType
-		end
-	end
-end
-
 function getBaseModel(element) -- [Exported]
 	return (getElementData(element, baseDataName) or getElementModel(element))
+end
+
+function getBaseModelDataName()
+	return baseDataName
 end
 
 function getDataNameFromType(elementType) -- [Exported]
@@ -131,6 +127,21 @@ function isCustomModID(id) -- [Exported]
 	return true, mod, elementType
 end
 
+function isRightModType(et, modEt)
+
+	if et == modEt then
+		return true
+	end
+
+	if (et == "player" or et == "ped") and (modEt == "player" or modEt == "ped") then
+		return true
+	end
+	if (et == "pickup" or et == "object") and (modEt == "pickup" or modEt == "object") then
+		return true
+	end
+	
+	return false
+end
 
 function isElementTypeSupported(et)
 	local found
@@ -189,4 +200,63 @@ function isCustomVehicle( theVehicle )
 	end
 
 	return true
+end
+
+function setElementModelRefreshed(element, currModel, newModel)
+	-- element types: player, ped, vehicle, object
+	if currModel ~= newModel then
+		return setElementModel(element, newModel)
+	end
+			
+	local elementType = getElementType(element)
+	local diffModel
+	if elementType == "player" or elementType == "ped" then
+		diffModel = 0
+	elseif elementType == "vehicle" then
+		diffModel = 400
+	elseif elementType == "object" then
+		diffModel = 1337
+	end
+	if diffModel == currModel then
+		diffModel = diffModel + 1
+	end
+
+	return setElementModel(element, diffModel) and setElementModel(element, newModel)
+end
+
+--[[
+	Useful function: checks if any given ID is valid
+	by doing the appropriate checks
+
+	Three possible return values:
+		- "INVALID_MODEL": invalid model ID
+		- "WRONG_MOD": the mod is not for the element type
+		- baseModel, isCustom, dataName, baseDataName: model ID ok for element type
+]]
+-- [Exported]
+function checkModelID(id, elementType)
+	assert(tonumber(id), "Non-number ID passed")
+	assert((elementType == "ped" or elementType == "player" or elementType == "object" or elementType == "vehicle" or elementType == "pickup"),
+		"Invalid element type passed: "..tostring(elementType))
+	local dataName = dataNames[elementType]
+	assert(dataName, "No data name for element type: "..tostring(elementType))
+
+	if elementType == "pickup" then
+		elementType = "object"
+	end
+
+	local baseModel
+	local isCustom, mod, modType = isCustomModID(id)
+	if isCustom then
+		if not isRightModType(elementType, modType) then
+			return "WRONG_MOD"
+		end
+		baseModel = mod.base_id
+	elseif isDefaultID(elementType, id) then
+		baseModel = id
+	else
+		return "INVALID_MODEL"
+	end
+
+	return baseModel, isCustom, dataName, baseDataName
 end

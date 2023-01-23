@@ -6,7 +6,7 @@
 
 	<info author="Fernando" name="Newmodels Unit Testing"
      description="created for debugging purposes to test all functionalities of newmodels framework"
-     version="2.0.5"
+     version="2.1.0"
      type="script" />
 
 	<include resource="newmodels"/>

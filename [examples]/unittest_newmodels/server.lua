@@ -18,7 +18,7 @@ function (startedResource)
    -- test6()
    -- test7()
    -- test8()
-
+   -- test9()
 end)
 
 
@@ -158,7 +158,7 @@ addCommandHandler("t3", function(thePlayer, cmd)
    setElementData(ped, data_name, 20001)
    outputChatBox("Removing created ped skin data in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
    setTimer(function(ped2, data_name2)
-      removeElementData(ped2, data_name2)
+      setElementData(ped2, data_name2, nil)
    end, 3000, 1, ped, data_name)
 
 end, false, false)
@@ -207,6 +207,31 @@ function test8()
    print("Created custom pickup with ID "..customID)
 end
 
+
+-- Test new func
+function test9()
+   local xoff = 0
+   for _, theID in ipairs({50001, 1338}) do
+      local baseModel, isCustom = exports.newmodels:checkModelID(theID, "object")
+      if tonumber(baseModel) then
+         local element = createObject(baseModel, 0+xoff,0,3)
+         if isCustom then
+            setElementData(element, "baseID", baseModel)
+		      setElementData(element, "objectID", theID)
+         end
+         xoff = xoff + 3
+         print("Custom object ID "..theID.." spawned successfully")
+
+      -- Handle possible errors
+      elseif baseModel == false then
+         outputDebugString("Error trying to spawn object", 1)
+      elseif baseModel == "WRONG_MOD" then
+         outputDebugString("Mod ID is not a valid object model", 1)
+      elseif baseModel == "INVALID_MODEL" then
+         outputDebugString("Invalid model ID", 1)
+      end
+   end
+end
 
 -- Vehicle testing
 function makeVehTest(thePlayer, cmd, testType)

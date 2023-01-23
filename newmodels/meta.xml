@@ -1,7 +1,7 @@
 <meta>
     <info author="Fernando" name="mta-add-models"
       description="minimalistic library for adding new models to your server"
-      version="2.0.5"
+      version="2.1.0"
       type="script"/>
     
     <!-- DOCUMENTATION:
@@ -54,10 +54,12 @@
 
     <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>
+    <export type="shared" function="getBaseModelDataName"/>
     <export type="shared" function="getBaseModel"/>
     <export type="shared" function="getModDataFromID"/>
     <export type="shared" function="isDefaultID"/>
     <export type="shared" function="isCustomModID"/>
+    <export type="shared" function="checkModelID"/>
 
     <export type="server" function="addExternalMod_IDFilenames"/>
     <export type="server" function="addExternalMods_IDFilenames"/>
@@ -66,7 +68,9 @@
     <export type="server" function="removeExternalMod"/>
 
     <export type="client" function="isClientReady"/>
+    <export type="client" function="isModAllocated"/>
     <export type="client" function="forceAllocate"/>
+    <export type="client" function="forceFreeAllocated"/>
     <export type="client" function="forceDownloadMod"/>
     <export type="client" function="isBusyDownloading"/>
     <!-- Main Scripts END -->

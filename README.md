@@ -1,11 +1,11 @@
 ![Banner](https://i.imgur.com/8kdbVbC.png)
 
-**mta-add-models** is a MTA resource that acts as a library, making use of [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) function to add new peds (skins), vehicles and objects:
+**mta-add-models** is an MTA resource (library) which makes use of the [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) features to add new peds (skins), vehicles and objects:
 
 - syncs all added models with all players
 - minimalistic, optimized and bug free
 
-In simpler terms, with this resource you can make scripts/change your scripts to add new skins, vehicles and objects to your server! For example we can now add all SA-MP objects whilst keeping their IDs.
+In simpler terms, with this resource you can make scripts/change your scripts to add new skin, vehicle and object IDs to your server! For example we can now add all SA-MP objects *whilst keeping their intended IDs*.
 
 MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
 
@@ -13,11 +13,9 @@ MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models
 
 If you need help with anything related to this project, please read the corresponding section on the MTA forum thread linked above.
 
-## Your opinion matters
+## [Your opinion matters](https://github.com/Fernando-A-Rocha/mta-add-models/issues/7)
 
-Click the button to check the project's feedback page:
-
-[<img src="https://i.imgur.com/x19GaN1.png?1">](https://github.com/Fernando-A-Rocha/mta-add-models/issues/7)
+Visit the project's feedback page to check other people's opinions and share your own.
 
 ## Getting Started
 
@@ -25,8 +23,7 @@ Click the button to check the project's feedback page:
 
 - Required minimum MTA Server & Client version `1.5.9-9.21437.0`
 - Get the installers from [nightly.mtasa.com](https://nightly.mtasa.com/)
-- ![https://i.imgur.com/BmkUosO.png](https://i.imgur.com/BmkUosO.png)
-- Client will auto-update upon joining the server
+- Client should auto-update upon joining the server
 - *Find out what the build numbers mean here: [buildinfo.mtasa.com](https://buildinfo.mtasa.com/)*
 - **If you don't have the right version these resources will not work correctly**
 
@@ -34,15 +31,11 @@ Click the button to check the project's feedback page:
 
 [newmodels](/newmodels): main library resource
 
-Example resources:
-
-- (optional) [newmodels-example](/[examples]/newmodels-example): an example implementation to add new objects/skins/etc to your server
+- (recommended) [newmodels-engine](/[examples]/newmodels-engine): a resource that uses the main scripts (useful)
 - (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP object models to your server
   - 👉 [Download](https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) `models.zip` containing all dff/txd/col files required
-- (optional) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
-
-Other resources:
-
+- (optional) [newmodels-example](/[examples]/newmodels-example): a basic resource that adds some models to your server
+- (debugging) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
 - (optional) [editor_custom](/docs/custom_editor/README.md): modified MTA:SA Map Editor resources to support using new model IDs
 
 ### Install
@@ -72,27 +65,33 @@ Main testing commands in `newmodels`:
 - /makeobject [ID] **creates an object and sets its model to a default or new ID**
 - /makevehicle [ID] **creates a vehicle and sets its model to a default or new ID**
 
-Testing command(s) in `newmodels-example`: [here](/[examples]/newmodels-example/server.lua)
-
-Testing command(s) in `sampobj_reloaded`: [here](/[examples]/sampobj_reloaded/server.lua)
-
-Testing command(s) in `unittest_newmodels`: [here](/[examples]/unittest_newmodels/server.lua)
-
 ## How to Use
 
-- [General Information/Guide](/docs/implementations/README.md)
-- [Lua Code Examples](/docs/EXAMPLES.md)
-- [Newmodels in Map Editor](/docs/custom_editor/README.md)
+### [General Information/Guide](/docs/MAIN.md)
+
+This guide should help you understand how the newmodels resource works and how to use it.
+
+### [Lua Code Examples](/docs/EXAMPLES.md)
+
+This page contains some code examples on how to use the newmodels features.
+
+### [New-Models in Map Editor](/docs/custom_editor/README.md)
+
+This page contains information on how to use the newmodels resource with the MTA:SA Map Editor.
+
+It's possible thanks to a modified version of the Map Editor resources, created specifically for this project.
 
 ## NandoCrypt
 
 There is support for encrypted model files using the [NandoCrypt](https://github.com/Fernando-A-Rocha/mta-nandocrypt) resource.
 
-## Object .col Files
+This is useful for those who want to keep the models private & prevent people from stealing them.
 
-Object mods need a .col file to define its collisions. Ped and vehicles don't need any because the collisions are automatically generated by the game engine.
+## Object Collisions
 
-There's a tool to generate a `.col` file from a given `.dff` model. Check out the tutorial [here](https://github.com/Fernando-A-Rocha/mta-samp-maploader/blob/main/docs/TUTORIAL_COL.md).
+**Object mods need a .col file to define its collisions.** Ped and vehicles don't need any because the collisions are automatically generated by the game engine.
+
+Use the KDFF tool to generate a `.col` file from a given `.dff` model ([tutorial here](https://github.com/Fernando-A-Rocha/mta-samp-maploader/blob/main/docs/TUTORIAL_COL.md)).
 
 ## Final Note
 

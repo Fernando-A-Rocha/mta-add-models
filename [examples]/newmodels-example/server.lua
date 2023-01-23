@@ -60,8 +60,6 @@ function (startedResource)
 		outputDebugString("[newmodels-example] Failed to add models: "..tostring(reason), 0, 255,110,61)
 		return
 	end
-
-	checkPossibleExistingElements()
 end)
 
 --[[
@@ -184,61 +182,6 @@ function startUpChecks()
     return true
 end
 
-
---[[
-	Checks for existing elements (peds, vehicles) spawned in the server with these mods' unique IDs
-]]
-local fixDelay = 15000
-function checkPossibleExistingElements()
-
-	local check = {}
-
-	for k,mod in pairs(myMods) do
-
-		local uid = mod[1]
-		local et = mod[2]
-		local baseid = mod[3]
-		local name = mod[4]
-		local dff = mod[5]
-		local txd = mod[6]
-		local col = mod[7]
-
-		if not check[et] then check[et] = {} end
-		check[et][uid] = true
-	end
-
-	-- hack
-	check["player"] = check["ped"]
-
-	local fix = {}
-	local count = 0
-
-	for type,ids in pairs(check) do
-		local dataName = exports.newmodels:getDataNameFromType(type)
-		for i,e in pairs(getElementsByType(type)) do
-			local uid = tonumber(getElementData(e, dataName))
-			if uid and check[type][uid] then
-				check[type][uid] = nil
-
-				removeElementData(e, dataName)
-
-				fix[e] = {dataName, uid}
-				count = count + 1
-			end
-		end
-	end
-
-	if count > 0 then
-		-- Reset after a certain delay (all players need to free the old bugged elements to receive the refresh)
-		print("Fixing "..count.." existing leftover modded elements in "..(fixDelay/1000).." seconds")
-		setTimer(function()
-			for element,v in pairs(fix) do
-				-- iprint("FIXED", element, v[1], v[2])
-				setElementData(element, v[1], v[2])
-			end
-		end, fixDelay, 1)
-	end
-end
 
 --[[
 	Some testing commands below

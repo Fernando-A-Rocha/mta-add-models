@@ -1,0 +1,29 @@
+<meta>
+    <!-- This resource is available in the repository below.
+    Its version now matches the main newmodels version!
+    
+    https://github.com/Fernando-A-Rocha/mta-add-models -->
+    
+    <info author="Fernando"
+        name="newmodels Engine"
+        description="useful functions to make good use of newmodels in your server"
+        version="2.1.0"
+        type="script" />
+    
+    <include resource="newmodels" />
+    
+    <oop>true</oop>
+
+    <script src="shared.lua" type="shared" cache="false"/>
+    <script src="testing_server.lua" type="server"/>
+
+	<export function="createObject" type="shared"/>
+	<export function="createVehicle" type="shared"/>	
+	<export function="createPed" type="shared"/>
+    
+	<export function="createPickup" type="shared"/>
+	<export function="setPickupType" type="shared"/>
+
+	<export function="setElementModel" type="shared"/>
+	<export function="getElementModel" type="shared"/>
+</meta>
