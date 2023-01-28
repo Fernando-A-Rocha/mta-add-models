@@ -3,7 +3,7 @@
 
 **Recommended**: install the [newmodels-engine](/[examples]/newmodels-engine) resource to use some of the functions below.
 
-Remember to check the [General Information/Guide](/docs/MAIN.md) and [Example Resources/Scripts](/[examples]).
+Remember to check the [General Information/Guide](/.github/docs/MAIN.md) and [Example Resources/Scripts](/[examples]).
 
 For more advanced developers, check the [newmodels exported functions](/newmodels/meta.xml) and explore the code which should be readable and easy to understand.
 

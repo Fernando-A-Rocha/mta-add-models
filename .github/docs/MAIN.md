@@ -6,7 +6,7 @@ This library was created with the goal of being usable in any server without bre
 
 Below is some general information to help you start using this library. It is strongly encouraged to explode the scripts and read the code to understand how it works.
 
-Remember to check [Lua Examples](/docs/EXAMPLES.md).
+Remember to check [Lua Examples](/.github/docs/EXAMPLES.md).
 
 ### (❗) Adding/Removing Mods
 
@@ -68,4 +68,4 @@ It provides you with the following functions that you can use in your server (e.
 
 Feel free to add your own implementations to this list by contributing to the repository via pull requests.
 
-- [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Guide for [Custom Ped Models (Skins)](/docs/implementations/OWL_PEDS.md)
+- [OwlGaming Gamemode](https://github.com/OwlGamingCommunity/MTA) - Guide for [Custom Ped Models (Skins)](/.github/docs/implementations/OWL_PEDS.md)
