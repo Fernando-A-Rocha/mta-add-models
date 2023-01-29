@@ -6,7 +6,7 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 --]]
 
--- Custom events:
+-- Internal events:
 addEvent(resName..":resetElementModel", true)
 addEvent(resName..":updateVehicleProperties", true)
 addEvent(resName..":kickOnDownloadsFail", true)
@@ -606,12 +606,14 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 	if sourceResName == resName then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
-
-	Async:foreach(list, function(modInfo)
-		
+	for _, modInfo in ipairs(list) do
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
+	end
+
+	Async:foreach(list, function(modInfo)
+		
 		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
 		addExternalMod_IDFilenames(
 			elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance, sourceResName
@@ -768,12 +770,14 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 	if sourceResName == resName then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
-
-	Async:foreach(list, function(modInfo)
-
+	for _, modInfo in ipairs(list) do
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
+	end
+
+	Async:foreach(list, function(modInfo)
+
 		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
 		addExternalMod_CustomFilenames(
 			elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance, sourceResName

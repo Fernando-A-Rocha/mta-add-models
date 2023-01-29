@@ -126,6 +126,7 @@ function isCustomModID(id) -- [Exported]
 	return true, mod, elementType
 end
 
+-- [Exported]
 function isRightModType(et, modEt)
 
 	if et == modEt then

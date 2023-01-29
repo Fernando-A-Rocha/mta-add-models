@@ -64,6 +64,7 @@
     <export type="shared" function="getModDataFromID"/>
     <export type="shared" function="isDefaultID"/>
     <export type="shared" function="isCustomModID"/>
+    <export type="shared" function="isRightModType"/>
     <export type="shared" function="checkModelID"/>
 
     <export type="server" function="addExternalMod_IDFilenames"/>

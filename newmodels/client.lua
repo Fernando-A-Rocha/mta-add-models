@@ -6,11 +6,13 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
--- Custom events:
-addEvent(resName..":receiveModList", true)
-addEvent(resName..":receiveVehicleHandling", true)
+-- Events other resources can handle:
 addEvent(resName..":onModListReceived", true)
 addEvent(resName..":onModFileDownloaded", true)
+
+-- Internal events:
+addEvent(resName..":receiveModList", true)
+addEvent(resName..":receiveVehicleHandling", true)
 
 
 allocated_ids = {} -- [new id] = allocated id
@@ -528,9 +530,9 @@ end
 function isModAllocated(id)
 	id = tonumber(id)
 	if not id then
-		return false
+		return
 	end
-	return allocated_ids[id] and true or false
+	return allocated_ids[id]
 end
 
 -- [Exported]
@@ -785,7 +787,7 @@ function setModFileReady(modId, path)
 				if all then
 					
 					received_modlist[elementType][k].allReady = true
-					triggerEvent(resName..":onModFileDownloaded", root, mod.id)
+					triggerEvent(resName..":onModFileDownloaded", localPlayer, mod.id)
 					
 					-- For set element custom model waiting:
 					for element, id in pairs(awaitingSetModel) do
@@ -885,10 +887,12 @@ end
 
 function forceDownloadMod(id) -- [Exported]
 	id = tonumber(id)
-	if not id then return false, "id not number" end
+	if not id then
+		return false, "INVALID_ID"
+	end
 	local isCustom, mod, elementType2 = isCustomModID(id)
 	if not isCustom then
-		return false, id.." not a custom mod ID"
+		return false, "NOT_CUSTOM_ID"
 	end
 
 	if not mod.allReady then
@@ -948,7 +952,7 @@ function receiveModList(modList)
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle
-	triggerEvent(resName..":onModListReceived", localPlayer)
+	triggerEvent(resName..":onModListReceived", localPlayer, modList)
 
 	if updateElementsInQueue() then
 		updateStreamedElements()
