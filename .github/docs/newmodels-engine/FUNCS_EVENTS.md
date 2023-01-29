@@ -10,7 +10,7 @@ All shared (clientside & serverside) exported functions are explained here.
 
 ---
 
-### **createObject**(`id`, `...`)
+### 🪑 **createObject**(`id`, `...`)
 
 Creates a new object with the given `id` (default or custom) and returns it.
 
@@ -25,7 +25,7 @@ Creates a new object with the given `id` (default or custom) and returns it.
 
 ---
 
-### **createVehicle**(`id`, `...`)
+### 🚗 **createVehicle**(`id`, `...`)
 
 Creates a new vehicle with the given `id` (default or custom) and returns it.
 
@@ -40,7 +40,7 @@ Creates a new vehicle with the given `id` (default or custom) and returns it.
 
 ---
 
-### **createPed**(`id`, `...`)
+### 🧍 **createPed**(`id`, `...`)
 
 Creates a new ped with the given `id` (default or custom) and returns it.
 
@@ -55,7 +55,7 @@ Creates a new ped with the given `id` (default or custom) and returns it.
 
 ---
 
-### **createPickup**(`id`, `...`)
+### 📍 **createPickup**(`id`, `...`)
 
 Creates a new pickup with the given `id` (default or custom) and returns it.
 
@@ -72,7 +72,7 @@ Custom object models are supported by pickups with type 3.
 
 ---
 
-### **setPickupType**(`pickup`, `theType`, `id`, `ammo`)
+### ✏️ **setPickupType**(`pickup`, `theType`, `id`, `ammo`)
 
 Sets the type of a pickup, supporting custom object models for type 3.
 
@@ -92,9 +92,11 @@ Sets the type of a pickup, supporting custom object models for type 3.
 
 ---
 
-### **setElementModel**(`element`, `id`)
+### ✏️ **setElementModel**(`element`, `id`)
 
-Sets the model of an element, supporting custom object models.
+Sets the model of an element, supporting custom object models. It sets the element's base model using `setElementModel` and then sets the custom model (if any) using `setElementData`, along with the base model ID for reference.
+
+On the client, custom element data won't sync with the server so that only that client will see the custom model. On the server, custom element data will sync with all clients so that all clients will see the custom model.
 
 **Required arguments**:
 
@@ -107,9 +109,9 @@ Sets the model of an element, supporting custom object models.
 
 ---
 
-### **getElementModel**(`element`)
+### 📑 **getElementModel**(`element`)
 
-Gets the model of an element, supporting custom object models.
+Gets the model of an element (custom or default). It gets the element's custom model using `getElementData` or the default model ID using `getElementModel` if the custom model is not set.
 
 **Required arguments**:
 
