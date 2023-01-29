@@ -69,7 +69,7 @@ All shared (clientside & serverside) exported functions are explained here.
 
 **Optional arguments**:
 
-- `elementType`: A valid element type from the dataNames table (e.g. "object")
+- `elementType`: A valid element type from the dataNames table (e.g. "object") or false/nil to check all element types
 
 **Returns**:
 
