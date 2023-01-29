@@ -67,23 +67,7 @@ Main testing commands in `newmodels`:
 
 ## How to Use
 
-### [General Information/Guide](/.github/docs/MAIN.md)
-
-This guide should help you understand how the newmodels resource works and how to use it.
-
-### [New-Models Functions & Events](/.github/docs/newmodels/FUNCS_EVENTS.md)
-
-This page contains information about the exported functions & custom events defined in newmodels (for developers).
-
-### [Lua Code Examples](/.github/docs/EXAMPLES.md)
-
-This page contains some code examples on how to use the newmodels features.
-
-### [New-Models in Map Editor](/.github/docs/custom_editor/README.md)
-
-This page contains information on how to use the newmodels resource with the MTA:SA Map Editor.
-
-It's possible thanks to a modified version of the Map Editor resources, created specifically for this project.
+[General Information/Guide](/.github/docs/MAIN.md): It should help you understand how the newmodels resource works and how to use it.
 
 ## NandoCrypt
 
