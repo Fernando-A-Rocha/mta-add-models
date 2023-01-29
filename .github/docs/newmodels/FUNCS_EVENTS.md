@@ -2,7 +2,7 @@
 
 Below is a list of all exported functions and custom events defined in `newmodels` that you can use as a developer from your own resources.
 
-## Exported Functions (**Client & Server**)
+## 🛠 Exported Functions (**Client & Server**)
 
 All shared (clientside & serverside) exported functions are explained here.
 
@@ -136,7 +136,7 @@ Checks if a given ID is a valid model ID for the given element type. It calls is
 
 ---
 
-## Exported Functions (**Server**)
+## 🔨 Exported Functions (**Server**)
 
 All server-side only exported functions are explained here.
 
@@ -241,7 +241,7 @@ Removes an external mod from the mod list.
 
 ---
 
-## Exported Functions (**Client**)
+## 🔧 Exported Functions (**Client**)
 
 All client-side only exported functions are explained here.
 
@@ -329,7 +329,7 @@ Checks if the client is busy downloading a mod.
 
 ---
 
-## Custom Events (**Client**)
+## 🧲 Custom Events (**Client**)
 
 All client-side only custom events **intended for other resources to handle** are explained here.
 
