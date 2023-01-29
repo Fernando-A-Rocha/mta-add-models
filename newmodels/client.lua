@@ -329,6 +329,7 @@ function allocateNewMod(element, elementType, id)
 	or ((colPath) and (not colworked))
 	)
 	then
+		engineResetModelLODDistance(allocated_id)
 		engineFreeModel(allocated_id)
 		if txdmodel then destroyElement(txdmodel) end -- free memory
 		if dffmodel then destroyElement(dffmodel) end -- free memory
@@ -470,6 +471,7 @@ end
 
 function freeAllocatedID(allocated_id, id, theEvent)
 
+	engineResetModelLODDistance(allocated_id)
 	local worked = engineFreeModel(allocated_id)
 	for k, element in pairs(model_elements[allocated_id] or {}) do
 		if isElement(element) then
@@ -959,6 +961,7 @@ addEventHandler(resName..":receiveModList", resourceRoot, receiveModList)
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)
 	for id, allocated_id in pairs(allocated_ids) do
+		engineResetModelLODDistance(allocated_id)
 		engineFreeModel(allocated_id)
 	end
 end)
