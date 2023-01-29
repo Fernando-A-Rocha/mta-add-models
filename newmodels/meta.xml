@@ -33,8 +33,8 @@
     <file src="models/80004.dff"/>
     <file src="models/80004.txd"/>
     <file src="models/80005.dff"/>
-    <file src="models/80006.dff.nandocrypt"/>
-    <file src="models/80006.txd.nandocrypt"/>
+    <file src="models/elegant.dff.nandocrypt"/>
+    <file src="models/elegant.txd.nandocrypt"/>
 
     <!-- objects -->
     <file src="models/50001.dff"/>

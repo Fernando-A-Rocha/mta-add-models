@@ -54,8 +54,9 @@ modList = {
 		{id=80004, base_id=400, path=modsFolder, name="98 Landstalker 1"},
 		{id=80005, base_id=468, path=modsFolder, name="Sanchez Test", ignoreTXD=true},
 
-		-- NandoCrypt test
-		{id=80006, base_id=507, path=modsFolder, name="Elegant Test"},
+		-- Models encrypted using NandoCrypt
+		-- Don't add the .nandocrypt extension, it's defined by the 'NANDOCRYPT_EXT' setting
+		{id=80006, base_id=507, path={dff=modsFolder.."elegant.dff", txd=modsFolder.."elegant.txd"}, name="Elegant Test"},
 	},
 
 	object = {

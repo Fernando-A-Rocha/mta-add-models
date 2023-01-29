@@ -12,12 +12,12 @@
 ---------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
 ------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
 
-local sx,sy = guiGetScreenSize()
+local SW, SH = guiGetScreenSize()
 local win = nil
 
 local drawing = false
-local dfontsize = 1
-local dfont = "default-bold"
+local D_FONTSIZE = 1
+local D_FONT = "default-bold"
 
 addEvent(resName..":openTestWindow", true)
 
@@ -33,8 +33,8 @@ function createTestWindow(version, title, data)
 	destroyTestWindow()
 	showCursor(true)
 
-	local w,h = sx/1.5, sy/1.5
-	local x,y = sx/2-w/2, sy/2-h/2
+	local w,h = SW/1.5, SH/1.5
+	local x,y = SW/2-w/2, SH/2-h/2
 	win = guiCreateWindow(x,y, w,h, (title or "?").."  -  Double click a line to copy", false)
 
 	if version == "listmods" then
@@ -54,26 +54,26 @@ function createTestWindow(version, title, data)
 		local cols2 = {}
 
 		for elementType,_ in pairs(dataNames) do
-			if elementType ~= "player" then
+			if not (elementType=="player" or elementType=="pickup") then
 				if not tabs1[elementType] then
 					tabs1[elementType] = guiCreateTab(elementType, panel11)
 					local ww,hh = guiGetSize(tabs1[elementType], false)
 					local grid = guiCreateGridList(0, 5, ww,hh, false, tabs1[elementType])
 					setElementData(tabs1[elementType], "modsgrid", grid)
 
-					cols1.id = guiGridListAddColumn(grid, "ID", 0.07)
+					cols1.id = guiGridListAddColumn(grid, "ID", 0.2)
 					cols1.name = guiGridListAddColumn(grid, "Name", 0.2)
 					cols1.base_id = guiGridListAddColumn(grid, "Base ID", 0.1)
-					cols1.path = guiGridListAddColumn(grid, "Folder Path", 0.4)
+					cols1.paths = guiGridListAddColumn(grid, "File Paths", 0.45)
 
 					addEventHandler( "onClientGUIDoubleClick", grid, 
 					function (button)
 						if button == "left" then
 							local row,col = guiGridListGetSelectedItem(source)
 							if row ~= -1 then
-								local id,name,base_id,path = guiGridListGetItemText(source, row, cols1.id), guiGridListGetItemText(source, row, cols1.name), guiGridListGetItemText(source, row, cols1.base_id), guiGridListGetItemText(source, row, cols1.path)
+								local id,name,base_id,paths = guiGridListGetItemText(source, row, cols1.id), guiGridListGetItemText(source, row, cols1.name), guiGridListGetItemText(source, row, cols1.base_id), guiGridListGetItemText(source, row, cols1.paths)
 								if id then
-									local text = elementType.." ID "..id.." ('"..name.."') with base ID "..base_id.." in folder: "..path
+									local text = elementType.." ID "..id.." ('"..name.."') with base ID "..base_id..": "..paths
 									if setClipboard(text) then
 										outputChatBox("Copied to clipboard: "..text,0,255,0)
 									end
@@ -88,11 +88,11 @@ function createTestWindow(version, title, data)
 					local grid = guiCreateGridList(0, 5, ww,hh, false, tabs2[elementType])
 					setElementData(tabs2[elementType], "modsgrid", grid)
 
-					cols2.res = guiGridListAddColumn(grid, "Resource", 0.18)
-					cols2.id = guiGridListAddColumn(grid, "ID", 0.07)
+					cols2.res = guiGridListAddColumn(grid, "Resource", 0.2)
+					cols2.id = guiGridListAddColumn(grid, "ID", 0.1)
 					cols2.name = guiGridListAddColumn(grid, "Name", 0.15)
-					cols2.base_id = guiGridListAddColumn(grid, "Base ID", 0.07)
-					cols2.paths = guiGridListAddColumn(grid, "File Paths", 0.4)
+					cols2.base_id = guiGridListAddColumn(grid, "Base ID", 0.1)
+					cols2.paths = guiGridListAddColumn(grid, "File Paths", 0.55)
 
 					addEventHandler( "onClientGUIDoubleClick", grid, 
 					function (button)
@@ -126,7 +126,7 @@ function createTestWindow(version, title, data)
 							guiGridListSetItemText(grid, row, cols2.id, mod.id, false, true)
 							guiGridListSetItemText(grid, row, cols2.name, mod.name, false, false)
 							guiGridListSetItemText(grid, row, cols2.base_id, mod.base_id, false, true)
-							local formattedPaths = tostring(inspect(mod.path)):gsub("[\n\r]", " ")
+							local formattedPaths = tostring(inspect(mod.paths)):gsub("[\n\r]", " ")
 							guiGridListSetItemText(grid, row, cols2.paths, formattedPaths, false, true)
 						end
 					end
@@ -139,7 +139,8 @@ function createTestWindow(version, title, data)
 							guiGridListSetItemText(grid, row, cols1.id, mod.id, false, true)
 							guiGridListSetItemText(grid, row, cols1.name, mod.name, false, false)
 							guiGridListSetItemText(grid, row, cols1.base_id, mod.base_id, false, true)
-							guiGridListSetItemText(grid, row, cols1.path, mod.path, false, true)
+							local formattedPaths = tostring(inspect(mod.paths)):gsub("[\n\r]", " ")
+							guiGridListSetItemText(grid, row, cols1.paths, formattedPaths, false, true)
 						end
 					end
 				end
@@ -159,7 +160,7 @@ function createTestWindow(version, title, data)
 
 			cols0.id = guiGridListAddColumn(grid, "Custom ID", 0.2)
 			cols0.modelid = guiGridListAddColumn(grid, "Model", 0.2)
-			cols0.pos = guiGridListAddColumn(grid, "Position", 0.5)
+			cols0.pos = guiGridListAddColumn(grid, "Position", 0.55)
 
 			addEventHandler( "onClientGUIDoubleClick", grid, 
 			function (button)
@@ -217,6 +218,23 @@ function destroyTestWindow()
 	win = nil
 	showCursor(false)
 end
+local function pairsByKeys(t)
+    local a = {}
+    for n in pairs(t) do
+        table.insert(a, n)
+    end
+    table.sort(a, f)
+    local i = 0
+    local iter = function()
+        i = i + 1
+        if a[i] == nil then
+            return nil
+        else
+            return a[i], t[a[i]]
+        end
+    end
+    return iter
+end
 
 function togSeeAllocatedTable(cmd, dontspam)
 	if not drawing then
@@ -233,16 +251,17 @@ end
 addCommandHandler("allocatedids", togSeeAllocatedTable, false)
 
 function drawAllocatedTable()
-	local text
+	local text = "["..(string.upper(resName)).." DEBUG]\n"
 	local count = table.size(allocated_ids)
 	if count > 0 then
-		text="Total allocated models: "..table.size(allocated_ids).."\n"..inspect(allocated_ids)
+		text=text.."Allocated new models (total "..count.."):\n"
+		for aid, id in pairsByKeys(allocated_ids) do
+			text = text..id.." : "..aid.."\n"
+		end
 	else
-		text="Total allocated models: "..table.size(allocated_ids)
+		text=text.."There are 0 new models currently allocated."
 	end
-	local width = dxGetTextWidth(text, dfontsize, dfont)
-	local x,y = sx/2 - width/2, 20
-	dxDrawText(text, x,y,x,y, "0xffffffff", dfontsize, dfont)
+	dxDrawText(text, 0,10, SW,SH, 0xffffffff, D_FONTSIZE, D_FONT, "center", "top")
 end
 
 
@@ -283,3 +302,11 @@ function outputStreamedInElements(cmd)
 	triggerEvent(resName..":openTestWindow", resourceRoot, "selements", "Total "..total.." streamed mod-compatible elements", tab)
 end
 addCommandHandler("selements", outputStreamedInElements, false)
+
+function table.size ( tab )
+    local length = 0
+    for _ in pairs ( tab ) do
+        length = length + 1
+    end
+    return length
+end

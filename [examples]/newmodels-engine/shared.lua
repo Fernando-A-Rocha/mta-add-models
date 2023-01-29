@@ -14,7 +14,6 @@ _createVehicle = createVehicle
 _createPed = createPed
 _createPickup = createPickup
 _setPickupType = setPickupType
-local thisResource = getThisResource()
 local resources = {}
 local isClientFile = isElement(localPlayer)
 local dataNames = {
@@ -26,9 +25,9 @@ local dataNames = {
 }
 local baseDataName = exports.newmodels:getBaseModelDataName()
 
-function setElementResource(element, resource)
+function setElementResource(element, theResource)
 	if isElement(element) then
-		resource = resource or thisResource
+		theResource = theResource or resource
 		if type(resources[resource]) ~= "table" then
 			resources[resource] = {}
 		end

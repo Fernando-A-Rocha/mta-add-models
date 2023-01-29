@@ -772,7 +772,7 @@ function onDownloadFailed(modId, path)
 end
 
 function handleDownloadFinish(fileName, success, requestRes)
-	if requestRes ~= getThisResource() then return end
+	if requestRes ~= resource then return end
 	if not currDownloading then return end
 	local modId, path = unpack(currDownloading)
 
@@ -884,6 +884,16 @@ function receiveModList(modList)
 
 	received_modlist = modList
 
+	-- local count = 0
+	-- for elementType, mods in pairs(modList) do
+	-- 	if not (elementType=="player" or elementType=="pickup") then
+	-- 		for _, mod in ipairs(mods) do
+	-- 			count = count + 1
+	-- 		end
+	-- 	end
+	-- end
+	-- outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
+	
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle
@@ -913,8 +923,6 @@ function (startedResource)
 			updateStreamedInElement(el)
 		end
 	end
-
-	triggerLatentServerEvent(resName..":requestModList", resourceRoot)
 end)
 
 local sw, sh = guiGetScreenSize()

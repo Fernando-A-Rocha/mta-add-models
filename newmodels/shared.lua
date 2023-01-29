@@ -6,8 +6,7 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
-thisRes = getThisResource()
-resName = getResourceName(thisRes)
+resName = getResourceName(resource)
 
 _outputDebugString = outputDebugString
 function outputDebugString(text, mode, r,g,b)
@@ -174,16 +173,6 @@ function verifySetModelArguments(element, elementType, id)
 		return false, "Non-number ID passed"
 	end
 	return true
-end
-
-function table.size ( tab )
-    local length = 0
-    
-    for _ in pairs ( tab ) do
-        length = length + 1
-    end
-    
-    return length
 end
 
 function isCustomVehicle( theVehicle )	
