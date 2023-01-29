@@ -71,6 +71,10 @@ Main testing commands in `newmodels`:
 
 This guide should help you understand how the newmodels resource works and how to use it.
 
+### [New-Models Functions & Events](/.github/docs/newmodels/FUNCS_EVENTS.md)
+
+This page contains information about the exported functions & custom events defined in newmodels (for developers).
+
 ### [Lua Code Examples](/.github/docs/EXAMPLES.md)
 
 This page contains some code examples on how to use the newmodels features.
