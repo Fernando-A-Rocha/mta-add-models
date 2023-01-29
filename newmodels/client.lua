@@ -494,8 +494,8 @@ function startFreeingMod(id2, checkStreamedIn, theEvent)
 
 			local oneStreamedIn = false
 			for elementType, name in pairs(dataNames) do
-				for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
-					if getElementData(el, name) == id then
+				for k,el in ipairs(getElementsByType(elementType)) do
+					if isElementStreamedIn(el) and getElementData(el, name) == id then
 						oneStreamedIn = true
 						break
 					end
@@ -734,27 +734,29 @@ function updateStreamedElements(thisId)
 	local freed = {}
 
 	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
+		for k,el in ipairs(getElementsByType(elementType)) do
+			if isElementStreamedIn(el) then
 
-			local id = tonumber(getElementData(el, name))
-			if id and not freed[id] then
+				local id = tonumber(getElementData(el, name))
+				if id and not freed[id] then
 
-				if (not thisId) or (id == thisId) then
+					if (not thisId) or (id == thisId) then
 
-					local found = false
+						local found = false
 
-					for j,mod in pairs(received_modlist[elementType]) do
-						if mod.id == id then
-							found = true
-							break
+						for j,mod in pairs(received_modlist[elementType]) do
+							if mod.id == id then
+								found = true
+								break
+							end
 						end
-					end
-					if not found then -- means the mod was removed by a serverside script
+						if not found then -- means the mod was removed by a serverside script
 
-						freed[id] = true
-						startFreeingMod(id, false, "updateStreamedElements => mod gone")
-					else
-						updateStreamedInElement(el)
+							freed[id] = true
+							startFreeingMod(id, false, "updateStreamedElements => mod gone")
+						else
+							updateStreamedInElement(el)
+						end
 					end
 				end
 			end
@@ -969,8 +971,10 @@ function (startedResource)
 	-- we need to apply the model on them
 
 	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
-			updateStreamedInElement(el)
+		for k,el in ipairs(getElementsByType(elementType)) do
+			if isElementStreamedIn(el) then
+				updateStreamedInElement(el)
+			end
 		end
 	end
 end)
