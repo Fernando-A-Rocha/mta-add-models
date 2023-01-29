@@ -155,6 +155,8 @@ function allocateNewMod(element, elementType, id)
 		end
 	end
 
+	local lodDistance = foundMod.lodDistance
+
 	if (ENABLE_NANDOCRYPT) then
 		-- Inspired by https://github.com/Fernando-A-Rocha/mta-nandocrypt/tree/main/nando_crypt-example
 
@@ -204,6 +206,8 @@ function allocateNewMod(element, elementType, id)
 					nc_waiting[allocated_id]["count"] = nc_waiting[allocated_id]["count"] + 1
 					if (nc_waiting[allocated_id]["count"] == nc_waiting[allocated_id]["total"]) then
 
+						local oneFailed = false
+
 						for k2, v2 in pairs(paths2) do
 							local t2,path2 = unpack(v2)
 							local data2 = nc_waiting[allocated_id][t2]
@@ -211,19 +215,61 @@ function allocateNewMod(element, elementType, id)
 							local model
 							if t2 == "txd" then
 								model = engineLoadTXD(data2)
-								engineImportTXD(model,allocated_id)
-								-- print("Loaded", "TXD", "Path "..path2)
+								if model then
+									if not engineImportTXD(model,allocated_id) then
+										oneFailed = true
+									end
+								else
+									oneFailed = true
+								end
 							elseif t2 == "dff" then
 								model = engineLoadDFF(data2, allocated_id)
-								engineReplaceModel(model,allocated_id)
-								-- print("Loaded", "DFF", "Path "..path2)
+								if model then
+									if not engineReplaceModel(model,allocated_id) then
+										oneFailed = true
+									end
+								else
+									oneFailed = true
+								end
 							elseif t2 == "col" then
 								model = engineLoadCOL(data2)
-								engineReplaceCOL(model, allocated_id)
-								-- print("Loaded", "COL", "Path "..path2)
+								if model then
+									if not engineReplaceCOL(model, allocated_id) then
+										oneFailed = true
+									end
+								else
+									oneFailed = true
+								end
 							end
-							table.insert(model_elements[allocated_id], model)
+							if model then
+								if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
+								table.insert(model_elements[allocated_id], model)
+							end
 						end
+
+						if oneFailed then
+
+							for _, model in ipairs(model_elements[allocated_id]) do
+								if isElement(model) then
+									destroyElement(model) -- free memory
+								end
+							end
+							model_elements[allocated_id] = nil
+
+							if txdmodel then  end 
+							if dffmodel then destroyElement(dffmodel) end -- free memory
+							if colmodel then destroyElement(colmodel) end -- free memory
+
+							outputDebugString("Failed to apply TXD/DFF/COL of NandoCrypted mod ID "..id, 1)
+						else
+
+							-- Lod Distance
+							if lodDistance then
+								engineSetModelLODDistance(allocated_id, lodDistance)
+							end
+
+						end
+						
 						-- print("Finished", "A-AID "..allocated_id, "Total files "..nc_waiting[allocated_id]["total"])
 						nc_waiting[allocated_id] = nil
 					end
@@ -234,7 +280,6 @@ function allocateNewMod(element, elementType, id)
 				return false, "Failed: NandoCrypt failed to decrypt '"..path_.."'"
 			else
 
-				if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
 				allocated_ids[id] = allocated_id
 				
 				hasOneNandoCrypted = true
@@ -301,6 +346,12 @@ function allocateNewMod(element, elementType, id)
 		end
 
 		return false, reason
+	end
+
+	-- Lod Distance
+	if lodDistance then
+		print(id, "lodDistance", lodDistance)
+		engineSetModelLODDistance(allocated_id, lodDistance)
 	end
 	
 	if isTimer(freeIdTimers[id]) then killTimer(freeIdTimers[id]) end
@@ -893,7 +944,7 @@ function receiveModList(modList)
 	-- 	end
 	-- end
 	-- outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
-	
+
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle

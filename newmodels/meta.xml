@@ -16,30 +16,35 @@
     <!-- ...... Mod Files ... START ...... -->
 
     <!-- peds -->
-    <file src="models/20001.dff"/>
-    <file src="models/20001.txd"/>
-    <file download="false" src="models/20002.dff"/>
-    <file download="false" src="models/20002.txd"/>
-    <file src="models/20003.dff"/>
-    <file src="models/20003.txd"/>
+    <file src="models/peds/20001.dff"/>
+    <file src="models/peds/20001.txd"/>
+    <file src="models/peds/20002.dff" download="false" />
+    <file src="models/peds/20002.txd" download="false" />
+    <file src="models/peds/20003.dff"/>
+    <file src="models/peds/20003.txd"/>
 
     <!-- vehicles -->
-    <file src="models/80001.dff"/>
-    <file src="models/80001.txd"/>
-    <file src="models/80002.dff"/>
-    <file src="models/80002.txd"/>
-    <file src="models/80003.dff"/>
-    <file src="models/80003.txd"/>
-    <file src="models/80004.dff"/>
-    <file src="models/80004.txd"/>
-    <file src="models/80005.dff"/>
-    <file src="models/elegant.dff.nandocrypt"/>
-    <file src="models/elegant.txd.nandocrypt"/>
+    <file src="models/vehicles/80001.dff"/>
+    <file src="models/vehicles/80001.txd"/>
+    <file src="models/vehicles/80002.dff"/>
+    <file src="models/vehicles/80002.txd"/>
+    <file src="models/vehicles/80003.dff"/>
+    <file src="models/vehicles/80003.txd"/>
+    <file src="models/vehicles/80004.dff"/>
+    <file src="models/vehicles/80004.txd"/>
+    <file src="models/vehicles/80005.dff"/>
+    <file src="models/vehicles/elegant.dff.nandocrypt"/>
+    <file src="models/vehicles/elegant.txd.nandocrypt"/>
 
     <!-- objects -->
-    <file src="models/50001.dff"/>
-    <file src="models/50001.txd"/>
-    <file src="models/50001.col"/>
+    <file src="models/objects/50001.dff"/>
+    <file src="models/objects/50001.txd"/>
+    <file src="models/objects/50001.col"/>
+    <file src="models/objects/wrecked_car.txd"/>
+    <file src="models/objects/wrecked_car1.dff"/>
+    <file src="models/objects/wrecked_car1.col"/>
+    <file src="models/objects/wrecked_car2.dff"/>
+    <file src="models/objects/wrecked_car2.col"/>
 
     <!-- ...... Mod Files ... END ...... -->
 

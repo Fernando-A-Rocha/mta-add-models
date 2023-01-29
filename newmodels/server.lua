@@ -315,8 +315,22 @@ function doModListChecks()
 				return false
 			end
 
-			-- 4.  verify files exist
+			-- 4.  verify files exist with optional params
 			local ignoreTXD, ignoreDFF, ignoreCOL = mod.ignoreTXD, mod.ignoreDFF, mod.ignoreCOL
+
+			if ignoreTXD ~= nil and type(ignoreTXD) ~= "boolean" then
+				modCheckMessage("Invalid param ignoreTXD value '"..tostring(ignoreTXD).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
+			if ignoreDFF ~= nil and type(ignoreDFF) ~= "boolean" then
+				modCheckMessage("Invalid param ignoreDFF value '"..tostring(ignoreDFF).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
+			if ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean" then
+				modCheckMessage("Invalid param ignoreCOL value '"..tostring(ignoreCOL).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
+
 			local paths
 			local path = mod.path
 			if type(path)=="table" then
@@ -345,10 +359,28 @@ function doModListChecks()
 					end
 				end
 			end
+
+			-- 5. verify optional param: metaDownloadFalse
+			if mod.metaDownloadFalse ~= nil and type(mod.metaDownloadFalse) ~= "boolean" then
+				modCheckMessage("Invalid param metaDownloadFalse value '"..tostring(mod.metaDownloadFalse).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
+
+			-- 6. verify optional param: disableAutoFree
+			if mod.disableAutoFree ~= nil and type(mod.disableAutoFree) ~= "boolean" then
+				modCheckMessage("Invalid param disableAutoFree value '"..tostring(mod.disableAutoFree).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
+
+			-- 7. verify optional param: lodDistance
+			if mod.lodDistance ~= nil and type(mod.lodDistance) ~= "number" then
+				modCheckMessage("Invalid param lodDistance value '"..tostring(mod.lodDistance).."' (expected number) for mod ID "..mod.id)
+				return false
+			end
 		end
 	end
 
-	-- 5.  verify file nodes exist in meta.xml
+	-- 8.  verify file nodes exist in meta.xml
 	local metaFile = xmlLoadFile("meta.xml", true)
 	if not metaFile then
 		outputDebugString("STARTUP MOD CHECK: Failed to open meta.xml file", 2)
@@ -580,9 +612,9 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
+		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
 		addExternalMod_IDFilenames(
-			elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, sourceResName
+			elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance, sourceResName
 		)
 	end)
 
@@ -593,7 +625,12 @@ end
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
-function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, fromResourceName) -- [Exported]
+-- [Exported]
+function addExternalMod_IDFilenames(
+	elementType, id, base_id, name, path,
+	ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance,
+	fromResourceName
+)
 
 	local sourceResName
 	if not fromResourceName then
@@ -642,11 +679,20 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
 		return false, "ignoreCOL passed must be true/false"
 	end
-	if (metaDownloadFalse ~= nil) and (not (metaDownloadFalse == true or metaDownloadFalse == false)) then
-		return false, "Incorrect 'metaDownloadFalse' passed, must be true/false"
+	if (metaDownloadFalse ~= nil) and type(metaDownloadFalse) ~= "boolean" then
+		return false, "metaDownloadFalse passed must be true/false"
 	end
 	if not metaDownloadFalse then
 		metaDownloadFalse = false
+	end
+	if (disableAutoFree ~= nil) and type(disableAutoFree) ~= "boolean" then
+		return false, "disableAutoFree passed must be true/false"
+	end
+	if not disableAutoFree then
+		disableAutoFree = false
+	end
+	if (lodDistance ~= nil) and type(lodDistance) ~= "number" then
+		return false, "lodDistance passed must be a number"
 	end
 
 	if string.sub(path, 1,1) ~= ":" then
@@ -682,7 +728,9 @@ function addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignore
 
 	-- Save mod in list
 	modList[elementType][#modList[elementType]+1] = {
-		id=id, base_id=base_id, path=path, name=name, metaDownloadFalse=metaDownloadFalse, srcRes=sourceResName
+		id=id, base_id=base_id, path=path, name=name,
+		metaDownloadFalse=metaDownloadFalse, disableAutoFree=disableAutoFree, lodDistance=lodDistance,
+		srcRes=sourceResName
 	}
 
 	fixModList()
@@ -726,9 +774,9 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 		if type(modInfo) ~= "table" then
 			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
 		end
-		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse = unpack(modInfo)
+		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
 		addExternalMod_CustomFilenames(
-			elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, sourceResName
+			elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance, sourceResName
 		)
 	end)
 
@@ -739,7 +787,12 @@ end
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
-function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, fromResourceName) -- [Exported]
+-- [Exported]
+function addExternalMod_CustomFilenames(
+	elementType, id, base_id, name, path_dff, path_txd, path_col,
+	ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance,
+	fromResourceName
+)
 
 	local sourceResName
 	if not fromResourceName then
@@ -786,12 +839,20 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
 		return false, "ignoreCOL passed must be true/false"
 	end
-
-	if (metaDownloadFalse ~= nil) and (not (metaDownloadFalse == true or metaDownloadFalse == false)) then
-		return false, "Incorrect 'metaDownloadFalse' passed, must be true/false"
+	if (metaDownloadFalse ~= nil) and type(metaDownloadFalse) ~= "boolean" then
+		return false, "metaDownloadFalse passed must be true/false"
 	end
 	if not metaDownloadFalse then
 		metaDownloadFalse = false
+	end
+	if (disableAutoFree ~= nil) and type(disableAutoFree) ~= "boolean" then
+		return false, "disableAutoFree passed must be true/false"
+	end
+	if not disableAutoFree then
+		disableAutoFree = false
+	end
+	if (lodDistance ~= nil) and type(lodDistance) ~= "number" then
+		return false, "lodDistance passed must be a number"
 	end
 
 
@@ -862,7 +923,9 @@ function addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff
 	-- Save mod in list
 	modList[elementType][#modList[elementType]+1] = {
 		-- path will be a table here, interpreted by the client differently
-		id=id, base_id=base_id, path=paths, name=name, metaDownloadFalse=metaDownloadFalse, srcRes=sourceResName
+		id=id, base_id=base_id, path=paths, name=name,
+		metaDownloadFalse=metaDownloadFalse, disableAutoFree=disableAutoFree, lodDistance=lodDistance,
+		srcRes=sourceResName
 	}
 
 	fixModList()

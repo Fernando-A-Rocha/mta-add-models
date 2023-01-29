@@ -93,6 +93,13 @@ This is useful for those who want to keep the models private & prevent people fr
 
 Use the KDFF tool to generate a `.col` file from a given `.dff` model ([tutorial here](https://github.com/Fernando-A-Rocha/mta-samp-maploader/blob/main/.github/docs/TUTORIAL_COL.md)).
 
+## Credits
+
+The resources `newmodels`, `newmodels-example` and `sampobj_reloaded` include mods from the following sources:
+
+- [SA-MP](https://dev.prineside.com/en/gtasa_samp_model_id/tag/2-sa-mp/)
+- [SA Proper Fixes (MixMods)](https://www.mixmods.com.br/2022/08/sa-proper-fixes/)
+
 ## Final Note
 
 Feel free to update the documentation in this repository and contribute to the code via pull requests.
