@@ -67,7 +67,7 @@ end
 
 function isDefaultID(elementType, id) -- [Exported]
 	id = tonumber(id)
-	if not id then return end
+	if not id then return false end
 
 	if not elementType then -- check all IDs
 		for k,id2 in pairs(pedIds) do
