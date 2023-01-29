@@ -14,7 +14,6 @@ _createVehicle = createVehicle
 _createPed = createPed
 _createPickup = createPickup
 _setPickupType = setPickupType
-local thisResource = getThisResource()
 local resources = {}
 local isClientFile = isElement(localPlayer)
 local dataNames = {
@@ -26,14 +25,14 @@ local dataNames = {
 }
 local baseDataName = exports.newmodels:getBaseModelDataName()
 
-function setElementResource(element, resource)
+function setElementResource(element, theResource)
 	if isElement(element) then
-		resource = resource or thisResource
-		if type(resources[resource]) ~= "table" then
-			resources[resource] = {}
+		theResource = theResource or resource
+		if type(resources[theResource]) ~= "table" then
+			resources[theResource] = {}
 		end
-		table.insert(resources[resource], element)
-		setElementParent(element, getResourceDynamicElementRoot(resource) )
+		table.insert(resources[theResource], element)
+		setElementParent(element, getResourceDynamicElementRoot(theResource) )
 	end
 end
 

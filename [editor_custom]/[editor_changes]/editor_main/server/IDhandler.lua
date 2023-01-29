@@ -47,7 +47,7 @@ local nameFromCategoryID = {
 function assignID ( theElement )
 	local creatorResource = edf.edfGetCreatorResource(theElement)
 	if creatorResource == edf.res then
-		creatorResource = thisResource
+		creatorResource = resource
 	end
 
 	local elementType = getElementType( theElement )

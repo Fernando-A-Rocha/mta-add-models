@@ -15,26 +15,6 @@
 ---------------------------- TESTING PURPOSES ONLY BELOW ----------------------------
 ------------------- YOU CAN REMOVE THE FOLLOWING FROM THE RESOURCE ------------------
 
--- [Optional] Start/Stop Messages:
-if START_STOP_MESSAGES then
-
-	addEventHandler( "onResourceStart", resourceRoot, -- startup message
-	function (startedResource)
-		local version = getResourceInfo(startedResource, "version") or false
-		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175started", root,255,255,255, true)
-	end)
-	addEventHandler( "onResourceStop", resourceRoot, -- startup message
-	function (stoppedResource)
-		local version = getResourceInfo(stoppedResource, "version") or false
-		outputChatBox("#ffc175[mta-add-models] #ababab"..resName..(version and (" "..version) or ("")).." #ffc175stopped", root,255,255,255, true)
-	end)
-end
-
-addCommandHandler("newmodels", function(thePlayer)
-		local version = getResourceInfo(getThisResource(), "version") or false
-		outputChatBox("#ffc175[mta-add-models] #ffffff"..resName..(version and (" "..version) or ("")).." #ffc175is loaded", thePlayer, 255, 255, 255, true)
-end, false,false)
-
 local function setElementModelSafe(element, id)
 	local elementType = getElementType(element)
 	local dataName = dataNames[elementType]
@@ -50,7 +30,7 @@ local function setElementModelSafe(element, id)
 	end
 
 	if isCustom then
-		setElementData(element, baseDataName, mod.base_id)
+		setElementData(element, baseDataName, baseModel)
 		setElementData(element, dataName, id)
 	
 	else

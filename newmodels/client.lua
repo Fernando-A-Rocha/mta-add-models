@@ -6,11 +6,13 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
--- Custom events:
-addEvent(resName..":receiveModList", true)
-addEvent(resName..":receiveVehicleHandling", true)
+-- Events other resources can handle:
 addEvent(resName..":onModListReceived", true)
 addEvent(resName..":onModFileDownloaded", true)
+
+-- Internal events:
+addEvent(resName..":receiveModList", true)
+addEvent(resName..":receiveVehicleHandling", true)
 
 
 allocated_ids = {} -- [new id] = allocated id
@@ -155,6 +157,8 @@ function allocateNewMod(element, elementType, id)
 		end
 	end
 
+	local lodDistance = foundMod.lodDistance
+
 	if (ENABLE_NANDOCRYPT) then
 		-- Inspired by https://github.com/Fernando-A-Rocha/mta-nandocrypt/tree/main/nando_crypt-example
 
@@ -204,6 +208,8 @@ function allocateNewMod(element, elementType, id)
 					nc_waiting[allocated_id]["count"] = nc_waiting[allocated_id]["count"] + 1
 					if (nc_waiting[allocated_id]["count"] == nc_waiting[allocated_id]["total"]) then
 
+						local oneFailed = false
+
 						for k2, v2 in pairs(paths2) do
 							local t2,path2 = unpack(v2)
 							local data2 = nc_waiting[allocated_id][t2]
@@ -211,19 +217,57 @@ function allocateNewMod(element, elementType, id)
 							local model
 							if t2 == "txd" then
 								model = engineLoadTXD(data2)
-								engineImportTXD(model,allocated_id)
-								-- print("Loaded", "TXD", "Path "..path2)
+								if model then
+									if not engineImportTXD(model,allocated_id) then
+										oneFailed = true
+									end
+								else
+									oneFailed = true
+								end
 							elseif t2 == "dff" then
 								model = engineLoadDFF(data2, allocated_id)
-								engineReplaceModel(model,allocated_id)
-								-- print("Loaded", "DFF", "Path "..path2)
+								if model then
+									if not engineReplaceModel(model,allocated_id) then
+										oneFailed = true
+									end
+								else
+									oneFailed = true
+								end
 							elseif t2 == "col" then
 								model = engineLoadCOL(data2)
-								engineReplaceCOL(model, allocated_id)
-								-- print("Loaded", "COL", "Path "..path2)
+								if model then
+									if not engineReplaceCOL(model, allocated_id) then
+										oneFailed = true
+									end
+								else
+									oneFailed = true
+								end
 							end
-							table.insert(model_elements[allocated_id], model)
+							if model then
+								if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
+								table.insert(model_elements[allocated_id], model)
+							end
 						end
+
+						if oneFailed then
+
+							for _, model in ipairs(model_elements[allocated_id]) do
+								if isElement(model) then
+									destroyElement(model) -- free memory
+								end
+							end
+							model_elements[allocated_id] = nil
+
+							outputDebugString("Failed to apply TXD/DFF/COL of NandoCrypted mod ID "..id, 1)
+						else
+
+							-- Lod Distance
+							if lodDistance then
+								engineSetModelLODDistance(allocated_id, lodDistance)
+							end
+
+						end
+						
 						-- print("Finished", "A-AID "..allocated_id, "Total files "..nc_waiting[allocated_id]["total"])
 						nc_waiting[allocated_id] = nil
 					end
@@ -234,7 +278,6 @@ function allocateNewMod(element, elementType, id)
 				return false, "Failed: NandoCrypt failed to decrypt '"..path_.."'"
 			else
 
-				if not model_elements[allocated_id] then model_elements[allocated_id] = {} end
 				allocated_ids[id] = allocated_id
 				
 				hasOneNandoCrypted = true
@@ -284,6 +327,7 @@ function allocateNewMod(element, elementType, id)
 	or ((colPath) and (not colworked))
 	)
 	then
+		engineResetModelLODDistance(allocated_id)
 		engineFreeModel(allocated_id)
 		if txdmodel then destroyElement(txdmodel) end -- free memory
 		if dffmodel then destroyElement(dffmodel) end -- free memory
@@ -301,6 +345,12 @@ function allocateNewMod(element, elementType, id)
 		end
 
 		return false, reason
+	end
+
+	-- Lod Distance
+	if lodDistance then
+		print(id, "lodDistance", lodDistance)
+		engineSetModelLODDistance(allocated_id, lodDistance)
 	end
 	
 	if isTimer(freeIdTimers[id]) then killTimer(freeIdTimers[id]) end
@@ -419,6 +469,7 @@ end
 
 function freeAllocatedID(allocated_id, id, theEvent)
 
+	engineResetModelLODDistance(allocated_id)
 	local worked = engineFreeModel(allocated_id)
 	for k, element in pairs(model_elements[allocated_id] or {}) do
 		if isElement(element) then
@@ -445,8 +496,8 @@ function startFreeingMod(id2, checkStreamedIn, theEvent)
 
 			local oneStreamedIn = false
 			for elementType, name in pairs(dataNames) do
-				for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do --streamed in only
-					if getElementData(el, name) == id then
+				for k,el in ipairs(getElementsByType(elementType)) do
+					if isElementStreamedIn(el) and getElementData(el, name) == id then
 						oneStreamedIn = true
 						break
 					end
@@ -479,9 +530,9 @@ end
 function isModAllocated(id)
 	id = tonumber(id)
 	if not id then
-		return false
+		return
 	end
-	return allocated_ids[id] and true or false
+	return allocated_ids[id]
 end
 
 -- [Exported]
@@ -685,27 +736,29 @@ function updateStreamedElements(thisId)
 	local freed = {}
 
 	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
+		for k,el in ipairs(getElementsByType(elementType)) do
+			if isElementStreamedIn(el) then
 
-			local id = tonumber(getElementData(el, name))
-			if id and not freed[id] then
+				local id = tonumber(getElementData(el, name))
+				if id and not freed[id] then
 
-				if (not thisId) or (id == thisId) then
+					if (not thisId) or (id == thisId) then
 
-					local found = false
+						local found = false
 
-					for j,mod in pairs(received_modlist[elementType]) do
-						if mod.id == id then
-							found = true
-							break
+						for j,mod in pairs(received_modlist[elementType]) do
+							if mod.id == id then
+								found = true
+								break
+							end
 						end
-					end
-					if not found then -- means the mod was removed by a serverside script
+						if not found then -- means the mod was removed by a serverside script
 
-						freed[id] = true
-						startFreeingMod(id, false, "updateStreamedElements => mod gone")
-					else
-						updateStreamedInElement(el)
+							freed[id] = true
+							startFreeingMod(id, false, "updateStreamedElements => mod gone")
+						else
+							updateStreamedInElement(el)
+						end
 					end
 				end
 			end
@@ -734,7 +787,7 @@ function setModFileReady(modId, path)
 				if all then
 					
 					received_modlist[elementType][k].allReady = true
-					triggerEvent(resName..":onModFileDownloaded", root, mod.id)
+					triggerEvent(resName..":onModFileDownloaded", localPlayer, mod.id)
 					
 					-- For set element custom model waiting:
 					for element, id in pairs(awaitingSetModel) do
@@ -772,7 +825,7 @@ function onDownloadFailed(modId, path)
 end
 
 function handleDownloadFinish(fileName, success, requestRes)
-	if requestRes ~= getThisResource() then return end
+	if requestRes ~= resource then return end
 	if not currDownloading then return end
 	local modId, path = unpack(currDownloading)
 
@@ -834,10 +887,12 @@ end
 
 function forceDownloadMod(id) -- [Exported]
 	id = tonumber(id)
-	if not id then return false, "id not number" end
+	if not id then
+		return false, "INVALID_ID"
+	end
 	local isCustom, mod, elementType2 = isCustomModID(id)
 	if not isCustom then
-		return false, id.." not a custom mod ID"
+		return false, "NOT_CUSTOM_ID"
 	end
 
 	if not mod.allReady then
@@ -884,10 +939,20 @@ function receiveModList(modList)
 
 	received_modlist = modList
 
+	-- local count = 0
+	-- for elementType, mods in pairs(modList) do
+	-- 	if not (elementType=="player" or elementType=="pickup") then
+	-- 		for _, mod in ipairs(mods) do
+	-- 			count = count + 1
+	-- 		end
+	-- 	end
+	-- end
+	-- outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
+
 	outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle
-	triggerEvent(resName..":onModListReceived", localPlayer)
+	triggerEvent(resName..":onModListReceived", localPlayer, modList)
 
 	if updateElementsInQueue() then
 		updateStreamedElements()
@@ -898,6 +963,7 @@ addEventHandler(resName..":receiveModList", resourceRoot, receiveModList)
 addEventHandler( "onClientResourceStop", resourceRoot, -- free memory on stop
 function (stoppedResource)
 	for id, allocated_id in pairs(allocated_ids) do
+		engineResetModelLODDistance(allocated_id)
 		engineFreeModel(allocated_id)
 	end
 end)
@@ -909,12 +975,12 @@ function (startedResource)
 	-- we need to apply the model on them
 
 	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType, getRootElement(), true)) do
-			updateStreamedInElement(el)
+		for k,el in ipairs(getElementsByType(elementType)) do
+			if isElementStreamedIn(el) then
+				updateStreamedInElement(el)
+			end
 		end
 	end
-
-	triggerLatentServerEvent(resName..":requestModList", resourceRoot)
 end)
 
 local sw, sh = guiGetScreenSize()

@@ -6,8 +6,7 @@
 	/!\ UNLESS YOU KNOW WHAT YOU ARE DOING, NO NEED TO CHANGE THIS FILE /!\
 ]]
 
-thisRes = getThisResource()
-resName = getResourceName(thisRes)
+resName = getResourceName(resource)
 
 _outputDebugString = outputDebugString
 function outputDebugString(text, mode, r,g,b)
@@ -68,7 +67,7 @@ end
 
 function isDefaultID(elementType, id) -- [Exported]
 	id = tonumber(id)
-	if not id then return end
+	if not id then return false end
 
 	if not elementType then -- check all IDs
 		for k,id2 in pairs(pedIds) do
@@ -127,6 +126,7 @@ function isCustomModID(id) -- [Exported]
 	return true, mod, elementType
 end
 
+-- [Exported]
 function isRightModType(et, modEt)
 
 	if et == modEt then
@@ -174,16 +174,6 @@ function verifySetModelArguments(element, elementType, id)
 		return false, "Non-number ID passed"
 	end
 	return true
-end
-
-function table.size ( tab )
-    local length = 0
-    
-    for _ in pairs ( tab ) do
-        length = length + 1
-    end
-    
-    return length
 end
 
 function isCustomVehicle( theVehicle )	

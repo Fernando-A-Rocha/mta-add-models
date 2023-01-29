@@ -3,9 +3,13 @@
 
 **Recommended**: install the [newmodels-engine](/[examples]/newmodels-engine) resource to use some of the functions below.
 
-Remember to check the [General Information/Guide](/.github/docs/MAIN.md) and [Example Resources/Scripts](/[examples]).
+Related:
 
-For more advanced developers, check the [newmodels exported functions](/newmodels/meta.xml) and explore the code which should be readable and easy to understand.
+- [General Information/Guide](/.github/docs/MAIN.md)
+- [Example Resources/Scripts](/[examples])
+- [New-Models in Map Editor](/.github/docs/custom_editor/README.md)
+- [newmodels Functions & Events](/.github/docs/newmodels/FUNCS_EVENTS.md)
+- [newmodels-engine Functions & Events](/.github/docs/newmodels-engine/FUNCS_EVENTS.md)
 
 ## Adding a mod from your own resource
 

@@ -174,7 +174,7 @@ function startUpChecks()
     if addedAny then
 		
 		print("AUTO-META", "Added at least 1 mod file to meta.xml, restarting...")
-        restartResource(getThisResource())
+        restartResource(resource)
 		return false
 	end
 
