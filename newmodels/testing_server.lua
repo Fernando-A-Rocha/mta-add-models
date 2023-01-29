@@ -30,7 +30,7 @@ local function setElementModelSafe(element, id)
 	end
 
 	if isCustom then
-		setElementData(element, baseDataName, mod.base_id)
+		setElementData(element, baseDataName, baseModel)
 		setElementData(element, dataName, id)
 	
 	else
