@@ -4,7 +4,7 @@ Below is a list of all exported functions and custom events defined in `newmodel
 
 ## Exported Functions (**Client & Server**)
 
----
+All shared (clientside & serverside) exported functions are explained here.
 
 ### **getModList**()
 
