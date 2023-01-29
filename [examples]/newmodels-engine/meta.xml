@@ -7,7 +7,7 @@
     <info author="Fernando"
         name="newmodels Engine"
         description="useful functions to make good use of newmodels in your server"
-        version="2.1.0"
+        version="2.2.0"
         type="script" />
     
     <include resource="newmodels" />
