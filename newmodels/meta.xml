@@ -13,9 +13,7 @@
       https://nightly.mtasa.com  -->
     <min_mta_version client="1.5.9-9.21437.0" server="1.5.9-9.21437.0"></min_mta_version>
 
-    <!-- ...... Mod Files ... START ...... -->
-
-    <!-- peds -->
+    <!-- Ped Mods -->
     <file src="models/peds/20001.dff"/>
     <file src="models/peds/20001.txd"/>
     <file src="models/peds/20002.dff" download="false" />
@@ -23,7 +21,7 @@
     <file src="models/peds/20003.dff"/>
     <file src="models/peds/20003.txd"/>
 
-    <!-- vehicles -->
+    <!-- Vehicle Mods -->
     <file src="models/vehicles/80001.dff"/>
     <file src="models/vehicles/80001.txd"/>
     <file src="models/vehicles/80002.dff"/>
@@ -36,7 +34,7 @@
     <file src="models/vehicles/elegant.dff.nandocrypt"/>
     <file src="models/vehicles/elegant.txd.nandocrypt"/>
 
-    <!-- objects -->
+    <!-- Object Mods -->
     <file src="models/objects/50001.dff"/>
     <file src="models/objects/50001.txd"/>
     <file src="models/objects/50001.col"/>
@@ -46,17 +44,22 @@
     <file src="models/objects/wrecked_car2.dff"/>
     <file src="models/objects/wrecked_car2.col"/>
 
-    <!-- ...... Mod Files ... END ...... -->
-
-    <!-- Main Scripts START -->
+    <!-- Config Script -->
     <script type="shared" src="_config.lua"/>
+
+    <!-- Updater Script (optional but recommended) -->
+    <script type="server" src="updater_s.lua"/>
+
+    <!-- Core Scripts -->
     <script type="shared" src="shared.lua"/>
     <script type="server" src="async_s.lua"/>
-    <script type="server" src="updater_s.lua"/>
-    <script type="server" src="mod_list.lua"/>
     <script type="server" src="server.lua"/>
     <script type="client" src="client.lua"/>
 
+    <!-- Serverside Mod List (mods defined in newmodels; optional, you can remove it) -->
+    <script type="server" src="mod_list.lua"/>
+
+    <!-- Exported functions (Client & Server) -->
     <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>
     <export type="shared" function="getBaseModelDataName"/>
@@ -67,26 +70,25 @@
     <export type="shared" function="isRightModType"/>
     <export type="shared" function="checkModelID"/>
 
+    <!-- Exported functions (Server only) -->
     <export type="server" function="addExternalMod_IDFilenames"/>
     <export type="server" function="addExternalMods_IDFilenames"/>
     <export type="server" function="addExternalMod_CustomFilenames"/>
     <export type="server" function="addExternalMods_CustomFileNames"/>
     <export type="server" function="removeExternalMod"/>
 
+    <!-- Exported functions (Client only) -->
     <export type="client" function="isClientReady"/>
     <export type="client" function="isModAllocated"/>
     <export type="client" function="forceAllocate"/>
     <export type="client" function="forceFreeAllocated"/>
     <export type="client" function="forceDownloadMod"/>
     <export type="client" function="isBusyDownloading"/>
-    <!-- Main Scripts END -->
 
     <!-- NandoCrypt plugin script (optional - you can remove it, and edit _config.lua) -->
     <script type="client" src="nando_decrypter"/>
-    <!-- NandoCrypt plugin END -->
 
-    <!-- testing scripts (optional - you can remove them) -->
+    <!-- Testing scripts (optional - you can remove them) -->
     <script type="server" src="testing_server.lua"/>
     <script type="client" src="testing_client.lua"/>
-    <!-- testing scripts END -->
 </meta>
