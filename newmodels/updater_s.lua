@@ -10,7 +10,7 @@ local CHECK_FOR_UPDATES = true -- change this to 'false' if you don't want to ch
 if CHECK_FOR_UPDATES then
 
 	local function outputInfo(msg)
-		msg = "["..string.upper(resName).."] "..msg
+		msg = "["..resName.."] "..msg
 		outputServerLog(msg)
 		outputDebugString(msg, 0, 255,255,255)
 	end

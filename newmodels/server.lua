@@ -213,42 +213,52 @@ local function fixModList()
 	return true
 end
 
-local function modCheckError(text)
-	outputServerLog("["..resName.."] Startup check error: "..text)
+local function modCheckMessage(text)
+	outputServerLog("["..resName.."] Startup Verifications: "..text)
 	outputDebugString(text, 1)
 end
 
 -- verifies modList, because people can fuck up sometimes :)
 function doModListChecks()
 
-	if type(modList) ~= "table" then
-		modCheckError("Table modList is corrupted/missing")
-		return false
+	local corruptedMissing = false
+	if (not modList) or (type(modList) ~= "table") then
+		corruptedMissing = true
+		modList = {}
 	end
 
 	for elementType, name in pairs(dataNames) do
-		
 		if not (
 			elementType == "player"
 			or elementType == "pickup"
 		) then -- exceptions
+
 			local mods1 = modList[elementType]
 			if not mods1 then
-				modCheckError("Missing from modList: "..elementType.." = {},")
-				return false
+				
+				if not corruptedMissing then
+					modCheckMessage("Missing from modList: "..elementType.." = {}, assuming empty")
+				end
+
+				modList[elementType] = {}
 			end
 		end
 	end
 
+	if corruptedMissing then
+		modCheckMessage("'modList' is corrupted/missing, assuming empty mod list")
+		return true -- Pass checks OK
+	end
+
 	-- verify element types
 	-- player & pickup mods are synced with ped and object mods respectively
-	for elementType,mods in pairs(modList) do
+	for elementType, mods in pairs(modList) do
 		if elementType == "player" then
-			modCheckError("Please remove mod from modList: player = {...}, it will be added automatically to match 'ped' mods")
+			modCheckMessage("Please remove mod from modList: player = {...}, it will be added automatically to match 'ped' mods")
 			return false
 		end
 		if elementType == "pickup" then
-			modCheckError("Please remove mod from modList: pickup = {...}, it will be added automatically to match 'object' mods")
+			modCheckMessage("Please remove mod from modList: pickup = {...}, it will be added automatically to match 'object' mods")
 			return false
 		end
 	end
@@ -256,52 +266,52 @@ function doModListChecks()
 	local usedModIds = {}
 	local usedFiles = {}
 
-	for elementType,mods in pairs(modList) do
+	for elementType, mods in pairs(modList) do
 		for _, mod in ipairs(mods) do
 			-- 1.  verify IDs
 			if not tonumber(mod.id) then
-				modCheckError("Invalid mod ID '"..tostring(mod.id).."'")
+				modCheckMessage("Invalid mod ID '"..tostring(mod.id).."'")
 				return false
 			end
 			if mod.id == 0 then
-				modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be != 0")
+				modCheckMessage("Invalid mod ID '"..tostring(mod.id).."', must be != 0")
 				return false
 			end
 			if isDefaultID(false, mod.id) then
-				modCheckError("Invalid mod ID '"..tostring(mod.id).."', must be out of the default GTA:SA ID Range, see shared.lua isDefaultID")
+				modCheckMessage("Invalid mod ID '"..tostring(mod.id).."', must be out of the default GTA:SA ID Range, see shared.lua isDefaultID")
 				return false
 			end
 			if usedModIds[mod.id] then
-				modCheckError("Duplicated mod ID '"..id.."'")
+				modCheckMessage("Duplicated mod ID '"..id.."'")
 				return false
 			end
 			usedModIds[mod.id] = true
 
 			if not tonumber(mod.base_id) then
-				modCheckError("Invalid mod base ID '"..tostring(mod.base_id).."'")
+				modCheckMessage("Invalid mod base ID '"..tostring(mod.base_id).."'")
 				return false
 			end
 			if not isDefaultID(false, mod.base_id) then
-				modCheckError("Invalid mod base ID '"..tostring(mod.base_id).."', must be a default GTA:SA ID")
+				modCheckMessage("Invalid mod base ID '"..tostring(mod.base_id).."', must be a default GTA:SA ID")
 				return false
 			end
 
 			-- 2.  verify name
 			if not mod.name or type(mod.name)~="string" then
 
-				modCheckError("Missing/Invalid mod name '"..tostring(mod.name).."' for mod ID "..mod.id)
+				modCheckMessage("Missing/Invalid mod name '"..tostring(mod.name).."' for mod ID "..mod.id)
 				return false
 			end
 
 			-- 3.  verify path
 			if (not mod.path) then
 
-				modCheckError("Missing mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
+				modCheckMessage("Missing mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
 				return false
 			end
 			if not (type(mod.path)=="string" or type(mod.path)=="table") then
 
-				modCheckError("Invalid mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
+				modCheckMessage("Invalid mod path '"..tostring(mod.path).."' for mod ID "..mod.id)
 				return false
 			end
 
@@ -317,18 +327,18 @@ function doModListChecks()
 			usedFiles[mod.id] = {}
 			for pathType, path2 in pairs(paths) do
 				if type(pathType) ~= "string" then
-					modCheckError("Invalid path type '"..tostring(pathType).."' for mod ID "..mod.id)
+					modCheckMessage("Invalid path type '"..tostring(pathType).."' for mod ID "..mod.id)
 					return false
 				end
 				if type(path2) ~= "string" then
-					modCheckError("Invalid file path '"..tostring(pathType).."' for mod ID "..mod.id)
+					modCheckMessage("Invalid file path '"..tostring(pathType).."' for mod ID "..mod.id)
 					return false
 				end
 				if (not ignoreTXD and pathType == "txd")
 				or (not ignoreDFF and pathType == "dff")
 				or ((not ignoreCOL) and elementType == "object" and pathType == "col") then
 					if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
-						modCheckError("File not found: '"..tostring(path2).."' or '"..tostring(path2..NANDOCRYPT_EXT).."' for mod ID "..mod.id)
+						modCheckMessage("File not found: '"..tostring(path2).."' or '"..tostring(path2..NANDOCRYPT_EXT).."' for mod ID "..mod.id)
 						return false
 					else
 						usedFiles[mod.id][pathType] = path2
@@ -361,7 +371,7 @@ function doModListChecks()
 			for pathType, path2 in pairs(files) do
 				if (not foundFiles[path2]) and ((ENABLE_NANDOCRYPT) and not foundFiles[path2..NANDOCRYPT_EXT]) then
 					xmlUnloadFile(metaFile)
-					modCheckError("File node not found in meta.xml: '"..tostring(path2).."' or '"..tostring(path2..NANDOCRYPT_EXT).."' for mod ID "..modId)
+					modCheckMessage("File node not found in meta.xml: '"..tostring(path2).."' or '"..tostring(path2..NANDOCRYPT_EXT).."' for mod ID "..modId)
 					return false
 				end
 			end
@@ -371,7 +381,7 @@ function doModListChecks()
 	end
 	
 	fixModList()
-	return true
+	return true -- Pass checks OK
 end
 
 addEventHandler( "onResourceStart", resourceRoot, 

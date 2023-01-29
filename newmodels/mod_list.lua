@@ -2,21 +2,23 @@
 	Author: https://github.com/Fernando-A-Rocha
 
 	mod_list.lua
-	
-	Default mods are defined here
 
-	You can change the 'modsFolder' and 'modsList' variables
 	
-	If you don't want to have any mods, and instead add your mods with other resources,
-	then use the commented 'modList' array below.
+	Default mods are defined here in 'modList'.
+
+	You can change the 'modsFolder' to any folder name, and use more variables to organize storage.
+	
+	If you to add your mods with other resources (recommended) then you can delete this file.
+	The server will assume an empty modList.
 ]]
 
+-- optional, for organization purposes
 local modsFolder = "models/"
 
 modList = {
 	
 	-- stored in server only, then sent to client on request
-	-- these are the default mods, more than be added via a function
+	-- these are the default mods, more than be added via functions
 	
 	-- element type
 	ped = {
@@ -63,14 +65,3 @@ modList = {
 		{id=50001, base_id=1337, path=modsFolder, name="Engine Hoist"},
 	},
 }
-
-
--- NO DEFAULT MODS CONFIG:
-
---[[
-modList = {
-	ped = {},
-	object = {},
-	vehicle = {},
-}
-]]
