@@ -333,7 +333,7 @@ Checks if the client is busy downloading a mod.
 
 All client-side only custom events **intended for other resources to handle** are explained here.
 
-All event names are prefixed with `resourceName` (e.g. `"newmodels"` which results in `"newmodels:onModListReceived"` for example). This allows you to change the resource name without having to change the event names in your scripts.
+All event names are prefixed with `resourceName` (e.g. `"newmodels"`) + `":"` which results in `"newmodels:onModListReceived"` for example. This allows you to change the resource name without having to change the event names in your scripts.
 
 ---
 
