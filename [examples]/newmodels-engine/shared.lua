@@ -28,11 +28,11 @@ local baseDataName = exports.newmodels:getBaseModelDataName()
 function setElementResource(element, theResource)
 	if isElement(element) then
 		theResource = theResource or resource
-		if type(resources[resource]) ~= "table" then
-			resources[resource] = {}
+		if type(resources[theResource]) ~= "table" then
+			resources[theResource] = {}
 		end
-		table.insert(resources[resource], element)
-		setElementParent(element, getResourceDynamicElementRoot(resource) )
+		table.insert(resources[theResource], element)
+		setElementParent(element, getResourceDynamicElementRoot(theResource) )
 	end
 end
 

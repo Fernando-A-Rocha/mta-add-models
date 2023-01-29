@@ -256,10 +256,6 @@ function allocateNewMod(element, elementType, id)
 							end
 							model_elements[allocated_id] = nil
 
-							if txdmodel then  end 
-							if dffmodel then destroyElement(dffmodel) end -- free memory
-							if colmodel then destroyElement(colmodel) end -- free memory
-
 							outputDebugString("Failed to apply TXD/DFF/COL of NandoCrypted mod ID "..id, 1)
 						else
 
