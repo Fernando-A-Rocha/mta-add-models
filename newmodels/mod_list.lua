@@ -5,14 +5,36 @@
 
 	
 	Default mods are defined here in 'modList'.
-
-	You can change the 'modsFolder' to any folder name, and use more variables to organize storage.
 	
 	If you to add your mods with other resources (recommended) then you can delete this file.
-	The server will assume an empty modList.
+		The server will assume an empty modList.
 ]]
 
--- optional, for organization purposes
+-- ....................................... modList explained .......................................
+
+-- 'id' must be unique and out of the default GTA (& preferrably SA-MP too) ID ranges
+
+-- 'base_id' is the model the mod will inherit some properties from
+-- Doesn't make much difference on peds(skins), but it does on vehicles & objects
+
+-- 'path' can be:
+--		a string, in which case it expects files to be named ID.dff or ID.txd in that folder
+-- 		an array(table), in which case it expects an array of file names like {dff="filepath.dff", txd="filepath.txd", col="filepath.col"}
+-- 	All paths defined manually in this file need to be local (this resource)
+-- 	To add a mod from another resource see the examples provided in the documentation.
+
+-- 'name' can be whatever you want (string)
+
+-- + optional parameters:
+
+-- 		'lodDistance' : custom LOD distance in GTA units (number), see possible values https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance
+-- 		'ignoreTXD', 'ignoreDFF', 'ignoreCOL' : if true, the script won't try to load TXD/DFF/COL for the mod
+--		'metaDownloadFalse' : if true, the mod will be only be downloaded when needed (when trying to set model)
+-- 		'disableAutoFree' : if true, the allocated mod ID will not be freed when no element streamed in is no longer using the mod ID
+--  		This causes the mod to stay in memory, be careful when enabling for big mods
+
+
+-- You can change this to any folder(directory) path, and use more variables to organize storage.
 local modsFolder = "models/"
 
 modList = {
@@ -22,27 +44,6 @@ modList = {
 	
 	-- element type
 	ped = {
-
-		-- ID must be unique and out of the default GTA (& preferrably SA-MP too) ID ranges
-
-		-- Base ID is the model the mod will inherit some properties from
-		-- Doesn't have much effect on peds or objects, but has on vehicles
-
-		-- path can be:
-		--		a string, in which case it expects files to be named ID.dff or ID.txd in that folder
-		-- 		an array, in which case it expects an array of file names like {dff="filepath.dff", txd="filepath.txd"}
-		--
-		-- 	All paths defined manually in this file need to be local (this resource)
-		-- 	To add a mod from another resource see the examples provided in the documentation.
-
-		-- name can be whatever you want (string)
-
-		-- + optional parameters:
-		-- 		ignoreTXD, ignoreDFF, ignoreCOL : if true, the script won't try to load TXD/DFF/COL for the mod
-		--		metaDownloadFalse : if true, the mod will be only be downloaded when needed (when trying to set model)
-		-- 		disableAutoFree: if true, the allocated mod ID will not be freed when no element streamed in is no longer using the mod ID
-		--  		This causes the mod to stay in memory, be careful when enabling for big mods
-
 
 		{id=20001, base_id=1, path=modsFolder, name="Mafioso 1"},
 		{id=20003, base_id=1, path=modsFolder, name="Mafioso 2"},
