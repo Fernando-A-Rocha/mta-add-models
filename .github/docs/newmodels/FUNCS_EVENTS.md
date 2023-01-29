@@ -6,6 +6,8 @@ Below is a list of all exported functions and custom events defined in `newmodel
 
 All shared (clientside & serverside) exported functions are explained here.
 
+---
+
 ### **getModList**()
 
 **Returns:**
