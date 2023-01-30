@@ -64,7 +64,7 @@ function createTestWindow(version, title, data)
 					cols1.id = guiGridListAddColumn(grid, "ID", 0.2)
 					cols1.name = guiGridListAddColumn(grid, "Name", 0.2)
 					cols1.base_id = guiGridListAddColumn(grid, "Base ID", 0.1)
-					cols1.paths = guiGridListAddColumn(grid, "File Paths", 0.45)
+					cols1.paths = guiGridListAddColumn(grid, "File Paths", 0.8)
 
 					addEventHandler( "onClientGUIDoubleClick", grid, 
 					function (button)
@@ -92,7 +92,7 @@ function createTestWindow(version, title, data)
 					cols2.id = guiGridListAddColumn(grid, "ID", 0.1)
 					cols2.name = guiGridListAddColumn(grid, "Name", 0.15)
 					cols2.base_id = guiGridListAddColumn(grid, "Base ID", 0.1)
-					cols2.paths = guiGridListAddColumn(grid, "File Paths", 0.55)
+					cols2.paths = guiGridListAddColumn(grid, "File Paths", 0.9)
 
 					addEventHandler( "onClientGUIDoubleClick", grid, 
 					function (button)
@@ -277,27 +277,6 @@ function outputStreamedInElements(cmd)
 			total = total + count
 		end
 	end
-
-	-- outputChatBox("TOTAL: "..total,255,126,0)
-	-- for elementType, elements in pairs(tab) do
-			
-	-- 	outputChatBox(elementType..": "..table.size(elements))
-	-- 	local dataName = dataNames[elementType]
-
-	-- 	for k, element in pairs(elements) do
-	-- 		local id = tonumber(getElementData(element, dataName))
-	-- 		if id then
-	-- 			local extra = ""
-	-- 			local allocated_id = allocated_ids[id]
-	-- 			if allocated_id then
-	-- 				extra = " allocated to ID "..allocated_id
-	-- 			end
-	-- 			local x,y,z = getElementPosition(element)
-	-- 			local int,dim = getElementInterior(element), getElementDimension(element)
-	-- 			outputChatBox(" - Model ID "..id..extra.." ("..x..", "..y..", "..z.." | int: "..int..", dim: "..dim..")",255,194,14)
-	-- 		end
-	-- 	end
-	-- end
 
 	triggerEvent(resName..":openTestWindow", resourceRoot, "selements", "Total "..total.." streamed mod-compatible elements", tab)
 end

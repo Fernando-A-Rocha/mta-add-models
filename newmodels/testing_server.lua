@@ -148,23 +148,14 @@ addCommandHandler("makevehicle", makeVehicleCmd, false, false)
 
 function listModsCmd(thePlayer, cmd)
 
-	-- outputChatBox("List of defined mods:", thePlayer,255,126,0)
 	local count = 0
-
 	for elementType, mods in pairs(modList) do
-		
-		if elementType ~= "player" then -- don't repeat
-
-			-- outputChatBox(elementType.." mods:", thePlayer,255,194,100)
-
+		if not (elementType == "player" or elementType == "pickup") then -- don't repeat
 			for k, mod in pairs(mods) do
-				-- outputChatBox("ID "..mod.id.." - "..mod.name, thePlayer,255,194,14)
 				count = count + 1
 			end
 		end
 	end
-
-	-- outputChatBox("Total: "..count, thePlayer,255,255,255)
 
 	triggerClientEvent(thePlayer, resName..":openTestWindow", resourceRoot, "listmods", "Total "..count.." Mods", modList)
 end

@@ -55,6 +55,11 @@ function (startedResource)
 		end
 	end
 
+	--[[
+		This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds
+		So don't assume that they've all been added immediately after the function returns true
+		Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added
+	]]
 	local worked, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
 	if not worked then
 		outputDebugString("[newmodels-example] Failed to add models: "..tostring(reason), 0, 255,110,61)

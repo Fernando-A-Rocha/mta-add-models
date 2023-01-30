@@ -25,16 +25,17 @@ You have at your disposal the following exported functions, [see code to underst
 Adding mods from other resources (ID.dff, ID.txd, ID.col):
 
 - `addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL)`
-- `addExternalMods_IDFilenames(list)` uses the function above^
+- `addExternalMods_IDFilenames(list_of_mods)` uses the function above^
 
 Adding mods from other resources (custom filenames):
 
 - `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL)`
-- `addExternalMods_CustomFileNames(list)` uses the function above^
+- `addExternalMods_CustomFileNames(list_of_mods)` uses the function above^
 
 Removing a mod from the `modList` which was added by another resource:
 
 - `removeExternalMod(id)`
+- `removeExternalMods(list_of_ids)`
 
 ### Applying New Model IDs
 

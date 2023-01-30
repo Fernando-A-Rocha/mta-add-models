@@ -532,13 +532,15 @@ function (stoppedResource, wasDeleted)
 	local stoppedResName = getResourceName(stoppedResource)
 	local delCount = 0
 	for elementType,mods in pairs(modList) do
-		for k,mod in pairs(mods) do
-			local srcRes = mod.srcRes
-			if srcRes then
-				if stoppedResName == srcRes then
-					-- delete mod added by resource that was just stopped
-					modList[elementType][k] = nil
-					delCount = delCount + 1
+		if not (elementType=="player" or elementType=="pickup") then
+			for k,mod in pairs(mods) do
+				local srcRes = mod.srcRes
+				if srcRes then
+					if stoppedResName == srcRes then
+						-- delete mod added by resource that was just stopped
+						table.remove(modList[elementType], k)
+						delCount = delCount + 1
+					end
 				end
 			end
 		end
@@ -593,6 +595,10 @@ addEventHandler(resName..":resetElementModel", resourceRoot, resetElementModel)
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
 	With this one you can just pass a table of mods and it calls that function for you
+
+	This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds.
+	So don't assume that they've all been added immediately after the function returns true.
+	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
 function addExternalMods_IDFilenames(list) -- [Exported]
 	if type(list) ~= "table" then
@@ -758,6 +764,10 @@ end
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
 	With this one you can just pass a table of mods and it calls that function for you
+
+	This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds.
+	So don't assume that they've all been added immediately after the function returns true.
+	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
 function addExternalMods_CustomFileNames(list) -- [Exported]
 	if type(list) ~= "table" then
@@ -950,6 +960,36 @@ function addExternalMod_CustomFilenames(
 	return true
 end
 
+
+--[[
+	This is an async function: mods in the list of IDs will be removed gradually and if you have too many it may take several seconds.
+	So don't assume that they've all been removed immediately after the function returns true.
+]]
+function removeExternalMods(list) -- [Exported]
+
+	if type(list) ~= "table" then
+		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
+	end
+	if not sourceResource then
+		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	end
+	local sourceResName = getResourceName(sourceResource)
+	if sourceResName == resName then
+		return false, "This command is meant to be called from outside resource '"..resName.."'"
+	end
+	for _, id in ipairs(list) do
+		if type(id) ~= "number" then
+			return false, "Missing/Invalid 'id' number passed: "..tostring(modInfo)
+		end
+	end
+
+	Async:foreach(list, function(id)
+		removeExternalMod(id)
+	end)
+
+	return true
+end
+
 function removeExternalMod(id) -- [Exported]
 
 	if not tonumber(id) then
@@ -964,10 +1004,7 @@ function removeExternalMod(id) -- [Exported]
 					local sourceResName = mod.srcRes
 					if sourceResName then
 					
-						outputDebugString("Removed "..elementType.." mod ID "..id, 0, 211, 255, 89)
-					
-						modList[elementType][k] = nil	
-						
+						table.remove(modList[elementType], k)
 						fixModList()
 
 						-- Don't spam chat/debug when mass adding/removing mods

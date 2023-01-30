@@ -174,6 +174,8 @@ Adds a new external mod which uses ID file names (e.g. "models/50001.txd") to th
 
 Adds a list of new external mods which use ID file names to the mod list. See the function above for the arguments.
 
+**NOTE**: This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds. So don't assume that they've all been added immediately after the function returns true. Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
+
 **Required arguments**:
 
 - `list`: A table (e.g. `{ {"vehicle", 80001, 400, "My Custom Vehicle", "models/"}, {"object", 50001, 1337, "My Custom Object", "models/"} }`)
@@ -217,6 +219,8 @@ Adds a new external mod which uses custom file names (e.g. "models/my_custom_obj
 
 Adds a list of new external mods which use custom file names to the mod list. See the function above for the arguments.
 
+**NOTE**: This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds. So don't assume that they've all been added immediately after the function returns true. Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
+
 **Required arguments**:
 
 - `list`: A table (e.g. `{ {"vehicle", 20001, 400, "My Custom Vehicle", "models/my_custom_vehicle.dff", "models/my_custom_vehicle.txd"}, {"object", 50001, 1337, "My Custom Object", "models/my_custom_object.dff", "models/my_custom_object.txd", "models/my_custom_object.col"} }`)
@@ -238,6 +242,22 @@ Removes an external mod from the mod list.
 **Returns**:
 
 - a `boolean` which is **true** if the mod was removed successfully [**OR**] **false** if not
+
+---
+
+### **removeExternalMods**(`list`)
+
+Removes a list of external mods from the mod list.
+
+**NOTE**: This is an async function: mods in the list of IDs will be removed gradually and if you have too many it may take several seconds. So don't assume that they've all been removed immediately after the function returns true.
+
+**Required arguments**:
+
+- `list`: A table (e.g. `{50001, 50002, 50003}`)
+
+**Returns**:
+
+- a `boolean` which is **true** if the mods started being removed [**OR**] **false** if not
 
 ---
 
