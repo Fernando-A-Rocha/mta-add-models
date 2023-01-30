@@ -497,9 +497,12 @@ function startFreeingMod(id2, checkStreamedIn, theEvent)
 			local oneStreamedIn = false
 			for elementType, name in pairs(dataNames) do
 				for k,el in ipairs(getElementsByType(elementType)) do
-					if isElementStreamedIn(el) and getElementData(el, name) == id then
-						oneStreamedIn = true
-						break
+					if isElementStreamedIn(el) then
+						local id_ = tonumber(getElementData(el, name))
+						if id_ == id then
+							oneStreamedIn = true
+							break
+						end
 					end
 				end
 			end

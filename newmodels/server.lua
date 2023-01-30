@@ -958,34 +958,36 @@ function removeExternalMod(id) -- [Exported]
 	id = tonumber(id)
 
 	for elementType,mods in pairs(modList) do
-		for k,mod in pairs(mods) do
-			if mod.id == id then
-				local sourceResName = mod.srcRes
-				if sourceResName then
-				
-					outputDebugString("Removed "..elementType.." mod ID "..id, 0, 211, 255, 89)
-				
-					modList[elementType][k] = nil	
+		if not (elementType=="player" or elementType=="pickup") then
+			for k,mod in pairs(mods) do
+				if mod.id == id then
+					local sourceResName = mod.srcRes
+					if sourceResName then
 					
-					fixModList()
+						outputDebugString("Removed "..elementType.." mod ID "..id, 0, 211, 255, 89)
+					
+						modList[elementType][k] = nil	
+						
+						fixModList()
 
-					-- Don't spam chat/debug when mass adding/removing mods
-					if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
-					
-					if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
-					table.insert(prevent_addrem_spam.rem[sourceResName], true)
+						-- Don't spam chat/debug when mass adding/removing mods
+						if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
+						
+						if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
+						table.insert(prevent_addrem_spam.rem[sourceResName], true)
 
-					prevent_addrem_spam.remtimer = setTimer(function()
-						for rname,mods2 in pairs(prevent_addrem_spam.rem) do
-							outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
-							prevent_addrem_spam.rem[rname] = nil
-							sendModListAllPlayers()
-						end
-					end, 1000, 1)
-					
-					return true
-				else
-					return false, "Mod with ID "..id.." doesn't have a source resource"
+						prevent_addrem_spam.remtimer = setTimer(function()
+							for rname,mods2 in pairs(prevent_addrem_spam.rem) do
+								outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
+								prevent_addrem_spam.rem[rname] = nil
+								sendModListAllPlayers()
+							end
+						end, 1000, 1)
+						
+						return true
+					else
+						return false, "Mod with ID "..id.." doesn't have a source resource"
+					end
 				end
 			end
 		end
