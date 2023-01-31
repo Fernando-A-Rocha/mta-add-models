@@ -9,7 +9,7 @@
 -- Internal events:
 addEvent(resName..":resetElementModel", true)
 addEvent(resName..":updateVehicleProperties", true)
-addEvent(resName..":kickOnDownloadsFail", true)
+addEvent(resName..":onDownloadFailed", true)
 
 local SERVER_READY = false
 local startTickCount = nil
@@ -1033,12 +1033,16 @@ function removeExternalMod(id) -- [Exported]
 	return false, "No mod with ID "..id.." found in modList"
 end
 
-addEventHandler(resName..":kickOnDownloadsFail", resourceRoot, function(modId, path)
-	if not client then return end
+addEventHandler(resName..":onDownloadFailed", resourceRoot, function(kick, times, modId, path)
+    if not client then return end
 
-	outputServerLog("["..resName.."] "..getPlayerName(client).." failed to download '"..path.."' (#"..modId..") too many times (kicked).")
-	kickPlayer(client, "System", "Failed to download '"..path.."' (#"..modId..") too many times.")
+	outputServerLog("["..resName.."] "..getPlayerName(client).." failed to download '"..path.."' (#"..modId..") "..times.." times"..(kick and ", kicking." or "."))
+
+    if kick == true then
+	    kickPlayer(client, "System", "Failed to download '"..path.."' (#"..modId..") "..times.." times.")
+    end
 end)
+
 
 addCommandHandler(string.lower(resName), function(thePlayer)
 		local version = getResourceInfo(resource, "version") or false

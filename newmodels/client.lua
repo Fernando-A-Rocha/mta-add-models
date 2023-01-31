@@ -821,31 +821,34 @@ function onDownloadFailed(modId, path)
 	fileDLTries[path] = fileDLTries[path] + 1
 
 	if fileDLTries[path] == DOWNLOAD_MAX_TRIES then
-		triggerServerEvent(resName..":kickOnDownloadsFail", resourceRoot, modId, path)
-		return true
-	end
-	return false
+		triggerServerEvent(resName..":onDownloadFailed", resourceRoot, true, fileDLTries[path], modId, path)
+		return "KICKED"
+    else
+        triggerServerEvent(resName..":onDownloadFailed", resourceRoot, false, fileDLTries[path], modId, path)
+    end
+	return fileDLTries[path]
 end
 
 function handleDownloadFinish(fileName, success, requestRes)
-	if requestRes ~= resource then return end
 	if not currDownloading then return end
 	local modId, path = unpack(currDownloading)
 
 	currDownloading = nil
 
 	local waitDelay = 50
-
 	if not success then
 
 		outputDebugString("Failed to download mod file: "..tostring(fileName), 1)
-		if onDownloadFailed(modId, path) then
-			return -- Kicked
-		end
+		
+		local result = onDownloadFailed(modId, path)
+		if result == "KICKED" then
+			return
+        elseif result < DOWNLOAD_MAX_TRIES then
 
-		-- place back in queue
-		table.insert(fileDLQueue, 1, {modId, path})
-		waitDelay = 1000
+            -- place back in queue
+            table.insert(fileDLQueue, 1, {modId, path})
+            waitDelay = 1000
+        end
 	else
 		setModFileReady(modId, path)
 	end
@@ -857,7 +860,7 @@ function handleDownloadFinish(fileName, success, requestRes)
 		busyDownloading = false
 	end
 end
-addEventHandler("onClientFileDownloadComplete", root, handleDownloadFinish)
+addEventHandler("onClientFileDownloadComplete", resourceRoot, handleDownloadFinish)
 
 function downloadFirstInQueue()
 	local first = fileDLQueue[1]
@@ -871,20 +874,30 @@ function downloadFirstInQueue()
 		if (SHOW_DOWNLOADING) then addEventHandler("onClientRender", root, showDownloadingDialog) end
 	end
 
-	table.remove(fileDLQueue, 1)
-
 	local modId, path = unpack(first)
 
 	currDownloading = {modId, path}
 
+	table.remove(fileDLQueue, 1)
+
 	if not downloadFile(path) then
 		outputDebugString("Error trying to download file: "..tostring(path), 1)
-		if onDownloadFailed(modId, path) then
-			return -- Kicked
-		end
+		
+		local result = onDownloadFailed(modId, path)
+		if result == "KICKED" then
+			return
+        elseif result < DOWNLOAD_MAX_TRIES then
 
-		-- retry after a bit:
-		setTimer(downloadFile, 1000, 1, path)
+            -- place back in queue
+            table.insert(fileDLQueue, 1, {modId, path})
+            -- retry after a bit:
+            setTimer(function()
+
+                currDownloading = nil
+
+                downloadFirstInQueue() 
+            end, 1000, 1)
+        end
 	end
 end
 
