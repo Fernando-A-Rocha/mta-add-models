@@ -92,4 +92,10 @@
     <!-- Testing scripts (optional - you can remove them) -->
     <script type="server" src="testing_server.lua"/>
     <script type="client" src="testing_client.lua"/>
+
+    <!-- ACL permissions that this resource requires -->
+    <aclrequest>
+        <right name="function.kickPlayer" access="true" />
+        <right name="function.fetchRemote" access="true" />
+    </aclrequest>
 </meta>
