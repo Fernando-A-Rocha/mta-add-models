@@ -12,13 +12,12 @@ If you need help with anything related to this project, please read the correspo
 
 1. Follow the instructions on the [New-Models Editor v2.2.0 release page](https://github.com/Fernando-A-Rocha/mtasa-resources/releases/tag/v2.2.0-newmodels-editor).
 
-2. Make sure you installed `newmodels` in your server properly (tutorial [here](/README.md#install)).
-
-3. Make sure you installed `newmodels` & `newmodels-engine` which you can obtain from the [mta-add-models v2.2.0 release page](https://github.com/Fernando-A-Rocha/mta-add-models/releases/tag/v2.2.0).
+2. Make sure you installed `newmodels` & `newmodels-engine` which you can obtain from the [mta-add-models v2.2.0 release page](https://github.com/Fernando-A-Rocha/mta-add-models/releases/tag/v2.2.0).
+    * Tutorial [here](/README.md#install).
     * Both of these are required for the New-Models Map Editor to work.
     * Make sure you have the right compatible versions of both resources installed.
 
-4. Use **/refresh** command in your server to find the changes.
+3. Use **refresh** command in your server console to apply the resource changes.
 
 ## Usage
 
