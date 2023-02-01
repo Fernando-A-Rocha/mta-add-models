@@ -830,6 +830,7 @@ function onDownloadFailed(modId, path)
 end
 
 function handleDownloadFinish(fileName, success, requestRes)
+	if requestRes ~= resource then return end
 	if not currDownloading then return end
 	local modId, path = unpack(currDownloading)
 
@@ -860,7 +861,7 @@ function handleDownloadFinish(fileName, success, requestRes)
 		busyDownloading = false
 	end
 end
-addEventHandler("onClientFileDownloadComplete", resourceRoot, handleDownloadFinish)
+addEventHandler("onClientFileDownloadComplete", root, handleDownloadFinish)
 
 function downloadFirstInQueue()
 	local first = fileDLQueue[1]
