@@ -138,11 +138,13 @@ function setPickupType(thePickup, theType, id, ammo)
 			return false
 		end
 		if isCustom then
+			setElementData(thePickup, baseDataName, baseModel, not isClientFile)
 			setElementData(thePickup, dataName, id, not isClientFile)
 			return true
 		end
 	end
 
+	setElementData(thePickup, baseDataName, nil, not isClientFile)
 	setElementData(thePickup, dataName, nil, not isClientFile)
 	return _setPickupType(thePickup, theType, id, ammo)
 end
@@ -176,15 +178,13 @@ function setElementModel(element, id)
 		_setElementModel(element, baseModel)
 	end
 
-	local syncData = not isElement(localPlayer)
-
 	if isCustom then
-		setElementData(element, baseDataName, baseModel, syncData)
-		setElementData(element, dataName, id, syncData)
+		setElementData(element, baseDataName, baseModel, not isClientFile)
+		setElementData(element, dataName, id, not isClientFile)
 	
 	else
-		setElementData(element, baseDataName, nil, syncData)
-		setElementData(element, dataName, nil, syncData)
+		setElementData(element, baseDataName, nil, not isClientFile)
+		setElementData(element, dataName, nil, not isClientFile)
 	end
 
 	return true
