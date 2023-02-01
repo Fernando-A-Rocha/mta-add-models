@@ -7,6 +7,10 @@
 		e.g. creating objects, vehicles, peds, pickups with custom models and changing their model
 ]]
 
+-- If you renamed newmodels, make sure to update "include resource" in meta.xml
+-- as well as this variable:
+local newmodelsResourceName = "newmodels"
+
 _getElementModel = getElementModel
 _setElementModel = setElementModel
 _createObject = createObject
@@ -17,13 +21,13 @@ _setPickupType = setPickupType
 local resources = {}
 local isClientFile = isElement(localPlayer)
 local dataNames = {
-	['object'] = exports.newmodels:getDataNameFromType('object'),
-	['vehicle'] = exports.newmodels:getDataNameFromType('vehicle'),
-	['ped'] = exports.newmodels:getDataNameFromType('ped'),
-	['player'] = exports.newmodels:getDataNameFromType('player'),
-	['pickup'] = exports.newmodels:getDataNameFromType('pickup'),
+	['object'] = exports[newmodelsResourceName]:getDataNameFromType('object'),
+	['vehicle'] = exports[newmodelsResourceName]:getDataNameFromType('vehicle'),
+	['ped'] = exports[newmodelsResourceName]:getDataNameFromType('ped'),
+	['player'] = exports[newmodelsResourceName]:getDataNameFromType('player'),
+	['pickup'] = exports[newmodelsResourceName]:getDataNameFromType('pickup'),
 }
-local baseDataName = exports.newmodels:getBaseModelDataName()
+local baseDataName = exports[newmodelsResourceName]:getBaseModelDataName()
 
 function setElementResource(element, theResource)
 	if isElement(element) then
@@ -63,7 +67,7 @@ end
 
 local function createElementSafe(elementType, id, ...)
 
-	local baseModel, isCustom = exports.newmodels:checkModelID(id, elementType)
+	local baseModel, isCustom = exports[newmodelsResourceName]:checkModelID(id, elementType)
 	if tonumber(baseModel) then
 		
 		local element = createElementWithModel(elementType, baseModel, ...)
@@ -129,7 +133,7 @@ function setPickupType(thePickup, theType, id, ammo)
 	local dataName = dataNames["pickup"]
 	theType = tonumber(theType)
 	if theType and theType == 3 then
-		local baseModel, isCustom = exports.newmodels:checkModelID(id, elementType)
+		local baseModel, isCustom = exports[newmodelsResourceName]:checkModelID(id, elementType)
 		if not tonumber(baseModel) then
 			outputCustomError(baseModel, id, elementType)
 			return false
@@ -162,7 +166,7 @@ function setElementModel(element, id)
 	assert(tonumber(id), "Non-number ID passed")
 	local dataName = dataNames[elementType]
 
-	local baseModel, isCustom = exports.newmodels:checkModelID(id, elementType)
+	local baseModel, isCustom = exports[newmodelsResourceName]:checkModelID(id, elementType)
 	if not tonumber(baseModel) then
 		outputCustomError(baseModel, id, elementType)
 		return false
@@ -176,7 +180,7 @@ function setElementModel(element, id)
 	local syncData = not isElement(localPlayer)
 
 	if isCustom then
-		setElementData(element, baseDataName, mod.base_id, syncData)
+		setElementData(element, baseDataName, baseModel, syncData)
 		setElementData(element, dataName, id, syncData)
 	
 	else

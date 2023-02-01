@@ -20,6 +20,10 @@ addCommandHandler("testnewmodelsengine", function(thePlayer)
         setTimer(function()
             print("obj2 set model 1338:", setElementModel(obj2, 1338))
             print("obj2 after: " .. tostring(getElementModel(obj2)))
+            setTimer(function()
+                print("obj2 set model 50001:", setElementModel(obj2, 50001))
+                print("obj2 after: " .. tostring(getElementModel(obj2)))
+            end, 2000, 1)
         end, 2000, 1)
     end
 
