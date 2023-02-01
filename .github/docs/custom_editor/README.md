@@ -14,8 +14,9 @@ If you need help with anything related to this project, please read the correspo
 
 2. Make sure you've installed `newmodels` in your server properly (tutorial [here](/README.md#install)).
 
-3. Make sure you have installed the `newmodels` & `newmodels-engine` resources included which you can obtain from the [latest mta-add-models release](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest).
+3. Make sure you have installed the `newmodels` & `newmodels-engine` resources included which you can obtain from the [mta-add-models v2.2.0 release page](https://github.com/Fernando-A-Rocha/mta-add-models/releases/tag/v2.2.0).
     * Both of these are required for the New-Models Map Editor to work.
+    * Make sure you have the right compatible versions of both resources installed.
 
 4. Use **/refresh** command in your server to find the changes.
 
