@@ -11,8 +11,6 @@ local temp_datas = {
 
 addEventHandler( "onClientRender", root, 
 function ()
-	if not getResourceFromName("newmodels") then return end
-
 	local lx, ly, lz = getCameraMatrix()
 	for elementType, dataName in pairs(temp_datas) do
 		for k,veh in ipairs(getElementsByType(elementType, getRootElement(), true)) do
