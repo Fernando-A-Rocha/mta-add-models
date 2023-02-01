@@ -7,8 +7,7 @@
 		e.g. creating objects, vehicles, peds, pickups with custom models and changing their model
 ]]
 
--- If you renamed newmodels, make sure to update "include resource" in meta.xml
--- as well as this variable:
+-- If you renamed newmodels, make sure to update "include resource" in meta.xml as well as this variable:
 local newmodelsResourceName = "newmodels"
 
 _getElementModel = getElementModel

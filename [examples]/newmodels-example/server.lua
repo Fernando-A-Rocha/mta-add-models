@@ -16,6 +16,9 @@
 		/testvehicles
 ]]
 
+-- If you renamed newmodels, make sure to update "include resource" in meta.xml as well as this variable:
+local newmodelsResourceName = "newmodels"
+
 local myMods = {
 	-- this is completely a personal choice, you can have your own way of loading mods
 	-- unique ID, type, base model ID or Name, Mod Name, dff path, txd path, col path
@@ -60,7 +63,7 @@ function (startedResource)
 		So don't assume that they've all been added immediately after the function returns true
 		Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added
 	]]
-	local worked, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
+	local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd)
 	if not worked then
 		outputDebugString("[newmodels-example] Failed to add models: "..tostring(reason), 0, 255,110,61)
 		return
@@ -200,7 +203,7 @@ function removeModCmd(thePlayer, cmd, id)
 
 	for k,v in pairs(myMods) do
 		if v[1] == id then
-			local worked, reason = exports.newmodels:removeExternalMod(id)
+			local worked, reason = exports[newmodelsResourceName]:removeExternalMod(id)
 			if not worked then
 				outputDebugString(reason, 0,255, 110, 61)
 			end
@@ -265,8 +268,8 @@ function testVehiclesCmd(thePlayer, cmd)
 	setElementDimension(thePlayer, 0)
 	setElementInterior(thePlayer, 0)
 	local elementType2 = "vehicle"
-	local data_name = exports.newmodels:getDataNameFromType(elementType2)
-	local modList = exports.newmodels:getModList()
+	local data_name = exports[newmodelsResourceName]:getDataNameFromType(elementType2)
+	local modList = exports[newmodelsResourceName]:getModList()
 	for elementType, mods in pairs(modList) do
 		if elementType == elementType2 then
 			for k,mod in pairs(mods) do

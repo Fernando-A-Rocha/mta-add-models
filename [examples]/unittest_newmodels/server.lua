@@ -2,6 +2,9 @@
    Resource for Unit Tests
 ]]
 
+-- If you renamed newmodels, make sure to update "include resource" in meta.xml as well as this variable:
+local newmodelsResourceName = "newmodels"
+
 math.randomseed(getRealTime().timestamp)
 
 addCommandHandler("bb", function(player) setElementPosition(player, 5,5,3.5) end, false, false)
@@ -28,7 +31,7 @@ function test1()
    local ped = createPed(280, 0, 0, 5)
    setTimer(function()
       if ped then
-         local data_name = exports.newmodels:getDataNameFromType("ped")
+         local data_name = exports[newmodelsResourceName]:getDataNameFromType("ped")
          if getElementData(ped, data_name) then
             setElementModel(ped, math.random(162,167))
          else
@@ -41,7 +44,7 @@ end
 --OK
 function test2()
    print("EXAMPLE PED TEST 2")
-   local data_name = exports.newmodels:getDataNameFromType("ped")
+   local data_name = exports[newmodelsResourceName]:getDataNameFromType("ped")
    local ped = createPed(10, 0, 0, 4)
    setTimer(setElementData, 1000, 1, ped , data_name, 20001)
    setTimer(setElementPosition, 2500, 1, ped , 3000, 3000, 3000)
@@ -53,7 +56,7 @@ end
 --OK
 function test3()
    print("EXAMPLE OBJECT TEST 1")
-   local data_name = exports.newmodels:getDataNameFromType("object")
+   local data_name = exports[newmodelsResourceName]:getDataNameFromType("object")
    local object = createObject(1271, 0, 10, 4)
    setTimer(setElementData, 1000, 1, object, data_name, 50001)
    setTimer(setElementPosition, 2500, 1, object, 3000, 3000, 3000)
@@ -63,7 +66,7 @@ end
 --OK
 function test4()
    print("EXAMPLE OBJECT TEST 2")
-   local data_name = exports.newmodels:getDataNameFromType("object")
+   local data_name = exports[newmodelsResourceName]:getDataNameFromType("object")
    local object = createObject(1271, 10, 10, 4)
    setTimer(setElementData, 1000, 1, object, data_name, 50001)
    setTimer(setElementPosition, 2500, 1, object, 3000, 3000, 3000)
@@ -91,7 +94,7 @@ function test5(obj)
    end
    print("EXAMPLE OBJECT TEST 3")
    local object = obj or createObject(1271, 0, 0, 4)
-   local data_name = exports.newmodels:getDataNameFromType("object")
+   local data_name = exports[newmodelsResourceName]:getDataNameFromType("object")
    setTimer(setElementData, 1000, 1, object, data_name, 50001)
    setTimer(setElementPosition, 2500, 1, object, 3000, 3000, 3000)
 
@@ -108,9 +111,9 @@ function test6()
    print("VEHICLE EXAMPLE TEST")
    local x,y,z, rx,ry,rz, int,dim = 0,0,5, 0,0,0, 0,0
    local handling = { ["engineAcceleration"] = 50, ["brakeBias"] = 1, }
-   local data_name = exports.newmodels:getDataNameFromType("vehicle")
+   local data_name = exports[newmodelsResourceName]:getDataNameFromType("vehicle")
    for k,vehID in pairs({80001,80002}) do
-      if exports.newmodels:isCustomModID(vehID) then
+      if exports[newmodelsResourceName]:isCustomModID(vehID) then
          local theVehicle = createVehicle(400, x,y,z, rx,ry,rz)
          if theVehicle then
             setElementData(theVehicle, data_name, vehID)
@@ -154,7 +157,7 @@ addCommandHandler("t3", function(thePlayer, cmd)
 
    local x,y,z = getElementPosition(thePlayer)
    local ped = createPed(280, x,y,z)
-   local data_name = exports.newmodels:getDataNameFromType("ped")
+   local data_name = exports[newmodelsResourceName]:getDataNameFromType("ped")
    setElementData(ped, data_name, 20001)
    outputChatBox("Removing created ped skin data in 3 secs, observe what happens in debug", thePlayer, 255,194,14)
    setTimer(function(ped2, data_name2)
@@ -170,7 +173,7 @@ function test7()
    local startid = 90000
    local endid = startid+149
    for id=startid,endid do
-      local worked, reason = exports.newmodels:addExternalMod_CustomFilenames("vehicle", id, 400, "Test "..id, "scantler.dff", "scantler.txd")
+      local worked, reason = exports[newmodelsResourceName]:addExternalMod_CustomFilenames("vehicle", id, 400, "Test "..id, "scantler.dff", "scantler.txd")
       if not worked then
          outputChatBox(reason, root,255,0,0)
          break
@@ -212,7 +215,7 @@ end
 function test9()
    local xoff = 0
    for _, theID in ipairs({50001, 1338}) do
-      local baseModel, isCustom = exports.newmodels:checkModelID(theID, "object")
+      local baseModel, isCustom = exports[newmodelsResourceName]:checkModelID(theID, "object")
       if tonumber(baseModel) then
          local element = createObject(baseModel, 0+xoff,0,3)
          if isCustom then
@@ -285,7 +288,7 @@ function makeVehTest(thePlayer, cmd, testType)
 
 		-- the vehicle will appear damaged if timer is used
 		setTimer(function()
-			local data_name = exports.newmodels:getDataNameFromType("vehicle")
+			local data_name = exports[newmodelsResourceName]:getDataNameFromType("vehicle")
 			setElementData(theVehicle, data_name, 80004)
 			outputChatBox("(timer) Applied custom ID to vehicle", thePlayer, 255,255,0)
 
@@ -299,7 +302,7 @@ function makeVehTest(thePlayer, cmd, testType)
 
 		-- if timer not used (element model change happens almost instantly)
 		-- they will already appear not damaged visibly
-		local data_name = exports.newmodels:getDataNameFromType("vehicle")
+		local data_name = exports[newmodelsResourceName]:getDataNameFromType("vehicle")
 		setElementData(theVehicle, data_name, 80004)
 		outputChatBox("Applied custom ID to vehicle", thePlayer, 255,255,0)
 

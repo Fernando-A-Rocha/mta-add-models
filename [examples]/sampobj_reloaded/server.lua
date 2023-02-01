@@ -10,7 +10,9 @@
 
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)
-	
+	-- If you renamed newmodels, make sure to update "include resource" in meta.xml as well as this variable:
+	local newmodelsResourceName = "newmodels"
+
 	local SAMP_FILES = { -- ID => {dff,txd file names}
 		[18643] = {"LaserPointer1.dff", "LaserPointer1.txd"},
 		[18675] = {"coke_puff.dff", "MatTextures.txd"},
@@ -1471,7 +1473,7 @@ function (startedResource)
 		So don't assume that they've all been added immediately after the function returns true
 		Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added
 	]]
-	local worked, reason = exports.newmodels:addExternalMods_CustomFileNames(listToAdd)
+	local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd)
 	if not worked then
 		outputDebugString("[sampobj_reloaded] Failed to add models: "..tostring(reason), 1)
 		return

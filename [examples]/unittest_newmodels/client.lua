@@ -1,9 +1,12 @@
+-- If you renamed newmodels, make sure to update "include resource" in meta.xml as well as this variable:
+local newmodelsResourceName = "newmodels"
+
 local temp_datas = {
-	vehicle = exports.newmodels:getDataNameFromType("vehicle"),
-	player = exports.newmodels:getDataNameFromType("player"),
-	ped = exports.newmodels:getDataNameFromType("ped"),
-	object = exports.newmodels:getDataNameFromType("object"),
-	pickup = exports.newmodels:getDataNameFromType("pickup"),
+	vehicle = exports[newmodelsResourceName]:getDataNameFromType("vehicle"),
+	player = exports[newmodelsResourceName]:getDataNameFromType("player"),
+	ped = exports[newmodelsResourceName]:getDataNameFromType("ped"),
+	object = exports[newmodelsResourceName]:getDataNameFromType("object"),
+	pickup = exports[newmodelsResourceName]:getDataNameFromType("pickup"),
 }
 
 addEventHandler( "onClientRender", root, 
@@ -24,7 +27,7 @@ function ()
 		    		local id = tonumber(data) and ("id "..data) or false
 		    		local text = elementType.." (model "..getElementModel(veh).."): "..tostring(id)
 		    		if id then
-		    			local mod = exports.newmodels:getModDataFromID(id)
+		    			local mod = exports[newmodelsResourceName]:getModDataFromID(id)
 		    			if type(mod)=="table" then
 		    				if mod.name then
 		    					text = text.." ["..mod.name.."]"
