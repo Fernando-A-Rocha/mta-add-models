@@ -52,8 +52,12 @@ This means that the map can be loaded on any server that has the same new models
 
 **Happy mapping!**
 
+## Contributing
+
+Want to help make this project better? See [this note](https://github.com/Fernando-A-Rocha/mta-add-models#final-note).
+
 ## Credits
 
 * [Fernando](https://github.com/Fernando-A-Rocha)
 * [Rick](https://github.com/httpRick)
-* MTA:SA Resources Contributors
+* [MTA:SA Resources Contributors](https://github.com/multitheftauto/mtasa-resources)
