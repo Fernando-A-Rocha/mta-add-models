@@ -419,6 +419,8 @@ end
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)
 
+	Async:setPriority(ASYNC_PRIORITY)
+
 	startTickCount = getTickCount()
 
 	if (STARTUP_VERIFICATIONS) then
@@ -447,13 +449,13 @@ function (startedResource)
 		outputChatBox((name and "#ffc175["..name.."] " or "").."#ffffff"..resName..(version and (" "..version) or ("")).." #ffc175started", root, 255,255,255, true)
 	end
 
-	if #OTHER_RESOURCES > 0 then
+	if #LINKED_RESOURCES > 0 then
 
-		outputDebugString(resName.." will start "..#OTHER_RESOURCES.." resources in 5s", 0, 255, 100, 255)
+		outputDebugString(resName.." will try to start "..#LINKED_RESOURCES.." resources in 5s", 0, 255, 100, 255)
 
 		setTimer(function()
 
-			for k, v in ipairs(OTHER_RESOURCES) do
+			for k, v in ipairs(LINKED_RESOURCES) do
 				local name, start, stop = v.name, v.start, v.stop
 				if type(name)=="string" and start == true then
 					local res = getResourceFromName(name)
@@ -484,15 +486,15 @@ function (stoppedResource, wasDeleted)
 	end
 
 	local willStart = {}
-	for k, v in ipairs(OTHER_RESOURCES) do
+	for k, v in ipairs(LINKED_RESOURCES) do
 		local name, start, stop = v.name, v.start, v.stop
 		if type(name)=="string" then
-			if start == true then
-				willStart[name] = true
-			end
-			if stop == true then
-				local res = getResourceFromName(name)
-				if res and getResourceState(res) == "running" then
+			local res = getResourceFromName(name)
+			if res and getResourceState(res) == "running" then
+				if start == true then
+					willStart[name] = true
+				end
+				if stop == true then
 					if not stopResource(res) then
 						outputDebugString("Failed to stop resource '"..name.."' on "..resName.." res-stop")
 					else

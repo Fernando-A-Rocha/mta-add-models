@@ -397,11 +397,6 @@ function forceAllocate(id) -- [Exported]
 end
 
 function setElementCustomModel(element, elementType, id, noRefresh)
-	local good, reason = verifySetModelArguments(element, elementType, id)
-	if not good then
-		return false, reason
-	end
-
 	id = tonumber(id)
 	if isElementStreamedIn(element) then
 
@@ -760,7 +755,10 @@ function updateStreamedElements(thisId)
 							freed[id] = true
 							startFreeingMod(id, false, "updateStreamedElements => mod gone")
 						else
-							updateStreamedInElement(el)
+							local success, reason = setElementCustomModel(el, elementType, id)
+							if not success then
+								outputDebugString("[updateStreamedElements] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
+							end
 						end
 					end
 				end
@@ -813,16 +811,16 @@ end
 
 function onDownloadFailed(modId, path)
 
-	if (not KICK_ON_DOWNLOAD_FAILS) then return end
-
 	if not fileDLTries[path] then
 		fileDLTries[path] = 0
 	end
 	fileDLTries[path] = fileDLTries[path] + 1
 
 	if fileDLTries[path] == DOWNLOAD_MAX_TRIES then
-		triggerServerEvent(resName..":onDownloadFailed", resourceRoot, true, fileDLTries[path], modId, path)
-		return "KICKED"
+		if KICK_ON_DOWNLOAD_FAILS then
+			triggerServerEvent(resName..":onDownloadFailed", resourceRoot, true, fileDLTries[path], modId, path)
+			return "KICKED"
+		end
     else
         triggerServerEvent(resName..":onDownloadFailed", resourceRoot, false, fileDLTries[path], modId, path)
     end

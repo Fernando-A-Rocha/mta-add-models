@@ -31,11 +31,11 @@ Visit the project's feedback page to check other people's opinions and share you
 
 [newmodels](/newmodels): main library resource
 
+- (debugging) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
 - (recommended) [newmodels-engine](/[examples]/newmodels-engine): a resource that uses the main scripts (useful)
 - (optional) [sampobj_reloaded](/[examples]/sampobj_reloaded): a resource that adds all SA-MP object models to your server
   - 👉 [Download](https://www.mediafire.com/file/mgqrk0rq7jrgsuc/models.zip/file) `models.zip` containing all dff/txd/col files required
-- (optional) [newmodels-example](/[examples]/newmodels-example): a basic resource that adds some models to your server
-- (debugging) [unittest_newmodels](/[examples]/unittest_newmodels): a resource for testing the main scripts
+- (optional) [vehicle_manager](/[examples]/vehicle_manager): a basic resource that adds some vehicle models to your server with custom properties
 - (optional) [editor_custom](/.github/docs/custom_editor/README.md): modified MTA:SA Map Editor resources to support using new model IDs
 
 ### Install
@@ -83,7 +83,7 @@ Use the KDFF tool to generate a `.col` file from a given `.dff` model ([tutorial
 
 ## Credits
 
-The resources `newmodels`, `newmodels-example` and `sampobj_reloaded` include mods from the following sources:
+The resources `newmodels`, `vehicle_manager` and `sampobj_reloaded` include mods from the following sources:
 
 - [SA-MP](https://dev.prineside.com/en/gtasa_samp_model_id/tag/2-sa-mp/)
 - [SA Proper Fixes (MixMods)](https://www.mixmods.com.br/2022/08/sa-proper-fixes/)

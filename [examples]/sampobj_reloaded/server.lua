@@ -1,7 +1,7 @@
 --[[
 	Author: https://github.com/Fernando-A-Rocha
 
-	server.lua
+	SA-MP Objects [RELOADED]
 
 	Adds all SA-MP objects to the game using the 'newmodels' library
 	Inspired by: https://github.com/Fernando-A-Rocha/MTA-SAMP-OBJ (discontinued)

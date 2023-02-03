@@ -1,7 +1,7 @@
 --[[
 	Author: https://github.com/Fernando-A-Rocha
 
-	testing_server.lua
+	New-Models Engine - Testing
 ]]
 
 -- This works if you have the default newmodels mods

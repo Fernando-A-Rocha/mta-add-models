@@ -1,7 +1,7 @@
 --[[
 	Author: https://github.com/Fernando-A-Rocha
 
-	testing_server.lua
+	SA-MP Objects [RELOADED] - Testing
 
 	Commands:
 		- /sampobj [ID]: Spawns a SA-MP object by ID at your position
