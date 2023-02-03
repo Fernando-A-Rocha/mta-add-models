@@ -88,6 +88,11 @@ The resources `newmodels`, `newmodels-example` and `sampobj_reloaded` include mo
 - [SA-MP](https://dev.prineside.com/en/gtasa_samp_model_id/tag/2-sa-mp/)
 - [SA Proper Fixes (MixMods)](https://www.mixmods.com.br/2022/08/sa-proper-fixes/)
 
+## Related Projects
+
+- [mta-mod-downloader](https://github.com/Fernando-A-Rocha/mta-mod-downloader#readme): mod downloader system with GUI which supports **NandoCrypt**
+- [mta-auto-modloader](https://github.com/Fernando-A-Rocha/mta-auto-modloader#readme): easy to use automatic mod loader system which also supports **NandoCrypt**
+
 ## Final Note
 
 Feel free to update the documentation in this repository and contribute to the code via pull requests.
