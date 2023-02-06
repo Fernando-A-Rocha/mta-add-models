@@ -12,7 +12,7 @@ addCommandHandler("testnewmodelsengine", function(thePlayer)
     setElementInterior(thePlayer, 0)
 
     local obj1 = createObject(50001, 0, 0, 3)
-    print("obj2: " .. tostring(getElementModel(obj1)))
+    print("obj1: " .. tostring(getElementModel(obj1)))
     
     local obj2 = createObject(50001, 0, 3, 3)
     print("obj2 before: " .. tostring(getElementModel(obj1)))

@@ -71,7 +71,7 @@ If you have an element with a custom model ID and you want to switch it to anoth
   - Set the element's model to the base ID
   - Set the element's custom model ID data with the name you just obtained (`setElementData(element, dataName, modelID)`)
 - Otherwise if it's a default ID then do the following:
-  - Remove the custom model ID data using `setElementModel(element, dataName, nil)` (⚠️ `removeElementData` unfortunately can't be detected by newmodels clients)
+  - Remove the custom model ID data using `setElementModel(element, dataName, nil)` or `removeElementData(element, dataName)`
   - Set the element's model to the default ID
 
 ### Simplified Usage
