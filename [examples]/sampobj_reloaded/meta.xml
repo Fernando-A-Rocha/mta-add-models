@@ -6,7 +6,7 @@
 
     <info author="Fernando" name="SAMP Objects Reloaded"
      description="implements mta-add-models library functions to add all SA-MP objects"
-     version="3.0.0"
+     version="3.1.0"
      type="script" />
 
     <include resource="newmodels" />
