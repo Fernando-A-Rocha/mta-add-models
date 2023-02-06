@@ -603,7 +603,7 @@ end
 	So don't assume that they've all been added immediately after the function returns true.
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
-function addExternalMods_IDFilenames(list, finishedEvent) -- [Exported]
+function addExternalMods_IDFilenames(list, onFinishEvent) -- [Exported]
 	if not sourceResource then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
@@ -624,15 +624,20 @@ function addExternalMods_IDFilenames(list, finishedEvent) -- [Exported]
 	if not list[1].path then
 		return false, "list[1] is missing 'path' key"
 	end
-	if finishedEvent ~= nil then
-		if type(finishedEvent) ~= "table" then
-			return false, "Invalid 'finishedEvent' passed, expected { source = 'eventSource', name = 'eventName' }"
+	if onFinishEvent ~= nil then
+		if type(onFinishEvent) ~= "table" then
+			return false, "Invalid 'onFinishEvent' passed, example: { source = 'eventSource', name = 'eventName', args = {thePlayer} }"
 		end
-		if not isElement(finishedEvent.source) then
-			return false, "Invalid 'finishedEvent.source' passed, expected element"
+		if not isElement(onFinishEvent.source) then
+			return false, "Invalid 'onFinishEvent.source' passed, expected element"
 		end
-		if type(finishedEvent.name) ~= "string" then
-			return false, "Invalid 'finishedEvent.name' passed, expected string"
+		if type(onFinishEvent.name) ~= "string" then
+			return false, "Invalid 'onFinishEvent.name' passed, expected string"
+		end
+		if (onFinishEvent.args ~= nil) then
+			if type(onFinishEvent.args) ~= "table" then
+				return false, "Invalid 'onFinishEvent.args' passed, expected table"
+			end
 		end
 	end
 	Async:foreach(list, function(modInfo)
@@ -641,8 +646,12 @@ function addExternalMods_IDFilenames(list, finishedEvent) -- [Exported]
 			outputDebugString("addExternalMod_IDFilenames failed: "..tostring(reason), 1)
 		end
 	end, function()
-		if (finishedEvent) then
-			triggerEvent(finishedEvent.name, finishedEvent.source)
+		if (onFinishEvent) then
+			if onFinishEvent.args then
+				triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+			else
+				triggerEvent(onFinishEvent.name, onFinishEvent.source)
+			end
 		end
 	end)
 	return true
@@ -815,7 +824,7 @@ end
 	So don't assume that they've all been added immediately after the function returns true.
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
-function addExternalMods_CustomFileNames(list, finishedEvent) -- [Exported]
+function addExternalMods_CustomFileNames(list, onFinishEvent) -- [Exported]
 	if not sourceResource then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
@@ -836,15 +845,20 @@ function addExternalMods_CustomFileNames(list, finishedEvent) -- [Exported]
 	if list[1].path then
 		return false, "list[1] has 'path' key, this can only be used in addExternalMods_IDFilenames"
 	end
-	if finishedEvent ~= nil then
-		if type(finishedEvent) ~= "table" then
-			return false, "Invalid 'finishedEvent' passed, expected { source = 'eventSource', name = 'eventName' }"
+	if onFinishEvent ~= nil then
+		if type(onFinishEvent) ~= "table" then
+			return false, "Invalid 'onFinishEvent' passed, example: { source = 'eventSource', name = 'eventName', args = {thePlayer} }"
 		end
-		if not isElement(finishedEvent.source) then
-			return false, "Invalid 'finishedEvent.source' passed, expected element"
+		if not isElement(onFinishEvent.source) then
+			return false, "Invalid 'onFinishEvent.source' passed, expected element"
 		end
-		if type(finishedEvent.name) ~= "string" then
-			return false, "Invalid 'finishedEvent.name' passed, expected string"
+		if type(onFinishEvent.name) ~= "string" then
+			return false, "Invalid 'onFinishEvent.name' passed, expected string"
+		end
+		if (onFinishEvent.args ~= nil) then
+			if type(onFinishEvent.args) ~= "table" then
+				return false, "Invalid 'onFinishEvent.args' passed, expected table"
+			end
 		end
 	end
 	Async:foreach(list, function(modInfo)
@@ -853,8 +867,12 @@ function addExternalMods_CustomFileNames(list, finishedEvent) -- [Exported]
 			outputDebugString("addExternalMods_CustomFileNames failed: "..tostring(reason), 1)
 		end
 	end, function()
-		if (finishedEvent) then
-			triggerEvent(finishedEvent.name, finishedEvent.source)
+		if (onFinishEvent) then
+			if onFinishEvent.args then
+				triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+			else
+				triggerEvent(onFinishEvent.name, onFinishEvent.source)
+			end
 		end
 	end)
 	return true
@@ -1037,7 +1055,7 @@ end
 	This is an async function: mods in the list of IDs will be removed gradually and if you have too many it may take several seconds.
 	So don't assume that they've all been removed immediately after the function returns true.
 ]]
-function removeExternalMods(list, finishedEvent) -- [Exported]
+function removeExternalMods(list, onFinishEvent) -- [Exported]
 	if not sourceResource then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
@@ -1051,15 +1069,20 @@ function removeExternalMods(list, finishedEvent) -- [Exported]
 	if type(list[1]) ~= "number" then
 		return false, "list[1] is not a number: "..tostring(list[1])
 	end
-	if finishedEvent ~= nil then
-		if type(finishedEvent) ~= "table" then
-			return false, "Invalid 'finishedEvent' passed, expected { source = 'eventSource', name = 'eventName' }"
+	if onFinishEvent ~= nil then
+		if type(onFinishEvent) ~= "table" then
+			return false, "Invalid 'onFinishEvent' passed, example: { source = 'eventSource', name = 'eventName', args = {thePlayer} }"
 		end
-		if not isElement(finishedEvent.source) then
-			return false, "Invalid 'finishedEvent.source' passed, expected element"
+		if not isElement(onFinishEvent.source) then
+			return false, "Invalid 'onFinishEvent.source' passed, expected element"
 		end
-		if type(finishedEvent.name) ~= "string" then
-			return false, "Invalid 'finishedEvent.name' passed, expected string"
+		if type(onFinishEvent.name) ~= "string" then
+			return false, "Invalid 'onFinishEvent.name' passed, expected string"
+		end
+		if (onFinishEvent.args ~= nil) then
+			if type(onFinishEvent.args) ~= "table" then
+				return false, "Invalid 'onFinishEvent.args' passed, expected table"
+			end
 		end
 	end
 	Async:foreach(list, function(id)
@@ -1068,8 +1091,12 @@ function removeExternalMods(list, finishedEvent) -- [Exported]
 			outputDebugString("removeExternalMod("..tostring(id)..") failed: "..tostring(reason), 1)
 		end
 	end, function()
-		if (finishedEvent) then
-			triggerEvent(finishedEvent.name, finishedEvent.source)
+		if (onFinishEvent) then
+			if onFinishEvent.args then
+				triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+			else
+				triggerEvent(onFinishEvent.name, onFinishEvent.source)
+			end
 		end
 	end)
 	return true

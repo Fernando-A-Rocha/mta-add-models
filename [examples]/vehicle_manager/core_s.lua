@@ -117,8 +117,8 @@ function addNewModels()
 		So don't assume that they've all been added immediately after the function returns true
 		Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added ]]
 		
-		local finishedEvent = { name = "vehicle_manager:newmodelsFinishedAdding", source = root }
-		local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd, finishedEvent)
+		local onFinishEvent = { name = "vehicle_manager:newmodelsFinishedAdding", source = root }
+		local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd, onFinishEvent)
 		if not worked then
 			sendDebugMsg("Failed to add models: "..tostring(reason), "ERROR")
 			-- addedModels = {}

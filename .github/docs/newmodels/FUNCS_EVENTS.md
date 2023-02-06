@@ -142,26 +142,24 @@ All server-side only exported functions are explained here.
 
 ---
 
-### **addExternalMod_IDFilenames**(`elementType`, `id`, `base_id`, `name`, `path`, `ignoreTXD`, `ignoreDFF`, `ignoreCOL`, `metaDownloadFalse`, `disableAutoFree`, `lodDistance`)
+### **addExternalMod_IDFilenames**(`modInfo`)
 
 Adds a new external mod which uses ID file names (e.g. "models/50001.txd") to the mod list.
 
 **Required arguments**:
 
-- `elementType`: A valid element type from the dataNames table (e.g. "object")
-- `id`: A number (e.g. 50001)
-- `base_id`: A number (e.g. 1337)
-- `name`: A string (e.g. "My Custom Object")
-- `path`: A string (e.g. "models/")
-
-**Optional arguments**:
-
-- `ignoreTXD`: A boolean (e.g. false)
-- `ignoreDFF`: A boolean (e.g. false)
-- `ignoreCOL`: A boolean (e.g. false)
-- `metaDownloadFalse`: A boolean (e.g. false)
-- `disableAutoFree`: A boolean (e.g. false)
-- `lodDistance`: A number (e.g. 300)
+- `modInfo`: A table with the following keys:
+  - `elementType`: A valid element type from the dataNames table (e.g. "object")
+  - `id`: A number (e.g. 50001)
+  - `base_id`: A number (e.g. 1337)
+  - `name`: A string (e.g. "My Custom Object")
+  - `path`: A string (e.g. "models/")
+  - (optional) `ignoreTXD`: A boolean (e.g. false)
+  - (optional) `ignoreDFF`: A boolean (e.g. false)
+  - (optional) `ignoreCOL`: A boolean (e.g. false)
+  - (optional) `metaDownloadFalse`: A boolean (e.g. false)
+  - (optional) `disableAutoFree`: A boolean (e.g. false)
+  - (optional) `lodDistance`: A number (e.g. 300)
 
 **Returns**:
 
@@ -170,7 +168,7 @@ Adds a new external mod which uses ID file names (e.g. "models/50001.txd") to th
 
 ---
 
-### **addExternalMods_IDFilenames**(`list`)
+### **addExternalMods_IDFilenames**(`list`, `onFinishEvent`)
 
 Adds a list of new external mods which use ID file names to the mod list. See the function above for the arguments.
 
@@ -178,7 +176,14 @@ Adds a list of new external mods which use ID file names to the mod list. See th
 
 **Required arguments**:
 
-- `list`: A table (e.g. `{ {"vehicle", 80001, 400, "My Custom Vehicle", "models/"}, {"object", 50001, 1337, "My Custom Object", "models/"} }`)
+- `list`: A table (e.g. `{ {elementType = "object", id = 50001, base_id = 1337, name = "My Custom Object", path = "models/"}, {elementType = "vehicle", id = 50002, base_id = 400, name = "My Custom Vehicle", path = "models/"} }`)
+
+**Optional arguments**:
+
+- `onFinishEvent`: A table with the following keys:
+  - `source`: An element for the event source (e.g. root)
+  - `name`: A string for the event name (e.g. "onExternalModsAdded")
+  - (optional) `args`: A table for the event arguments (e.g. `{}`)
 
 **Returns**:
 
@@ -186,28 +191,24 @@ Adds a list of new external mods which use ID file names to the mod list. See th
 
 ---
 
-### **addExternalMod_CustomFilenames**(`elementType`, `id`, `base_id`, `name`, `path_dff`, `path_txd`, `path_col`, `ignoreTXD`, `ignoreDFF`, `ignoreCOL`, `metaDownloadFalse`, `disableAutoFree`, `lodDistance`)
+### **addExternalMod_CustomFilenames**(`modInfo`)
 
 Adds a new external mod which uses custom file names (e.g. "models/my_custom_object.dff") to the mod list.
 
 **Required arguments**:
 
-- `elementType`: A valid element type from the dataNames table (e.g. "ped")
-- `id`: A number (e.g. 20001)
-- `base_id`: A number (e.g. 1)
-- `name`: A string (e.g. "My Custom Ped")
-- `path_dff`: A string (e.g. "models/my_custom_ped.dff")
-- `path_txd`: A string (e.g. "models/my_custom_ped.txd")
-- `path_col`: A string (e.g. "models/my_custom_ped.col"), only applicable to objects
-
-**Optional arguments**:
-
-- `ignoreTXD`: A boolean (e.g. false)
-- `ignoreDFF`: A boolean (e.g. false)
-- `ignoreCOL`: A boolean (e.g. false)
-- `metaDownloadFalse`: A boolean (e.g. false)
-- `disableAutoFree`: A boolean (e.g. false)
-- `lodDistance`: A number (e.g. 100)
+- `modInfo`: A table with the following keys:
+  - `elementType`: A valid element type from the dataNames table (e.g. "object")
+  - `id`: A number (e.g. 50001)
+  - `base_id`: A number (e.g. 1337)
+  - `name`: A string (e.g. "My Custom Object")
+  - `path`: A string (e.g. "models/")
+  - (optional) `ignoreTXD`: A boolean (e.g. false)
+  - (optional) `ignoreDFF`: A boolean (e.g. false)
+  - (optional) `ignoreCOL`: A boolean (e.g. false)
+  - (optional) `metaDownloadFalse`: A boolean (e.g. false)
+  - (optional) `disableAutoFree`: A boolean (e.g. false)
+  - (optional) `lodDistance`: A number (e.g. 300)
 
 **Returns**:
 
@@ -215,7 +216,7 @@ Adds a new external mod which uses custom file names (e.g. "models/my_custom_obj
 
 ---
 
-### **addExternalMods_CustomFilenames**(`list`)
+### **addExternalMods_CustomFilenames**(`list`, `onFinishEvent`)
 
 Adds a list of new external mods which use custom file names to the mod list. See the function above for the arguments.
 
@@ -223,7 +224,14 @@ Adds a list of new external mods which use custom file names to the mod list. Se
 
 **Required arguments**:
 
-- `list`: A table (e.g. `{ {"vehicle", 20001, 400, "My Custom Vehicle", "models/my_custom_vehicle.dff", "models/my_custom_vehicle.txd"}, {"object", 50001, 1337, "My Custom Object", "models/my_custom_object.dff", "models/my_custom_object.txd", "models/my_custom_object.col"} }`)
+- `list`: A table (e.g. `{ {elementType = "vehicle", id = 80001, base_id = 400, name = "My Custom Vehicle", path_dff = "models/my_custom_vehicle.dff", path_txd = "models/my_custom_vehicle.txd"}, {elementType = "object", id = 50001, base_id = 1337, name = "My Custom Object", path_dff = "models/my_custom_object.dff", path_txd = "models/my_custom_object.txd", path_col = "models/my_custom_object.col"} }`)
+
+**Optional arguments**:
+
+- `onFinishEvent`: A table with the following keys:
+  - `source`: An element for the event source (e.g. root)
+  - `name`: A string for the event name (e.g. "onExternalModsAdded")
+  - (optional) `args`: A table for the event arguments (e.g. `{}`)
 
 **Returns**:
 
@@ -245,7 +253,7 @@ Removes an external mod from the mod list.
 
 ---
 
-### **removeExternalMods**(`list`)
+### **removeExternalMods**(`list`, `onFinishEvent`)
 
 Removes a list of external mods from the mod list.
 
@@ -254,6 +262,13 @@ Removes a list of external mods from the mod list.
 **Required arguments**:
 
 - `list`: A table (e.g. `{50001, 50002, 50003}`)
+
+**Optional arguments**:
+
+- `onFinishEvent`: A table with the following keys:
+  - `source`: An element for the event source (e.g. root)
+  - `name`: A string for the event name (e.g. "onExternalModsAdded")
+  - (optional) `args`: A table for the event arguments (e.g. `{}`)
 
 **Returns**:
 
