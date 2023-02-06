@@ -13,23 +13,7 @@ Related:
 
 ## Adding a mod from your own resource
 
-**Server code:**
-
-```lua
--- (You could fetch the values from a table or database)
--- We suppose that you have a script with the following files in the root of your resource:
---     mymod.dff and mymod.txd
-
--- We assign custom ID 90001 to this skin mod by calling:
-local worked, reason = exports.newmodels:addExternalMod_CustomFilenames(
-  "ped", 90001, 1, "My skin mod", "mymod.dff", "mymod.txd" )
-
-if not worked then -- show why it failed to add
-  return outputDebugString(reason, 0,255, 110, 61)
-else
-  -- You can now use this ID to spawn custom peds or set custom player skins
-end
-```
+See the [sampobj_reloaded](/[examples]/sampobj_reloaded/) and [vehicle_manager](/[examples]/vehicle_manager/) resources for examples.
 
 ## Spawning an object outside of newmodels (any ID)
 

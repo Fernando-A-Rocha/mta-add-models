@@ -570,7 +570,7 @@ end
 	Backwards compatibility for old modInfo tables
 ]]
 function addExternalMods_IDFilenames_Legacy(sourceResName, list)
-	outputDebugString("You are passing deprecated modInfo tables to addExternalMods_IDFilenames. Update your code to use the new format.", 2)
+	_outputDebugString("You are passing deprecated modInfo tables to addExternalMods_IDFilenames. Update your code to use the new format.", 2)
 	Async:foreach(list, function(modInfo)
 		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
 		local modInfo2 = {
@@ -760,8 +760,8 @@ function addExternalMod_IDFilenames(...)
 	local paths = getActualModPaths(path, id)
 	for k, path2 in pairs(paths) do
 		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
-			if (not modInfo.ignoreTXD and k == "txd")
-			or (not modInfo.ignoreDFF and k == "dff")
+			if ((not modInfo.ignoreTXD) and k == "txd")
+			or ((not modInfo.ignoreDFF) and k == "dff")
 			or ((not modInfo.ignoreCOL) and elementType == "object" and k == "col") then
 				return false, "File doesn't exist: '"..tostring(path2).."', check folder: '"..path.."'"
 			end
@@ -798,7 +798,7 @@ end
 	Backwards compatibility for old modInfo tables
 ]]
 function addExternalMods_CustomFileNames_Legacy(sourceResName, list)
-	outputDebugString("You are passing deprecated modInfo tables to addExternalMods_CustomFileNames. Update your code to use the new format.", 2)
+	_outputDebugString("You are passing deprecated modInfo tables to addExternalMods_CustomFileNames. Update your code to use the new format.", 2)
 	Async:foreach(list, function(modInfo)
 		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
 		local modInfo2 = {
@@ -1016,8 +1016,8 @@ function addExternalMod_CustomFilenames(...)
 	end
 	for k, path2 in pairs(paths) do
 		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
-			if (not modInfo.ignoreTXD and k == "txd")
-			or (not modInfo.ignoreDFF and k == "dff")
+			if ((not modInfo.ignoreTXD) and k == "txd")
+			or ((not modInfo.ignoreDFF) and k == "dff")
 			or ((not modInfo.ignoreCOL) and elementType == "object" and k == "col") then
 
 				return false, "File doesn't exist: '"..tostring(path2).."'"
