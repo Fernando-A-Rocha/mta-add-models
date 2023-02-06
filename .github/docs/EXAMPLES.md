@@ -103,3 +103,20 @@ Disclaimer: The client only loads the mod list from the server a few seconds aft
 ```lua
 local mod = exports.newmodels:getModDataFromID(theID)
 ```
+
+## Spawning a player properly
+
+You always need to pass a model ID to the `spawnPlayer` function, which it sets.
+
+If you want to re-spawn a player and keep its custom skin ID, you need to unset it then set it again, in order for the changes to take effect.
+
+**Server code:**
+
+```lua
+local data_name = exports.newmodels:getDataNameFromType("player")
+local id = tonumber(getElementData(player, data_name))
+if id then
+  removeElementData(player, data_name)
+  setElementData(source, data_name, id)
+end
+```
