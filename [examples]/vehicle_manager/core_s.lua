@@ -4,6 +4,8 @@
 	New-Models Vehicle Manager
 ]]
 
+addEvent("vehicle_manager:newmodelsFinishedAdding", true)
+
 -- local addedModels = {}
 local dbCon = nil
 
@@ -15,7 +17,6 @@ local function createDBTables()
 	local DEFAULT_OPTIONS = toJSON({
 		ignoreTXD = false,
 		ignoreDFF = false,
-		ignoreCOL = true,
 		metaDownloadFalse = true,
 		disableAutoFree = false
 	})
@@ -95,17 +96,16 @@ function addNewModels()
 				end
 			end
 
-			local ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree
+			local ignoreTXD, ignoreDFF, metaDownloadFalse, disableAutoFree
 			
 			ignoreTXD = row.options.ignoreTXD or false
 			ignoreDFF = row.options.ignoreDFF or false
-			ignoreCOL = row.options.ignoreCOL or false
 			metaDownloadFalse = row.options.metaDownloadFalse or false
 			disableAutoFree = row.options.disableAutoFree or false
 
 			listToAdd[#listToAdd+1] = {
-				"vehicle", row.id, row.baseid, row.name, row.dff, row.txd, false,
-				ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree
+				elementType = "vehicle", id = row.id, base_id = row.baseid, name = row.name, path_dff = row.dff, path_txd = row.txd,
+				ignoreTXD = ignoreTXD, ignoreDFF = ignoreDFF, metaDownloadFalse = metaDownloadFalse, disableAutoFree = disableAutoFree
 			}
 			-- addedModels[row.id] = {
 			-- 	baseid = row.baseid, name = row.name, dff = row.dff, txd = row.txd
@@ -117,7 +117,8 @@ function addNewModels()
 		So don't assume that they've all been added immediately after the function returns true
 		Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added ]]
 		
-		local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd)
+		local finishedEvent = { name = "vehicle_manager:newmodelsFinishedAdding", source = root }
+		local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd, finishedEvent)
 		if not worked then
 			sendDebugMsg("Failed to add models: "..tostring(reason), "ERROR")
 			-- addedModels = {}
@@ -126,6 +127,11 @@ function addNewModels()
 
     end, dbCon, qstr)
 end
+
+addEventHandler("vehicle_manager:newmodelsFinishedAdding", root, function()
+	outputDebugString("vehicle_manager: all new models have been registered", 3)
+	-- proceed ...
+end)
 
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)
