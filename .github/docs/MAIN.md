@@ -61,6 +61,19 @@ This resource makes the clients listen to the set element datas in order to appl
 - **Clientside**: `getElementModel` will return an arbitrary ID (that MTA generates) on elements with custom model IDs that you set. To get the actual custom ID, use `getElementData(dataName, element)` instead.
 - **Serverside**: `getElementModel` will return always return base model of any element.
 
+### Switching Element Models
+
+If you have an element with a custom model ID and you want to switch it to another custom model ID, do the following:
+
+- Check if model ID you want to set is custom or default using `isDefaultID(modelID)` and `isCustomModID(modelID)`
+- If it's a custom ID then do the following:
+  - Obtain the base/parent model ID from the mod by accessing `mod.base_id`
+  - Set the element's model to the base ID
+  - Set the element's custom model ID data with the name you just obtained (`setElementData(element, dataName, modelID)`)
+- Otherwise if it's a default ID then do the following:
+  - Remove the custom model ID data using `setElementModel(element, dataName, nil)` (⚠️ `removeElementData` unfortunately can't be detected by newmodels clients)
+  - Set the element's model to the default ID
+
 ### Simplified Usage
 
 If you don't want to code your own functions to manage elements with custom model IDs, use the `newmodels-engine` resource.
@@ -70,10 +83,10 @@ It provides you with the following functions that you can use in your server (e.
 - `createObject` -- safely create an object with custom/normal model ID
 - `createVehicle` -- safely create a vehicle with custom/normal model ID
 - `createPed` -- safely create a ped with custom/normal model ID
-- `createPickup` -- safely create a pickup with custom/normal model ID (type 3 is the one that supports object models)
 - `setElementModel` -- safely set a custom/normal model ID on an element
-- `setPickupType` -- safely change a pickup type 3's model ID to a custom/normal model ID
 - `getElementModel` -- safely get a custom/normal model ID from an element
+- `createPickup` -- safely create a pickup with custom/normal model ID (type 3 is the one that supports object models)
+- `setPickupType` -- safely change a pickup type 3's model ID to a custom/normal model ID
 
 ## Known Implementations
 
