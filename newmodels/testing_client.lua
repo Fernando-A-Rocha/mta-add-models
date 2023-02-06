@@ -6,6 +6,7 @@
 	Commands:
 		/allocatedids
 		/selements
+		/checkskin
 ]]
 
 
@@ -289,3 +290,20 @@ function table.size ( tab )
     end
     return length
 end
+
+addCommandHandler("checkskin", function(cmd, name)
+	if not name then
+		return outputChatBox("SYNTAX: /"..cmd.." [partial or full player name]", 255,194,14)
+	end
+	local foundPlayer = nil
+	for k, player in ipairs(getElementsByType("player")) do
+		if string.find(string.lower(getPlayerName(player)), string.lower(name)) then
+			foundPlayer = player
+			break
+		end
+	end
+	if not foundPlayer then
+		return outputChatBox("No player found with that name", 255,0,0)
+	end
+	outputChatBox("Clientside skin model of #ffff00'"..getPlayerName(foundPlayer).."'#ffffff is#ffff00 "..getElementModel(foundPlayer), 255, 255, 255, true)
+end, false, false)
