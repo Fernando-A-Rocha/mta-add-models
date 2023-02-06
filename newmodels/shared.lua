@@ -162,24 +162,6 @@ function isElementTypeSupported(et)
 	return true
 end
 
-function verifySetModelArguments(element, elementType, id)
-	if not isElement(element) then
-		return false, "Invalid element passed"
-	end
-
-	local et = getElementType(element)
-
-	local sup,reason = isElementTypeSupported(et)
-	if not sup then
-		return false, reason
-	end
-
-	if not tonumber(id) then
-		return false, "Non-number ID passed"
-	end
-	return true
-end
-
 function isCustomVehicle( theVehicle )	
 	if not isElement(theVehicle) then return false end
 		
@@ -193,29 +175,6 @@ function isCustomVehicle( theVehicle )
 		return false
 	end
 
-	return true
-end
-
-function setElementModelRefreshed(element, currModel, newModel)
-	-- element types: player, ped, vehicle, object
-	if currModel ~= newModel then
-		return setElementModel(element, newModel)
-	end
-			
-	local elementType = getElementType(element)
-	local diffModel
-	if elementType == "player" or elementType == "ped" then
-		diffModel = 0
-	elseif elementType == "vehicle" then
-		diffModel = 400
-	elseif elementType == "object" then
-		diffModel = 1337
-	end
-	if diffModel == newModel then
-		diffModel = diffModel + 1
-	end
-	iprint("setElementModel", element, diffModel, "result:", setElementModel(element, diffModel))
-	iprint("setElementModel", element, newModel, "result:", setElementModel(element, newModel))
 	return true
 end
 

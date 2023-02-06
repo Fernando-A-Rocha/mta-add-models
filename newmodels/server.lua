@@ -7,12 +7,12 @@
 --]]
 
 -- Internal events:
-addEvent(resName..":resetElementModel", true)
 addEvent(resName..":updateVehicleProperties", true)
 addEvent(resName..":onDownloadFailed", true)
 
 local SERVER_READY = false
 local startTickCount = nil
+local SEND_DELAY = 5000
 local clientsWaiting = {}
 
 local prevent_addrem_spam = {
@@ -110,32 +110,6 @@ function updateVehicleProperties(element)
 	updateVehicleUpgrades(element)
 end
 addEventHandler(resName..":updateVehicleProperties", resourceRoot, updateVehicleProperties)
-
---[[
-	Goal: solve the issue of element model not setting when it's already the same model serverside
-	This makes it so you don't need to use the 'refresh' element model method in any resource
-]]
--- OTHER RESOURCES ONLY
-function onSetElementModel( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
-	if sourceResource == resource then return end
-
-    local args = {...}
-    local element,newModel = unpack(args)
-    if not isElement(element) then return end
-    if not tonumber(newModel) then return end
-    newModel = tonumber(newModel)
-
-    oldModel = getElementModel(element)
-
-	setElementModelRefreshed(element, oldModel, newModel)
-
-	if getElementType(element) == "vehicle" then -- Vehicle specific
-		updateVehicleProperties(element)
-	end
-
-	return "skip"
-end
-addDebugHook( "preFunction", onSetElementModel, { "setElementModel" })
 
 function getModList() -- [Exported - Server Version]
 	if not SERVER_READY then
@@ -434,7 +408,7 @@ function (startedResource)
 
 	for player, _ in pairs(clientsWaiting) do
 		if isElement(player) then
-			sendModList(player)
+			sendModList(player, "clientsWaiting")
 		end
 	end
 
@@ -451,7 +425,7 @@ function (startedResource)
 
 	if #LINKED_RESOURCES > 0 then
 
-		outputDebugString(resName.." will try to start "..#LINKED_RESOURCES.." resources in 5s", 0, 255, 100, 255)
+		outputDebugString(resName.." will try to start "..#LINKED_RESOURCES.." resources in "..(SEND_DELAY/1000).."s", 0, 255, 100, 255)
 
 		setTimer(function()
 
@@ -469,21 +443,12 @@ function (startedResource)
 				end
 			end
 
-		end, 5000, 1)
+		end, SEND_DELAY, 1)
 	end
 end)
 
 addEventHandler( "onResourceStop", resourceRoot, 
 function (stoppedResource, wasDeleted)
-
-	for elementType, name in pairs(dataNames) do
-		for k,el in ipairs(getElementsByType(elementType)) do
-			local id = tonumber(getElementData(el, name))
-			if id then
-				resetElementModel(el)
-			end
-		end
-	end
 
 	local willStart = {}
 	for k, v in ipairs(LINKED_RESOURCES) do
@@ -537,12 +502,10 @@ function (stoppedResource, wasDeleted)
 		if not (elementType=="player" or elementType=="pickup") then
 			for k,mod in pairs(mods) do
 				local srcRes = mod.srcRes
-				if srcRes then
-					if stoppedResName == srcRes then
-						-- delete mod added by resource that was just stopped
-						table.remove(modList[elementType], k)
-						delCount = delCount + 1
-					end
+				if srcRes and stoppedResName == srcRes then
+					-- delete mod added by resource that was just stopped
+					table.remove(modList[elementType], k)
+					delCount = delCount + 1
 				end
 			end
 		end
@@ -551,22 +514,20 @@ function (stoppedResource, wasDeleted)
 	if delCount > 0 then
 		outputDebugString("Removed "..delCount.." mods because resource '"..stoppedResName.."' stopped", 0, 211, 255, 89)
 		fixModList()
-
-		setTimer(function()
-			sendModListAllPlayers()
-		end, 1000, 1)
+		setTimer(sendModListAllPlayers, 1000, 1, "onResourceStop")
 	end
 end)
 
-function sendModList(player)
+function sendModList(player, fromName)
 	triggerClientEvent(player, resName..":receiveModList", resourceRoot, modList)
+	-- outputDebugString("Sent mod list to "..getPlayerName(player).." | "..fromName, 0, 211, 255, 89)
 end
 
-function sendModListAllPlayers()
+function sendModListAllPlayers(fromName)
 
 	if SERVER_READY then
 		for k,player in ipairs(getElementsByType("player")) do
-			sendModList(player)
+			sendModList(player, fromName)
 		end
 	else
 		for k,player in ipairs(getElementsByType("player")) do
@@ -578,20 +539,12 @@ end
 function requestModList(res)
 	if res ~= resource then return end
 	if SERVER_READY then
-		sendModList(source)
+		sendModList(source, "requestModList")
 	else
 		clientsWaiting[source] = true
 	end
 end
 addEventHandler("onPlayerResourceStart", root, requestModList)
-
-function resetElementModel(element, old_id)
-	local currModel = getElementModel(element)
-	setElementModelRefreshed(element, currModel, currModel)
-	outputDebugString("Resetting model serverside for "..getElementType(element).." to ID "..currModel.." (previous ID: "..tostring(old_id)..")",0, 59, 160, 255)
-end
-addEventHandler(resName..":resetElementModel", resourceRoot, resetElementModel)
-
 
 --[[
 	This function exists to avoid too many exports calls of the function below from
@@ -755,9 +708,9 @@ function addExternalMod_IDFilenames(
 		for rname,mods in pairs(prevent_addrem_spam.add) do
 			outputDebugString("Added "..#mods.." mods from "..rname, 0, 136, 255, 89)
 			prevent_addrem_spam.add[rname] = nil
-			sendModListAllPlayers()
+			sendModListAllPlayers("addExternalMod_IDFilenames")
 		end
-	end, 1000, 1)
+	end, SEND_DELAY, 1)
 
 	return true
 end
@@ -956,9 +909,9 @@ function addExternalMod_CustomFilenames(
 		for rname,mods in pairs(prevent_addrem_spam.add) do
 			outputDebugString("Added "..#mods.." mods from "..rname, 0, 136, 255, 89)
 			prevent_addrem_spam.add[rname] = nil
-			sendModListAllPlayers()
+			sendModListAllPlayers("addExternalMod_CustomFilenames")
 		end
-	end, 1000, 1)
+	end, SEND_DELAY, 1)
 	return true
 end
 
@@ -1019,9 +972,9 @@ function removeExternalMod(id) -- [Exported]
 							for rname,mods2 in pairs(prevent_addrem_spam.rem) do
 								outputDebugString("Removed "..#mods2.." mods from "..rname, 0, 211, 255, 89)
 								prevent_addrem_spam.rem[rname] = nil
-								sendModListAllPlayers()
+								sendModListAllPlayers("removeExternalMod")
 							end
-						end, 1000, 1)
+						end, SEND_DELAY, 1)
 						
 						return true
 					else

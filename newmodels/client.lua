@@ -396,7 +396,7 @@ function forceAllocate(id) -- [Exported]
 	return allocated_id2, reason
 end
 
-function setElementCustomModel(element, elementType, id, noRefresh)
+function setElementCustomModel(element, elementType, id)
 	id = tonumber(id)
 	if isElementStreamedIn(element) then
 
@@ -429,7 +429,7 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 			if allocated_id2 then
 
 				-- try setting again
-				return setElementCustomModel(element, elementType, id, noRefresh)
+				return setElementCustomModel(element, elementType, id)
 			else
 				return false, reason2
 			end
@@ -438,14 +438,7 @@ function setElementCustomModel(element, elementType, id, noRefresh)
 		if getElementType(element) == "pickup" then
 			setPickupType(element, 3, allocated_id)
 		else
-			-- refresh model so change can actually have an effect
-			local currModel = getElementModel(element)
-			if not noRefresh then
-
-				setElementModelRefreshed(element, currModel, allocated_id)
-			else
-				setElementModel(element, allocated_id)
-			end
+			setElementModel(element, allocated_id)
 		end
 
 		if getElementType(element)=="vehicle" then
@@ -597,15 +590,6 @@ function updateElementOnDataChange(source, theKey, oldValue, newValue)
 		else
 			outputDebugString("["..(eventName or "?").."] Warning: unknown "..et.." model ID: "..id, 2)
 		end
-	
-	elseif newValue == nil or newValue == false then
-
-		if tonumber(oldValue) then
-			-- removing new model id
-			if (not wasElementCreatedClientside(source)) and (et ~= "pickup") then
-				triggerServerEvent(resName..":resetElementModel", resourceRoot, source, tonumber(oldValue))
-			end
-		end
 	end
 
 	if tonumber(oldValue) then
@@ -656,8 +640,8 @@ addEventHandler( "onClientElementStreamIn", root, function () updateStreamedInEl
 -- (3) updateStreamedOutElement
 function updateStreamedOutElement(source)
 	if not isElement(source) then return end
-	local et = getElementType(source)
 
+	local et = getElementType(source)
 	if not isElementTypeSupported(et) then
 		return
 	end

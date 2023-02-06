@@ -7,7 +7,21 @@
 local addedModels = {}
 local dbCon = nil
 
+--[[
+	May freeze your server in case of DB bugs (only runs once)
+]]
 local function createDBTables()
+	local now = getRealTime().timestamp
+	local DEFAULT_OPTIONS = toJSON({
+		ignoreTXD = false,
+		ignoreDFF = false,
+		ignoreCOL = true,
+		metaDownloadFalse = true,
+		disableAutoFree = false
+	})
+	local INSERT_MODELS = {
+		{-1, 489, "Samoa", "models/samoa.dff", "models/samoa.txd" },
+	}
 	for i, execCode in ipairs({
         [[
             CREATE TABLE models (
@@ -17,7 +31,6 @@ local function createDBTables()
                 dff TEXT NOT NULL,
                 txd TEXT NOT NULL,
                 options TEXT NOT NULL,
-				handling TEXT NOT NULL,
                 updated_at INTEGER NOT NULL,
                 updated_by TEXT NOT NULL
             )
@@ -28,6 +41,15 @@ local function createDBTables()
         if not result then
             return false
         end
+
+		local insertQstr = "INSERT INTO models (id, baseid, name, dff, txd, options, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+		for _, row in ipairs(INSERT_MODELS) do
+			local query = dbQuery(dbCon, insertQstr, row[1], row[2], row[3], row[4], row[5], DEFAULT_OPTIONS, now, "system")
+			local result = dbPoll(query, -1)
+			if not result then
+				return false
+			end
+		end
     end
     return true
 end
@@ -68,7 +90,7 @@ function addNewModels()
             for k, v in pairs(row) do
                 if tonumber(v) then
                     row[k] = tonumber(v)
-				elseif k == "options" or k == "handling" then
+				elseif k == "options" then
 					row[k] = fromJSON(v) or {}
 				end
 			end
@@ -86,7 +108,7 @@ function addNewModels()
 				ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree
 			}
 			addedModels[row.id] = {
-				baseid = row.baseid, name = row.name, dff = row.dff, txd = row.txd, handling = row.handling
+				baseid = row.baseid, name = row.name, dff = row.dff, txd = row.txd
 			}
         end
 
@@ -102,45 +124,8 @@ function addNewModels()
 			return
 		end
 
-		updateVehicleHandlings()
-
     end, dbCon, qstr)
 end
-
-function updateVehicleHandlings()
-
-	for k, vehicle in ipairs(getElementsByType("vehicle")) do
-    	local customID = getElementData(vehicle, newVehModelDataName)
-		if customID then
-			local modelInfo = addedModels[customID]
-			if modelInfo then
-				local handling = modelInfo.handling
-				local c = 0
-				for k, v in pairs(handling) do
-					if setVehicleHandling(vehicle, k, v) then
-						c = c + 1
-					end
-				end
-				if c > 0 then
-					sendDebugMsg("Updated "..c.." handling properties for vehicle with ID "..customID, "SUCCESS")
-				end
-			end
-		end
-	end
-end
-
-addEvent("vehicle_manager:saveVehicleHandling", true)
-addEventHandler("vehicle_manager:saveVehicleHandling", resourceRoot, function(model, list)
-	local f
-	if not fileExists("handling/"..model..".json") then
-		f = fileCreate("handling/"..model..".json")
-	else
-		f = fileOpen("handling/"..model..".json")
-	end
-	if not f then return end
-	fileWrite(f, toJSON(list))
-	fileClose(f)
-end)
 
 addEventHandler( "onResourceStart", resourceRoot, 
 function (startedResource)

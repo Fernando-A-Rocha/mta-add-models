@@ -2,9 +2,6 @@
 	Author: https://github.com/Fernando-A-Rocha
 
 	New-Models Vehicle Manager
-
-    Commands:
-        - /gethandling
 ]]
 
 -- If you renamed newmodels, make sure to update "include resource" in meta.xml as well as this variable:
