@@ -1,7 +1,7 @@
 --[[
 	Author: https://github.com/Fernando-A-Rocha
 
-	shared.lua
+	New-Models Engine
 
 	Useful functions that make use of newmodels
 		e.g. creating objects, vehicles, peds, pickups with custom models and changing their model

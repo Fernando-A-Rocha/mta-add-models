@@ -20,22 +20,26 @@ This library lets you load mods stored within the `newmodels` resource, and also
 
 Check the [quick testing](#quick-testing) to understand how to load mods from within the `newmodels` resource (easier).
 
-You have at your disposal the following exported functions, [see code to understand](/newmodels/server.lua) and [example to see implementation](/[examples]/newmodels-example/server.lua):
+You have at your disposal the following exported functions:
 
 Adding mods from other resources (ID.dff, ID.txd, ID.col):
 
-- `addExternalMod_IDFilenames(elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL)`
+- `addExternalMod_IDFilenames(...)`
 - `addExternalMods_IDFilenames(list_of_mods)` uses the function above^
 
 Adding mods from other resources (custom filenames):
 
-- `addExternalMod_CustomFilenames(elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL)`
+- `addExternalMod_CustomFilenames(...)`
 - `addExternalMods_CustomFileNames(list_of_mods)` uses the function above^
 
 Removing a mod from the `modList` which was added by another resource:
 
 - `removeExternalMod(id)`
 - `removeExternalMods(list_of_ids)`
+
+PS: **...** means that this function accepts several variables.
+
+See [the documentation](/.github/docs/newmodels/FUNCS_EVENTS.md) to better understand the functions.
 
 ### Applying New Model IDs
 
