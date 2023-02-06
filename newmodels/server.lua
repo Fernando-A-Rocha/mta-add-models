@@ -22,9 +22,6 @@ local prevent_addrem_spam = {
 	remtimer = {},
 }
 
- -- Vehicle specific
-local savedHandlings = {}
-
 --[[
 	Goal: solve the issue of handling resetting every time the vehicle's model is changed serverside/clientside
 ]]
@@ -37,16 +34,13 @@ function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, lua
 	local theVehicle, property, var = unpack(args)
 	if not isCustomVehicle(theVehicle) then return end
 
-	if not savedHandlings[theVehicle] then
-		savedHandlings[theVehicle] = {}
-	end
-	table.insert(savedHandlings[theVehicle], {property, var})
-	-- print(theVehicle, "Added handling: ", tostring(property), tostring(var))
+	local savedHandling = getElementData(theVehicle, "newmodels:savedHandling") or {}
+	table.insert(savedHandling, {property, var})
+	setElementData(theVehicle, "newmodels:savedHandling", savedHandling, false)
 
 end
 addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
 
-local savedUpgrades = {}
 --[[
 	Goal: solve the issue of upgrades resetting every time the vehicle's model is changed serverside/clientside
 ]]
@@ -59,27 +53,13 @@ function onVehicleUpgradesChanged( sourceResource, functionName, isAllowedByACL,
 	local theVehicle = unpack(args)
 	if not isCustomVehicle(theVehicle) then return end
 
-	savedUpgrades[theVehicle] = getVehicleUpgrades(theVehicle)
+	setElementData(theVehicle, "newmodels:savedUpgrades", getVehicleUpgrades(theVehicle), false)
 end
 addDebugHook( "postFunction", onVehicleUpgradesChanged, { "addVehicleUpgrade", "removeVehicleUpgrade" })
 
-addEventHandler( "onElementDestroy", root, 
-function ()
-	if getElementType(source) ~= "vehicle" then return end
-	if savedHandlings[source] then
-		savedHandlings[source] = nil
-	end
-	if savedUpgrades[source] then
-		savedUpgrades[source] = nil
-	end
-end)
-
 function updateVehicleHandling(element)
-	local handling = savedHandlings[element]
+	local handling = getElementData(element, "newmodels:savedHandling")
 	if handling then
-	-- Only saves for custom vehicles because those are the ones that get model changed all the time,
-	-- which ends up resetting the handling (everytime on setElementModel)
-
 		local count = 0
 		local count2 = 0
 		for k,v in pairs(handling) do
@@ -91,13 +71,11 @@ function updateVehicleHandling(element)
 				count2 = count2 + 1
 			end
 		end
-
-		-- print(element, "Set "..count..", deleted "..count2.." handling properties")
 	end
 end
 
 function updateVehicleUpgrades(element)
-	local upgrades = savedUpgrades[element]
+	local upgrades = getElementData(element, "newmodels:savedUpgrades")
 	if upgrades then
 		for _, upgrade in pairs(upgrades) do
 			addVehicleUpgrade(element, upgrade)			
