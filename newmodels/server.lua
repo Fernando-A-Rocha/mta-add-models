@@ -669,6 +669,7 @@ function addExternalMod_IDFilenames(...)
 	local modInfo
 	local fromResourceName
 	if type(args[1]) == "string" then
+		_outputDebugString("You are passing deprecated variables to addExternalMod_IDFilenames. Update your code to use the new format.", 2)
 		--[[
 			BEFORE:
 
@@ -890,6 +891,7 @@ function addExternalMod_CustomFilenames(...)
 	local modInfo
 	local fromResourceName
 	if type(args[1]) == "string" then
+		_outputDebugString("You are passing deprecated variables to addExternalMod_CustomFilenames. Update your code to use the new format.", 2)
 		--[[
 			BEFORE:
 
