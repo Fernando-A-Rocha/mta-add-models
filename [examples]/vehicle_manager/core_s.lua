@@ -4,7 +4,7 @@
 	New-Models Vehicle Manager
 ]]
 
-local addedModels = {}
+-- local addedModels = {}
 local dbCon = nil
 
 --[[
@@ -44,9 +44,9 @@ local function createDBTables()
 
 		local insertQstr = "INSERT INTO models (id, baseid, name, dff, txd, options, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 		for _, row in ipairs(INSERT_MODELS) do
-			local query = dbQuery(dbCon, insertQstr, row[1], row[2], row[3], row[4], row[5], DEFAULT_OPTIONS, now, "system")
-			local result = dbPoll(query, -1)
-			if not result then
+			local query2 = dbQuery(dbCon, insertQstr, row[1], row[2], row[3], row[4], row[5], DEFAULT_OPTIONS, now, "system")
+			local result2 = dbPoll(query2, -1)
+			if not result2 then
 				return false
 			end
 		end
@@ -107,9 +107,9 @@ function addNewModels()
 				"vehicle", row.id, row.baseid, row.name, row.dff, row.txd, false,
 				ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree
 			}
-			addedModels[row.id] = {
-				baseid = row.baseid, name = row.name, dff = row.dff, txd = row.txd
-			}
+			-- addedModels[row.id] = {
+			-- 	baseid = row.baseid, name = row.name, dff = row.dff, txd = row.txd
+			-- }
         end
 
 		--[[
@@ -120,7 +120,7 @@ function addNewModels()
 		local worked, reason = exports[newmodelsResourceName]:addExternalMods_CustomFileNames(listToAdd)
 		if not worked then
 			sendDebugMsg("Failed to add models: "..tostring(reason), "ERROR")
-			addedModels = {}
+			-- addedModels = {}
 			return
 		end
 
