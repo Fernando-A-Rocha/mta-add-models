@@ -1,4 +1,4 @@
-![Banner](https://i.imgur.com/8kdbVbC.png)
+![Banner](https://i.imgur.com/R1Gno6b.png)
 
 **mta-add-models** is an MTA resource (library) which makes use of the [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) features to add new peds (skins), vehicles and objects:
 
