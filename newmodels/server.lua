@@ -524,6 +524,76 @@ function requestModList(res)
 end
 addEventHandler("onPlayerResourceStart", root, requestModList)
 
+local function verifyOptionalModParameters(modInfo)
+
+	local ignoreTXD = modInfo.ignoreTXD or false
+	if (type(ignoreTXD) ~= "boolean") then
+		return false, "ignoreTXD passed must be true/false"
+	end
+
+	local ignoreDFF = modInfo.ignoreDFF or false
+	if (type(ignoreDFF) ~= "boolean") then
+		return false, "ignoreDFF passed must be true/false"
+	end
+
+	local ignoreCOL = modInfo.ignoreCOL or false
+	if (type(ignoreCOL) ~= "boolean") then
+		return false, "ignoreCOL passed must be true/false"
+	end
+
+	local metaDownloadFalse = modInfo.metaDownloadFalse or false
+	if type(metaDownloadFalse) ~= "boolean" then
+		return false, "metaDownloadFalse passed must be true/false"
+	end
+
+	local disableAutoFree = modInfo.disableAutoFree or false
+	if type(disableAutoFree) ~= "boolean" then
+		return false, "disableAutoFree passed must be true/false"
+	end
+
+	local lodDistance = modInfo.lodDistance or nil
+	if (lodDistance ~= nil) and type(lodDistance) ~= "number" then
+		return false, "lodDistance passed must be a number"
+	end
+
+	modInfo.ignoreTXD = ignoreTXD
+	modInfo.ignoreDFF = ignoreDFF
+	modInfo.ignoreCOL = ignoreCOL
+	modInfo.metaDownloadFalse = metaDownloadFalse
+	modInfo.disableAutoFree = disableAutoFree
+	modInfo.lodDistance = lodDistance
+
+	return modInfo
+end
+
+--[[
+	Backwards compatibility for old modInfo tables
+]]
+function addExternalMods_IDFilenames_Legacy(sourceResName, list)
+	_outputDebugString("You are passing deprecated modInfo tables to addExternalMods_IDFilenames. Update your code to use the new format.", 2)
+	Async:foreach(list, function(modInfo)
+		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
+		local modInfo2 = {
+			elementType = elementType,
+			id = id,
+			base_id = base_id,
+			name = name,
+			path = path,
+			ignoreTXD = ignoreTXD,
+			ignoreDFF = ignoreDFF,
+			ignoreCOL = ignoreCOL,
+			metaDownloadFalse = metaDownloadFalse,
+			disableAutoFree = disableAutoFree,
+			lodDistance = lodDistance,
+		}
+		local worked, reason = addExternalMod_IDFilenames(modInfo2, sourceResName)
+		if not worked then
+			outputDebugString("addExternalMod_IDFilenames failed: "..tostring(reason), 1)
+		end
+	end)
+	return true
+end
+
 --[[
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
@@ -533,11 +603,7 @@ addEventHandler("onPlayerResourceStart", root, requestModList)
 	So don't assume that they've all been added immediately after the function returns true.
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
-function addExternalMods_IDFilenames(list) -- [Exported]
-	if type(list) ~= "table" then
-		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
-	end
-
+function addExternalMods_IDFilenames(list, onFinishEvent) -- [Exported]
 	if not sourceResource then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
@@ -545,20 +611,49 @@ function addExternalMods_IDFilenames(list) -- [Exported]
 	if sourceResName == resName then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
-	for _, modInfo in ipairs(list) do
-		if type(modInfo) ~= "table" then
-			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
+	if type(list) ~= "table" then
+		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
+	end
+	if type(list[1]) ~= "table" then
+		return false, "Missing/Invalid 'list[1]' table passed: "..tostring(list[1])
+	end
+	if tonumber(list[1][2]) then
+		-- Backwards compatibility for old modInfo tables
+		return addExternalMods_IDFilenames_Legacy(sourceResName, list)
+	end
+	if not list[1].path then
+		return false, "list[1] is missing 'path' key"
+	end
+	if onFinishEvent ~= nil then
+		if type(onFinishEvent) ~= "table" then
+			return false, "Invalid 'onFinishEvent' passed, example: { source = 'eventSource', name = 'eventName', args = {thePlayer} }"
+		end
+		if not isElement(onFinishEvent.source) then
+			return false, "Invalid 'onFinishEvent.source' passed, expected element"
+		end
+		if type(onFinishEvent.name) ~= "string" then
+			return false, "Invalid 'onFinishEvent.name' passed, expected string"
+		end
+		if (onFinishEvent.args ~= nil) then
+			if type(onFinishEvent.args) ~= "table" then
+				return false, "Invalid 'onFinishEvent.args' passed, expected table"
+			end
 		end
 	end
-
 	Async:foreach(list, function(modInfo)
-		
-		local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
-		addExternalMod_IDFilenames(
-			elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance, sourceResName
-		)
+		local worked, reason = addExternalMod_IDFilenames(modInfo, sourceResName)
+		if not worked then
+			outputDebugString("addExternalMod_IDFilenames failed: "..tostring(reason), 1)
+		end
+	end, function()
+		if (onFinishEvent) then
+			if onFinishEvent.args then
+				triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+			else
+				triggerEvent(onFinishEvent.name, onFinishEvent.source)
+			end
+		end
 	end)
-
 	return true
 end
 
@@ -567,74 +662,81 @@ end
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
 -- [Exported]
-function addExternalMod_IDFilenames(
-	elementType, id, base_id, name, path,
-	ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance,
-	fromResourceName
-)
+function addExternalMod_IDFilenames(...)
+
+	-- Backwards compatibility for old arguments
+	local args = {...}
+	local modInfo
+	local fromResourceName
+	if type(args[1]) == "string" then
+		_outputDebugString("You are passing deprecated variables to addExternalMod_IDFilenames. Update your code to use the new format.", 2)
+		--[[
+			BEFORE:
+
+			elementType, id, base_id, name, path,
+			ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance,
+			fromResourceName
+		]]
+		modInfo = {
+			elementType = args[1], id = args[2], base_id = args[3], name = args[4],
+			path = args[5], ignoreTXD = args[6], ignoreDFF = args[7], ignoreCOL = args[8],
+			metaDownloadFalse = args[9], disableAutoFree = args[10], lodDistance = args[11]
+		}
+		fromResourceName = args[12]
+	else
+		modInfo = args[1]
+		fromResourceName = args[2]
+	end
 
 	local sourceResName
-	if not fromResourceName then
-		sourceResName = getResourceName(sourceResource)
-		if sourceResName == resName then
+	if type(fromResourceName) ~= "string" then
+		if (not sourceResource) or (getResourceName(sourceResource) == resName) then
 			return false, "This command is meant to be called from outside resource '"..resName.."'"
 		end
+		sourceResName = getResourceName(sourceResource)
 	else
 		sourceResName = fromResourceName
 	end
 
+	local elementType = modInfo.elementType
 	if type(elementType) ~= "string" then
 		return false, "Missing/Invalid 'elementType' passed: "..tostring(elementType)
 	end
-	local sup,reason = isElementTypeSupported(elementType)
+	local sup, reason = isElementTypeSupported(elementType)
 	if not sup then
 		return false, "Invalid 'elementType' passed: "..reason
 	end
-
-	if elementType == "player" then
-		elementType = "ped" -- so it can be fixed later
+	if elementType == "player" or elementType == "pickup" then
+		return false, "'player' or 'pickup' mods have to be added with type 'ped' or 'object' respectively"
 	end
 
+	local id = modInfo.id
 	if not tonumber(id) then
 		return false, "Missing/Invalid 'id' passed: "..tostring(id)
 	end
 	id = tonumber(id)
 
+	local base_id = modInfo.base_id
 	if not tonumber(base_id) then
 		return false, "Missing/Invalid 'base_id' passed: "..tostring(base_id)
 	end
 	base_id = tonumber(base_id)
 
+	local name = modInfo.name
 	if type(name) ~= "string" then
 		return false, "Missing/Invalid 'name' passed: "..tostring(name)
 	end
+
+	local path = modInfo.path
 	if type(path) ~= "string" then
 		return false, "Missing/Invalid 'path' passed: "..tostring(path)
 	end
-	if (ignoreTXD ~= nil and type(ignoreTXD) ~= "boolean") then
-		return false, "ignoreTXD passed must be true/false"
+
+	local modInfo2, optionalReason = verifyOptionalModParameters(modInfo)
+	if not modInfo2 then
+		return false, optionalReason
 	end
-	if (ignoreDFF ~= nil and type(ignoreDFF) ~= "boolean") then
-		return false, "ignoreDFF passed must be true/false"
-	end
-	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
-		return false, "ignoreCOL passed must be true/false"
-	end
-	if (metaDownloadFalse ~= nil) and type(metaDownloadFalse) ~= "boolean" then
-		return false, "metaDownloadFalse passed must be true/false"
-	end
-	if not metaDownloadFalse then
-		metaDownloadFalse = false
-	end
-	if (disableAutoFree ~= nil) and type(disableAutoFree) ~= "boolean" then
-		return false, "disableAutoFree passed must be true/false"
-	end
-	if not disableAutoFree then
-		disableAutoFree = false
-	end
-	if (lodDistance ~= nil) and type(lodDistance) ~= "number" then
-		return false, "lodDistance passed must be a number"
-	end
+	modInfo = modInfo2
 
 	if string.sub(path, 1,1) ~= ":" then
 		path = ":"..sourceResName.."/"..path
@@ -659,9 +761,9 @@ function addExternalMod_IDFilenames(
 	local paths = getActualModPaths(path, id)
 	for k, path2 in pairs(paths) do
 		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
-			if (not ignoreTXD and k == "txd")
-			or (not ignoreDFF and k == "dff")
-			or ((not ignoreCOL) and elementType == "object" and k == "col") then
+			if ((not modInfo.ignoreTXD) and k == "txd")
+			or ((not modInfo.ignoreDFF) and k == "dff")
+			or ((not modInfo.ignoreCOL) and elementType == "object" and k == "col") then
 				return false, "File doesn't exist: '"..tostring(path2).."', check folder: '"..path.."'"
 			end
 		end
@@ -670,7 +772,7 @@ function addExternalMod_IDFilenames(
 	-- Save mod in list
 	modList[elementType][#modList[elementType]+1] = {
 		id=id, base_id=base_id, path=path, name=name,
-		metaDownloadFalse=metaDownloadFalse, disableAutoFree=disableAutoFree, lodDistance=lodDistance,
+		metaDownloadFalse=modInfo.metaDownloadFalse, disableAutoFree=modInfo.disableAutoFree, lodDistance=modInfo.lodDistance,
 		srcRes=sourceResName
 	}
 
@@ -694,6 +796,27 @@ function addExternalMod_IDFilenames(
 end
 
 --[[
+	Backwards compatibility for old modInfo tables
+]]
+function addExternalMods_CustomFileNames_Legacy(sourceResName, list)
+	_outputDebugString("You are passing deprecated modInfo tables to addExternalMods_CustomFileNames. Update your code to use the new format.", 2)
+	Async:foreach(list, function(modInfo)
+		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
+		local modInfo2 = {
+			elementType=elementType, id=id, base_id=base_id, name=name,
+			path_dff = path_dff, path_txd = path_txd, path_col = path_col,
+			ignoreTXD=ignoreTXD, ignoreDFF=ignoreDFF, ignoreCOL=ignoreCOL,
+			metaDownloadFalse=metaDownloadFalse, disableAutoFree=disableAutoFree, lodDistance=lodDistance
+		}
+		local worked, reason = addExternalMod_CustomFilenames(modInfo2, sourceResName)
+		if not worked then
+			outputDebugString("addExternalMods_CustomFileNames failed: "..tostring(reason), 1)
+		end
+	end)
+	return true
+end	
+
+--[[
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
 	With this one you can just pass a table of mods and it calls that function for you
@@ -702,10 +825,7 @@ end
 	So don't assume that they've all been added immediately after the function returns true.
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
-function addExternalMods_CustomFileNames(list) -- [Exported]
-	if type(list) ~= "table" then
-		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
-	end
+function addExternalMods_CustomFileNames(list, onFinishEvent) -- [Exported]
 	if not sourceResource then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
@@ -713,20 +833,49 @@ function addExternalMods_CustomFileNames(list) -- [Exported]
 	if sourceResName == resName then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
-	for _, modInfo in ipairs(list) do
-		if type(modInfo) ~= "table" then
-			return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
+	if type(list) ~= "table" then
+		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
+	end
+	if type(list[1]) ~= "table" then
+		return false, "Missing/Invalid 'list[1]' table passed: "..tostring(list[1])
+	end
+	if tonumber(list[1][2]) then
+		-- Backwards compatibility for old modInfo tables
+		return addExternalMods_CustomFileNames_Legacy(sourceResName, list)
+	end
+	if list[1].path then
+		return false, "list[1] has 'path' key, this can only be used in addExternalMods_IDFilenames"
+	end
+	if onFinishEvent ~= nil then
+		if type(onFinishEvent) ~= "table" then
+			return false, "Invalid 'onFinishEvent' passed, example: { source = 'eventSource', name = 'eventName', args = {thePlayer} }"
+		end
+		if not isElement(onFinishEvent.source) then
+			return false, "Invalid 'onFinishEvent.source' passed, expected element"
+		end
+		if type(onFinishEvent.name) ~= "string" then
+			return false, "Invalid 'onFinishEvent.name' passed, expected string"
+		end
+		if (onFinishEvent.args ~= nil) then
+			if type(onFinishEvent.args) ~= "table" then
+				return false, "Invalid 'onFinishEvent.args' passed, expected table"
+			end
 		end
 	end
-
 	Async:foreach(list, function(modInfo)
-
-		local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance = unpack(modInfo)
-		addExternalMod_CustomFilenames(
-			elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance, sourceResName
-		)
+		local worked, reason = addExternalMod_CustomFilenames(modInfo, sourceResName)
+		if not worked then
+			outputDebugString("addExternalMods_CustomFileNames failed: "..tostring(reason), 1)
+		end
+	end, function()
+		if (onFinishEvent) then
+			if onFinishEvent.args then
+				triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+			else
+				triggerEvent(onFinishEvent.name, onFinishEvent.source)
+			end
+		end
 	end)
-
 	return true
 end
 
@@ -735,78 +884,87 @@ end
 	you pass directly individual file paths for dff, txd and col files
 ]]
 -- [Exported]
-function addExternalMod_CustomFilenames(
-	elementType, id, base_id, name, path_dff, path_txd, path_col,
-	ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance,
-	fromResourceName
-)
+function addExternalMod_CustomFilenames(...)
+
+	-- Backwards compatibility for old arguments
+	local args = {...}
+	local modInfo
+	local fromResourceName
+	if type(args[1]) == "string" then
+		_outputDebugString("You are passing deprecated variables to addExternalMod_CustomFilenames. Update your code to use the new format.", 2)
+		--[[
+			BEFORE:
+
+			elementType, id, base_id, name, path_dff, path_txd, path_col,
+			ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance,
+			fromResourceName
+		]]
+		modInfo = {
+			elementType = args[1], id = args[2], base_id = args[3], name = args[4],
+			path_dff = args[5], path_txd = args[6], path_col = args[7],
+			ignoreTXD = args[8], ignoreDFF = args[9], ignoreCOL = args[10],
+			metaDownloadFalse = args[11], disableAutoFree = args[12], lodDistance = args[13]
+		}
+		fromResourceName = args[14]
+	else
+		modInfo = args[1]
+		fromResourceName = args[2]
+	end
+
+	if type(modInfo) ~= "table" then
+		return false, "Missing/Invalid 'modInfo' table passed: "..tostring(modInfo)
+	end
 
 	local sourceResName
-	if not fromResourceName then
-		sourceResName = getResourceName(sourceResource)
-		if sourceResName == resName then
+	if type(fromResourceName) ~= "string" then
+		if (not sourceResource) or (getResourceName(sourceResource) == resName) then
 			return false, "This command is meant to be called from outside resource '"..resName.."'"
 		end
+		sourceResName = getResourceName(sourceResource)
 	else
 		sourceResName = fromResourceName
 	end
 
+	local elementType = modInfo.elementType
 	if type(elementType) ~= "string" then
 		return false, "Missing/Invalid 'elementType' passed: "..tostring(elementType)
 	end
-	local sup,reason = isElementTypeSupported(elementType)
+	local sup, reason = isElementTypeSupported(elementType)
 	if not sup then
 		return false, "Invalid 'elementType' passed: "..reason
 	end
-
-	if elementType == "player" then
-		elementType = "ped" -- so it can be fixed later
+	if elementType == "player" or elementType == "pickup" then
+		return false, "'player' or 'pickup' mods have to be added with type 'ped' or 'object' respectively"
 	end
 
+	local id = modInfo.id
 	if not tonumber(id) then
 		return false, "Missing/Invalid 'id' passed: "..tostring(id)
 	end
 	id = tonumber(id)
 
+	local base_id = modInfo.base_id
 	if not tonumber(base_id) then
 		return false, "Missing/Invalid 'base_id' passed: "..tostring(base_id)
 	end
 	base_id = tonumber(base_id)
 
+	local name = modInfo.name
 	if type(name) ~= "string" then
 		return false, "Missing/Invalid 'name' passed: "..tostring(name)
 	end
 
-	if (ignoreTXD ~= nil and type(ignoreTXD) ~= "boolean") then
-		return false, "ignoreTXD passed must be true/false"
+	local modInfo2, optionalReason = verifyOptionalModParameters(modInfo)
+	if not modInfo2 then
+		return false, optionalReason
 	end
-	if (ignoreDFF ~= nil and type(ignoreDFF) ~= "boolean") then
-		return false, "ignoreDFF passed must be true/false"
-	end
-	if (ignoreCOL ~= nil and type(ignoreCOL) ~= "boolean") then
-		return false, "ignoreCOL passed must be true/false"
-	end
-	if (metaDownloadFalse ~= nil) and type(metaDownloadFalse) ~= "boolean" then
-		return false, "metaDownloadFalse passed must be true/false"
-	end
-	if not metaDownloadFalse then
-		metaDownloadFalse = false
-	end
-	if (disableAutoFree ~= nil) and type(disableAutoFree) ~= "boolean" then
-		return false, "disableAutoFree passed must be true/false"
-	end
-	if not disableAutoFree then
-		disableAutoFree = false
-	end
-	if (lodDistance ~= nil) and type(lodDistance) ~= "number" then
-		return false, "lodDistance passed must be a number"
-	end
-
+	modInfo = modInfo2
 
 	local paths = {}
 
-	if (ignoreDFF ~= true) then
+	if (modInfo.ignoreDFF == false) then
 
+		local path_dff = modInfo.path_dff or modInfo.dff
 		if type(path_dff) ~= "string" then
 			return false, "Missing/Invalid 'path_dff' passed: "..tostring(path_dff)
 		end
@@ -817,8 +975,9 @@ function addExternalMod_CustomFilenames(
 
 	end
 
-	if (ignoreTXD ~= true) then
+	if (modInfo.ignoreTXD == false) then
 
+		local path_txd = modInfo.path_txd or modInfo.txd
 		if type(path_txd) ~= "string" then
 			return false, "Missing/Invalid 'path_txd' passed: "..tostring(path_txd)
 		end
@@ -829,8 +988,9 @@ function addExternalMod_CustomFilenames(
 
 	end
 
-	if (ignoreCOL ~= true and elementType == "object") then
+	if (modInfo.ignoreCOL == false and elementType == "object") then
 
+		local path_col = modInfo.path_col or modInfo.col
 		if type(path_col) ~= "string" then
 			return false, "Missing/Invalid 'path_col' passed: "..tostring(path_col)
 		end
@@ -858,9 +1018,9 @@ function addExternalMod_CustomFilenames(
 	end
 	for k, path2 in pairs(paths) do
 		if (not fileExists(path2)) and ((ENABLE_NANDOCRYPT) and not fileExists(path2..NANDOCRYPT_EXT)) then
-			if (not ignoreTXD and k == "txd")
-			or (not ignoreDFF and k == "dff")
-			or ((not ignoreCOL) and elementType == "object" and k == "col") then
+			if ((not modInfo.ignoreTXD) and k == "txd")
+			or ((not modInfo.ignoreDFF) and k == "dff")
+			or ((not modInfo.ignoreCOL) and elementType == "object" and k == "col") then
 
 				return false, "File doesn't exist: '"..tostring(path2).."'"
 			end
@@ -869,9 +1029,8 @@ function addExternalMod_CustomFilenames(
 
 	-- Save mod in list
 	modList[elementType][#modList[elementType]+1] = {
-		-- path will be a table here, interpreted by the client differently
 		id=id, base_id=base_id, path=paths, name=name,
-		metaDownloadFalse=metaDownloadFalse, disableAutoFree=disableAutoFree, lodDistance=lodDistance,
+		metaDownloadFalse=modInfo.metaDownloadFalse, disableAutoFree=modInfo.disableAutoFree, lodDistance=modInfo.lodDistance,
 		srcRes=sourceResName
 	}
 
@@ -898,11 +1057,7 @@ end
 	This is an async function: mods in the list of IDs will be removed gradually and if you have too many it may take several seconds.
 	So don't assume that they've all been removed immediately after the function returns true.
 ]]
-function removeExternalMods(list) -- [Exported]
-
-	if type(list) ~= "table" then
-		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
-	end
+function removeExternalMods(list, onFinishEvent) -- [Exported]
 	if not sourceResource then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
@@ -910,16 +1065,42 @@ function removeExternalMods(list) -- [Exported]
 	if sourceResName == resName then
 		return false, "This command is meant to be called from outside resource '"..resName.."'"
 	end
-	for _, id in ipairs(list) do
-		if type(id) ~= "number" then
-			return false, "Missing/Invalid 'id' number passed: "..tostring(modInfo)
+	if type(list) ~= "table" then
+		return false, "Missing/Invalid 'list' table passed: "..tostring(list)
+	end
+	if type(list[1]) ~= "number" then
+		return false, "list[1] is not a number: "..tostring(list[1])
+	end
+	if onFinishEvent ~= nil then
+		if type(onFinishEvent) ~= "table" then
+			return false, "Invalid 'onFinishEvent' passed, example: { source = 'eventSource', name = 'eventName', args = {thePlayer} }"
+		end
+		if not isElement(onFinishEvent.source) then
+			return false, "Invalid 'onFinishEvent.source' passed, expected element"
+		end
+		if type(onFinishEvent.name) ~= "string" then
+			return false, "Invalid 'onFinishEvent.name' passed, expected string"
+		end
+		if (onFinishEvent.args ~= nil) then
+			if type(onFinishEvent.args) ~= "table" then
+				return false, "Invalid 'onFinishEvent.args' passed, expected table"
+			end
 		end
 	end
-
 	Async:foreach(list, function(id)
-		removeExternalMod(id)
+		local worked, reason = removeExternalMod(id)
+		if not worked then
+			outputDebugString("removeExternalMod("..tostring(id)..") failed: "..tostring(reason), 1)
+		end
+	end, function()
+		if (onFinishEvent) then
+			if onFinishEvent.args then
+				triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+			else
+				triggerEvent(onFinishEvent.name, onFinishEvent.source)
+			end
+		end
 	end)
-
 	return true
 end
 

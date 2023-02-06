@@ -10,9 +10,9 @@ If you need help with anything related to this project, please read the correspo
 
 ## Installation
 
-1. Follow the instructions on the [New-Models Editor v3.0.0 release page](https://github.com/Fernando-A-Rocha/mtasa-resources/releases/tag/v3.0.0-newmodels-editor).
+1. Follow the instructions on the [New-Models Editor v3.1.0 release page](https://github.com/Fernando-A-Rocha/mtasa-resources/releases/tag/v3.1.0-newmodels-editor).
 
-2. Make sure you installed `newmodels` & `newmodels-engine` which you can obtain from the [mta-add-models v3.0.0 release page](https://github.com/Fernando-A-Rocha/mta-add-models/releases/tag/v3.0.0).
+2. Make sure you installed `newmodels` & `newmodels-engine` which you can obtain from the [mta-add-models v3.1.0 release page](https://github.com/Fernando-A-Rocha/mta-add-models/releases/tag/v3.1.0).
     * Tutorial [here](/README.md#install).
     * Both of these are required for the New-Models Map Editor to work.
     * Make sure you have the right compatible versions of both resources installed.

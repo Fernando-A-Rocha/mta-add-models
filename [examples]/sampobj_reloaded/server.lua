@@ -1463,9 +1463,7 @@ function (startedResource)
 			Newmodels will handle the downloading in a queue, so we don't need to worry about it
 		]]
 		local metaDownloadFalse = true
-
-		-- ARGS: elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse
-		listToAdd[#listToAdd+1] = {"object", id, 1337, name, dff, txd, col, false, false, false, metaDownloadFalse}
+		listToAdd[#listToAdd+1] = {elementType = "object", id = id, base_id = 1337, name = name, path_dff = dff, path_txd = txd, path_col = col, metaDownloadFalse = metaDownloadFalse}
 	end
 
 	--[[
