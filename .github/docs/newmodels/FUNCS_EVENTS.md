@@ -142,7 +142,7 @@ All server-side only exported functions are explained here.
 
 ---
 
-### **addExternalMod_IDFilenames**(`modInfo`)
+### **addExternalMod_IDFilenames**(`modInfo`, `fromResourceName`)
 
 Adds a new external mod which uses ID file names (e.g. "models/50001.txd") to the mod list.
 
@@ -160,6 +160,10 @@ Adds a new external mod which uses ID file names (e.g. "models/50001.txd") to th
   - (optional) `metaDownloadFalse`: A boolean (e.g. false)
   - (optional) `disableAutoFree`: A boolean (e.g. false)
   - (optional) `lodDistance`: A number (e.g. 300)
+
+**Optional arguments**:
+
+- `fromResourceName`: A string (e.g. "myResource") - where the mod files are located
 
 **Returns**:
 
@@ -191,7 +195,7 @@ Adds a list of new external mods which use ID file names to the mod list. See th
 
 ---
 
-### **addExternalMod_CustomFilenames**(`modInfo`)
+### **addExternalMod_CustomFilenames**(`modInfo`, `fromResourceName`)
 
 Adds a new external mod which uses custom file names (e.g. "models/my_custom_object.dff") to the mod list.
 
@@ -209,6 +213,10 @@ Adds a new external mod which uses custom file names (e.g. "models/my_custom_obj
   - (optional) `metaDownloadFalse`: A boolean (e.g. false)
   - (optional) `disableAutoFree`: A boolean (e.g. false)
   - (optional) `lodDistance`: A number (e.g. 300)
+
+**Optional arguments**:
+
+- `fromResourceName`: A string (e.g. "myResource") - where the mod files are located
 
 **Returns**:
 
