@@ -1,10 +1,10 @@
 # Using Newmodels
 
-This library was created with the goal of being usable in any server without breaking most of its scripts. It actually lets you use default GTA model IDs on any elements serverside, without issues. However, look no further if you want to implement new model IDs and how they can be set/fetched.
+This library was created with the goal of being usable in any server without breaking most of its scripts. It actually lets you use default GTA model IDs on any elements. Look no further if you want to implement new model IDs and understand how they can be set/fetched.
 
 ## Guide
 
-Below is some general information to help you start using this library. It is strongly encouraged to explode the scripts and read the code to understand how it works.
+Below is some general information to help you start using this library. It is strongly encouraged to explore the scripts and read the code to understand how it works.
 
 Related:
 
