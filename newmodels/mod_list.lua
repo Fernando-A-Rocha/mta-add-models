@@ -36,6 +36,8 @@
 --		'metaDownloadFalse' : if true, the mod will be only be downloaded when needed (when trying to set model)
 -- 		'disableAutoFree' : if true, the allocated mod ID will not be freed when no element streamed in is no longer using the mod ID
 --  		This causes the mod to stay in memory, be careful when enabling for big mods
+-- 		'filteringEnabled' (engineLoadTXD)
+-- 		'alphaTransparency' (engineReplaceModel)
 
 modList = {
 	
