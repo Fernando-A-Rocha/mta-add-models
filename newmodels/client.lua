@@ -349,7 +349,6 @@ function allocateNewMod(element, elementType, id)
 
 	-- Lod Distance
 	if lodDistance then
-		print(id, "lodDistance", lodDistance)
 		engineSetModelLODDistance(allocated_id, lodDistance)
 	end
 	
@@ -934,17 +933,16 @@ function receiveModList(modList)
 
 	received_modlist = modList
 
-	-- local count = 0
-	-- for elementType, mods in pairs(modList) do
-	-- 	if not (elementType=="player" or elementType=="pickup") then
-	-- 		for _, mod in ipairs(mods) do
-	-- 			count = count + 1
-	-- 		end
-	-- 	end
-	-- end
-	-- outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
-
-	outputDebugString("Received mod list on client", 0, 115, 236, 255)
+	local count = 0
+	for elementType, mods in pairs(modList) do
+		if not (elementType=="player" or elementType=="pickup") then
+			for _, mod in ipairs(mods) do
+				count = count + 1
+			end
+		end
+	end
+	outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
+	-- outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle
 	triggerEvent(resName..":onModListReceived", localPlayer, modList)
