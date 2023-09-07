@@ -97,5 +97,7 @@
     <aclrequest>
         <right name="function.kickPlayer" access="true" />
         <right name="function.fetchRemote" access="true" />
+        <right name="function.startResource" access="true" />
+        <right name="function.stopResource" access="true" />
     </aclrequest>
 </meta>
