@@ -293,7 +293,7 @@ function allocateNewMod(element, elementType, id)
 	local txdworked,dffworked,colworked = false,false,false
 
 	if txdPath then
-		local txd = engineLoadTXD(txdPath)
+		local txd = engineLoadTXD(txdPath, foundMod.filteringEnabled)
 		if txd then
 			txdmodel = txd
 			if engineImportTXD(txd,allocated_id) then
@@ -306,7 +306,7 @@ function allocateNewMod(element, elementType, id)
 		local dff = engineLoadDFF(dffPath, allocated_id)
 		if dff then
 			dffmodel = dff
-			if engineReplaceModel(dff,allocated_id) then
+			if engineReplaceModel(dff, allocated_id, foundMod.alphaTransparency) then
 				dffworked = true
 			end
 		end
@@ -349,7 +349,6 @@ function allocateNewMod(element, elementType, id)
 
 	-- Lod Distance
 	if lodDistance then
-		print(id, "lodDistance", lodDistance)
 		engineSetModelLODDistance(allocated_id, lodDistance)
 	end
 	
@@ -713,36 +712,32 @@ function updateElementsInQueue()
 	return true
 end
 
-function updateStreamedElements(thisId)
+function refreshStreamedInElements()
 
-	local freed = {}
+	-- Free all instantly
+	for id, allocated_id in pairs(allocated_ids) do
+		freeAllocatedID(allocated_id, id, "refreshStreamedInElements")
+	end
 
 	for elementType, name in pairs(dataNames) do
 		for k,el in ipairs(getElementsByType(elementType)) do
 			if isElementStreamedIn(el) then
 
 				local id = tonumber(getElementData(el, name))
-				if id and not freed[id] then
+				if id then
 
-					if (not thisId) or (id == thisId) then
+					local found = false
 
-						local found = false
-
-						for j,mod in pairs(received_modlist[elementType]) do
-							if mod.id == id then
-								found = true
-								break
-							end
+					for j,mod in pairs(received_modlist[elementType]) do
+						if mod.id == id then
+							found = true
+							break
 						end
-						if not found then -- means the mod was removed by a serverside script
-
-							freed[id] = true
-							startFreeingMod(id, false, "updateStreamedElements => mod gone")
-						else
-							local success, reason = setElementCustomModel(el, elementType, id)
-							if not success then
-								outputDebugString("[updateStreamedElements] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
-							end
+					end
+					if found then
+						local success, reason = setElementCustomModel(el, elementType, id)
+						if not success then
+							outputDebugString("[refreshStreamedInElements] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
 						end
 					end
 				end
@@ -938,23 +933,22 @@ function receiveModList(modList)
 
 	received_modlist = modList
 
-	-- local count = 0
-	-- for elementType, mods in pairs(modList) do
-	-- 	if not (elementType=="player" or elementType=="pickup") then
-	-- 		for _, mod in ipairs(mods) do
-	-- 			count = count + 1
-	-- 		end
-	-- 	end
-	-- end
-	-- outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
-
-	outputDebugString("Received mod list on client", 0, 115, 236, 255)
+	local count = 0
+	for elementType, mods in pairs(modList) do
+		if not (elementType=="player" or elementType=="pickup") then
+			for _, mod in ipairs(mods) do
+				count = count + 1
+			end
+		end
+	end
+	outputDebugString("Received mod list on client ("..count..")", 0, 115, 236, 255)
+	-- outputDebugString("Received mod list on client", 0, 115, 236, 255)
 
 	-- for other resources to handle
 	triggerEvent(resName..":onModListReceived", localPlayer, modList)
 
 	if updateElementsInQueue() then
-		updateStreamedElements()
+		refreshStreamedInElements()
 	end
 end
 addEventHandler(resName..":receiveModList", resourceRoot, receiveModList)

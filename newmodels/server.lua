@@ -14,6 +14,7 @@ local SERVER_READY = false
 local startTickCount = nil
 local SEND_DELAY = 5000
 local clientsWaiting = {}
+local loadedPlayers = {}
 
 local prevent_addrem_spam = {
 	add = {},
@@ -329,10 +330,22 @@ function doModListChecks()
 				modCheckMessage("Invalid param lodDistance value '"..tostring(mod.lodDistance).."' (expected number) for mod ID "..mod.id)
 				return false
 			end
+
+			-- 8. verify optional param: filteringEnabled
+			if mod.filteringEnabled ~= nil and type(mod.filteringEnabled) ~= "boolean" then
+				modCheckMessage("Invalid param filteringEnabled value '"..tostring(mod.filteringEnabled).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
+
+			-- 9. verify optional param: alphaTransparency
+			if mod.alphaTransparency ~= nil and type(mod.alphaTransparency) ~= "boolean" then
+				modCheckMessage("Invalid param alphaTransparency value '"..tostring(mod.alphaTransparency).."' (expected true/false) for mod ID "..mod.id)
+				return false
+			end
 		end
 	end
 
-	-- 8.  verify file nodes exist in meta.xml
+	-- 10.  verify file nodes exist in meta.xml
 	local metaFile = xmlLoadFile("meta.xml", true)
 	if not metaFile then
 		outputDebugString("STARTUP MOD CHECK: Failed to open meta.xml file", 2)
@@ -516,13 +529,34 @@ end
 
 function requestModList(res)
 	if res ~= resource then return end
+
+	for i, v in ipairs(loadedPlayers) do
+		if v == source then
+			return
+		end
+	end
+
 	if SERVER_READY then
 		sendModList(source, "requestModList")
 	else
 		clientsWaiting[source] = true
 	end
+
+	table.insert(loadedPlayers, source)
 end
 addEventHandler("onPlayerResourceStart", root, requestModList)
+
+addEventHandler("onPlayerQuit", root, 
+	function()
+		for i, v in ipairs(loadedPlayers) do
+			if v == source then
+				table.remove(loadedPlayers, i)
+
+				break
+			end
+		end	
+	end
+)
 
 local function verifyOptionalModParameters(modInfo)
 
@@ -556,12 +590,24 @@ local function verifyOptionalModParameters(modInfo)
 		return false, "lodDistance passed must be a number"
 	end
 
+	local filteringEnabled = modInfo.filteringEnabled or true
+	if type(filteringEnabled) ~= "boolean" then
+		return false, "filteringEnabled passed must be true/false"
+	end
+
+	local alphaTransparency = modInfo.alphaTransparency or false
+	if type(alphaTransparency) ~= "boolean" then
+		return false, "alphaTransparency passed must be true/false"
+	end
+
 	modInfo.ignoreTXD = ignoreTXD
 	modInfo.ignoreDFF = ignoreDFF
 	modInfo.ignoreCOL = ignoreCOL
 	modInfo.metaDownloadFalse = metaDownloadFalse
 	modInfo.disableAutoFree = disableAutoFree
 	modInfo.lodDistance = lodDistance
+	modInfo.filteringEnabled = filteringEnabled
+	modInfo.alphaTransparency = alphaTransparency
 
 	return modInfo
 end
@@ -773,6 +819,7 @@ function addExternalMod_IDFilenames(...)
 	modList[elementType][#modList[elementType]+1] = {
 		id=id, base_id=base_id, path=path, name=name,
 		metaDownloadFalse=modInfo.metaDownloadFalse, disableAutoFree=modInfo.disableAutoFree, lodDistance=modInfo.lodDistance,
+		filteringEnabled=modInfo.filteringEnabled, alphaTransparency=modInfo.alphaTransparency,
 		srcRes=sourceResName
 	}
 
@@ -1031,6 +1078,7 @@ function addExternalMod_CustomFilenames(...)
 	modList[elementType][#modList[elementType]+1] = {
 		id=id, base_id=base_id, path=paths, name=name,
 		metaDownloadFalse=modInfo.metaDownloadFalse, disableAutoFree=modInfo.disableAutoFree, lodDistance=modInfo.lodDistance,
+		filteringEnabled=modInfo.filteringEnabled, alphaTransparency=modInfo.alphaTransparency,
 		srcRes=sourceResName
 	}
 

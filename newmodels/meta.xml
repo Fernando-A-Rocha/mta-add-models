@@ -1,7 +1,7 @@
 <meta>
     <info author="Fernando" name="mta-add-models"
       description="minimalistic library for adding new models to your server"
-      version="3.1.0"
+      version="3.2.0"
       type="script"/>
     
     <!-- DOCUMENTATION:
@@ -11,7 +11,7 @@
     <!-- IMPORTANT TO HAVE THE VERSION
       SPECIFIED SO THAT ADDED MODELS WORK AS EXPECTED
       https://nightly.mtasa.com  -->
-    <min_mta_version client="1.5.9-9.21437.0" server="1.5.9-9.21437.0"></min_mta_version>
+    <min_mta_version client="1.6.0-9.22184.0" server="1.6.0-9.22184.0"></min_mta_version>
 
     <!-- Ped Mods -->
     <file src="models/peds/20001.dff"/>
