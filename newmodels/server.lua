@@ -234,7 +234,7 @@ function doModListChecks()
 				return false
 			end
 			if usedModIds[mod.id] then
-				modCheckMessage("Duplicated mod ID '"..id.."'")
+				modCheckMessage("Duplicated mod ID '"..tostring(mod.id).."'")
 				return false
 			end
 			usedModIds[mod.id] = true
