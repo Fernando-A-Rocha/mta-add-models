@@ -14,6 +14,7 @@ local SERVER_READY = false
 local startTickCount = nil
 local SEND_DELAY = 5000
 local clientsWaiting = {}
+local loadedPlayers = {}
 
 local prevent_addrem_spam = {
 	add = {},
@@ -344,7 +345,7 @@ function doModListChecks()
 		end
 	end
 
-	-- 8.  verify file nodes exist in meta.xml
+	-- 10.  verify file nodes exist in meta.xml
 	local metaFile = xmlLoadFile("meta.xml", true)
 	if not metaFile then
 		outputDebugString("STARTUP MOD CHECK: Failed to open meta.xml file", 2)
@@ -528,13 +529,34 @@ end
 
 function requestModList(res)
 	if res ~= resource then return end
+
+	for i, v in ipairs(loadedPlayers) do
+		if v == source then
+			return
+		end
+	end
+
 	if SERVER_READY then
 		sendModList(source, "requestModList")
 	else
 		clientsWaiting[source] = true
 	end
+
+	table.insert(loadedPlayers, source)
 end
 addEventHandler("onPlayerResourceStart", root, requestModList)
+
+addEventHandler("onPlayerQuit", root, 
+	function()
+		for i, v in ipairs(loadedPlayers) do
+			if v == source then
+				table.remove(loadedPlayers, i)
+
+				break
+			end
+		end	
+	end
+)
 
 local function verifyOptionalModParameters(modInfo)
 
