@@ -62,3 +62,7 @@ CHAT_DEBUG_MESSAGES = true -- make debug console messages to go chatbox (better 
 	Async:setPriority("high");   -- better perfomance
 ]]
 ASYNC_PRIORITY = "normal"
+
+DATANAME_VEH_HANDLING = "newmodels:savedHandling" -- element data name for saved vehicle handling
+DATANAME_VEH_UPGRADES = "newmodels:savedUpgrades" -- element data name for saved vehicle upgrades
+DATANAME_VEH_PAINTJOB = "newmodels:savedPaintjob" -- element data name for saved vehicle paintjob

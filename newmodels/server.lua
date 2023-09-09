@@ -7,7 +7,6 @@
 --]]
 
 -- Internal events:
-addEvent(resName..":updateVehicleProperties", true)
 addEvent(resName..":onDownloadFailed", true)
 
 local SERVER_READY = false
@@ -26,69 +25,60 @@ local prevent_addrem_spam = {
 --[[
 	Goal: solve the issue of handling resetting every time the vehicle's model is changed serverside/clientside
 ]]
-function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
-	if sourceResource == resource then
-		return
+if DATANAME_VEH_HANDLING then
+	function onSetVehicleHandling( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
+		if sourceResource == resource then
+			return
+		end
+
+		local args = {...}
+		local theVehicle, property, value = unpack(args)
+		if not isCustomVehicle(theVehicle) then return end
+
+		-- https://wiki.multitheftauto.com/wiki/SetVehicleHandling
+		-- Configuration resets not supported, only normal property-value setting
+		if not property then return end
+
+		local savedHandling = getElementData(theVehicle, DATANAME_VEH_HANDLING) or {}
+		savedHandling[property] = value
+
+		setElementData(theVehicle, DATANAME_VEH_HANDLING, savedHandling, true)
 	end
-
-	local args = {...}
-	local theVehicle, property, var = unpack(args)
-	if not isCustomVehicle(theVehicle) then return end
-
-	local savedHandling = getElementData(theVehicle, "newmodels:savedHandling") or {}
-	table.insert(savedHandling, {property, var})
-	setElementData(theVehicle, "newmodels:savedHandling", savedHandling, false)
-
+	addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
 end
-addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
 
 --[[
 	Goal: solve the issue of upgrades resetting every time the vehicle's model is changed serverside/clientside
 ]]
-function onVehicleUpgradesChanged( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
-	if sourceResource == resource then
-		return 
-	end
-
-	local args = {...}
-	local theVehicle = unpack(args)
-	if not isCustomVehicle(theVehicle) then return end
-
-	setElementData(theVehicle, "newmodels:savedUpgrades", getVehicleUpgrades(theVehicle), false)
-end
-addDebugHook( "postFunction", onVehicleUpgradesChanged, { "addVehicleUpgrade", "removeVehicleUpgrade" })
-
-function updateVehicleHandling(element)
-	local handling = getElementData(element, "newmodels:savedHandling")
-	if handling then
-		local count = 0
-		local count2 = 0
-		for k,v in pairs(handling) do
-			local property,var = unpack(v)
-			if setVehicleHandling(element, property, var) then
-				count = count + 1
-			else
-				handling[k] = nil
-				count2 = count2 + 1
-			end
+if DATANAME_VEH_UPGRADES then
+	function onVehicleUpgradesChanged( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
+		if sourceResource == resource then
+			return 
 		end
+
+		local args = {...}
+		local theVehicle = unpack(args)
+		if not isCustomVehicle(theVehicle) then return end
+
+		setElementData(theVehicle, DATANAME_VEH_UPGRADES, getVehicleUpgrades(theVehicle), true)
 	end
+	addDebugHook( "postFunction", onVehicleUpgradesChanged, { "addVehicleUpgrade", "removeVehicleUpgrade" })
 end
 
-function updateVehicleUpgrades(element)
-	local upgrades = getElementData(element, "newmodels:savedUpgrades")
-	if upgrades then
-		for _, upgrade in pairs(upgrades) do
-			addVehicleUpgrade(element, upgrade)			
+if DATANAME_VEH_PAINTJOB then
+	function onVehiclePaintjobChanged( sourceResource, functionName, isAllowedByACL, luaFilename, luaLineNumber, ... )
+		if sourceResource == resource then
+			return 
 		end
-	end
-end
 
-function updateVehicleProperties(element)
-	updateVehicleHandling(element)
-	updateVehicleUpgrades(element)
+		local args = {...}
+		local theVehicle = unpack(args)
+		if not isCustomVehicle(theVehicle) then return end
+
+		setElementData(theVehicle, DATANAME_VEH_PAINTJOB, getVehiclePaintjob(theVehicle), true)
+	end
+	addDebugHook( "postFunction", onVehiclePaintjobChanged, { "setVehiclePaintjob" })
 end
-addEventHandler(resName..":updateVehicleProperties", resourceRoot, updateVehicleProperties)
 
 function getModList() -- [Exported - Server Version]
 	if not SERVER_READY then
