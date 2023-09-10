@@ -4,7 +4,7 @@
     
     https://github.com/Fernando-A-Rocha/mta-add-models -->
     
-    <info version="3.2.0" author="Fernando" name="New-Models Vehicle Manager" description="adds new vehicle models with custom properties" type="script" />
+    <info version="3.3.0" author="Fernando" name="New-Models Vehicle Manager" description="adds new vehicle models with custom properties" type="script" />
     
     <include resource="newmodels" />
     

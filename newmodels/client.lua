@@ -438,16 +438,39 @@ function setElementCustomModel(element, elementType, id)
 			setPickupType(element, 3, allocated_id)
 		else
 			setElementModel(element, allocated_id)
-		end
 
-		if getElementType(element)=="vehicle" then
-			if isTimer(update_properties[element]) then killTimer(update_properties[element]) end
-			update_properties[element] = setTimer(function()
-				if isElement(element) and not wasElementCreatedClientside(element) then
-					triggerServerEvent(resName..":updateVehicleProperties", resourceRoot, element)
-				end
-				update_properties[element] = nil
-			end, 1000, 1)
+			if getElementType(element)=="vehicle" then
+				if isTimer(update_properties[element]) then killTimer(update_properties[element]) end
+				update_properties[element] = setTimer(function()
+					if isElement(element) then
+						if DATANAME_VEH_HANDLING then
+							local handling = getElementData(element, DATANAME_VEH_HANDLING)
+							if handling then
+								iprint(element, handling)
+								for property, value in pairs(handling) do
+									setVehicleHandling(element, property, value)
+								end
+								iprint(setVehicleHandling(element, "mass", 969))
+							end
+						end
+						if DATANAME_VEH_UPGRADES then
+							local upgrades = getElementData(element, DATANAME_VEH_UPGRADES)
+							if upgrades then
+								for upgradeName, value in pairs(upgrades) do
+									addVehicleUpgrade(element, value)
+								end
+							end
+						end
+						if DATANAME_VEH_PAINTJOB then
+							local paintjob = getElementData(element, DATANAME_VEH_PAINTJOB)
+							if paintjob then
+								setVehiclePaintjob(element, paintjob)
+							end
+						end
+					end
+					update_properties[element] = nil
+				end, 1000, 1)
+			end
 		end
 	end
 
