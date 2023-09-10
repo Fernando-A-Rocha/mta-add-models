@@ -446,11 +446,9 @@ function setElementCustomModel(element, elementType, id)
 						if DATANAME_VEH_HANDLING then
 							local handling = getElementData(element, DATANAME_VEH_HANDLING)
 							if handling then
-								iprint(element, handling)
 								for property, value in pairs(handling) do
 									setVehicleHandling(element, property, value)
 								end
-								iprint(setVehicleHandling(element, "mass", 969))
 							end
 						end
 						if DATANAME_VEH_UPGRADES then
