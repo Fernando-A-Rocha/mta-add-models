@@ -8,6 +8,7 @@
 
 -- Internal events:
 addEvent(resName..":onDownloadFailed", true)
+addEvent(resName..":forceSetVehicleHandling", true)
 
 local SERVER_READY = false
 local startTickCount = nil
@@ -46,6 +47,18 @@ if DATANAME_VEH_HANDLING then
 	end
 	addDebugHook( "postFunction", onSetVehicleHandling, { "setVehicleHandling" })
 end
+
+-- Temp solution (see where it's triggered from client.lua):
+-- It's not ideal because with a lot of players requesting handling this can cause server lag
+function forceSetVehicleHandling(element, handling)
+	if not (isElement(element)) then return end
+	if type(handling) ~= "table" then return end
+	for property, value in pairs(handling) do
+		setVehicleHandling(element, property, value)
+	end
+	-- iprint("Force set vehicle handling", element)
+end
+addEventHandler(resName..":forceSetVehicleHandling", resourceRoot, forceSetVehicleHandling, false)
 
 --[[
 	Goal: solve the issue of upgrades resetting every time the vehicle's model is changed serverside/clientside
