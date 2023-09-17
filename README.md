@@ -21,7 +21,7 @@ Visit the project's feedback page to check other people's opinions and share you
 
 ### Prerequisites
 
-- Required minimum MTA Server & Client version `1.5.9-9.21437.0`
+- Required minimum MTA Server & Client version `1.6.0-9.22204.0` (MTA 1.6) ⚠️
 - Get the installers from [nightly.mtasa.com](https://nightly.mtasa.com/)
 - Client should auto-update upon joining the server
 - *Find out what the build numbers mean here: [buildinfo.mtasa.com](https://buildinfo.mtasa.com/)*
