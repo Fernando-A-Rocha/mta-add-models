@@ -446,19 +446,9 @@ function setElementCustomModel(element, elementType, id)
 						if DATANAME_VEH_HANDLING then
 							local handling = getElementData(element, DATANAME_VEH_HANDLING)
 							if handling then
-								--[[
-								
-								-- Sadly this doesn't work yet because MTA doesn't let you setVehicleHandling clientside on server-created vehicles
-								-- I hope this changes in the future (the following PR makes it possible)
-								-- https://github.com/multitheftauto/mtasa-blue/pull/1935
-
 								for property, value in pairs(handling) do
 									setVehicleHandling(element, property, value)
 								end
-
-								-- Temp solution below (sets the handling serverside)
-								--]]
-								triggerServerEvent(resName..":forceSetVehicleHandling", resourceRoot, element, handling)
 							end
 						end
 						if DATANAME_VEH_UPGRADES then
