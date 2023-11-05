@@ -12,15 +12,15 @@ addEvent(resName..":onModFileDownloaded", true)
 
 -- Internal events:
 addEvent(resName..":receiveModList", true)
-addEvent(resName..":receiveVehicleHandling", true)
-
 
 allocated_ids = {} -- [new id] = allocated id
 local model_elements = {} -- [allocated id] = {dff,txd[,col]}
 local received_modlist -- [element type] = {...}
 local waiting_queue = {} -- [element] = { func num, args }
 local freeIdTimers = {} -- [new id] = timer
-local FREE_ID_DELAY = 5000 -- ms
+local FREE_ID_DELAY = 10000 -- ms
+local FREE_ID_DELAY_STEP = 500 -- ms
+local currFreeIdDelay = FREE_ID_DELAY
 
 -- downloadFile queue
 local fileDLQueue = {}
@@ -495,6 +495,11 @@ function startFreeingMod(id2, checkStreamedIn, theEvent)
 	
 	if isTimer(freeIdTimers[id2]) then killTimer(freeIdTimers[id2]) end
 
+	currFreeIdDelay = currFreeIdDelay - FREE_ID_DELAY_STEP
+	if currFreeIdDelay < FREE_ID_DELAY_STEP then
+		currFreeIdDelay = FREE_ID_DELAY
+	end
+
 	freeIdTimers[id2] = setTimer(function(id, en)
 
 		local allocated_id = allocated_ids[id]
@@ -523,7 +528,9 @@ function startFreeingMod(id2, checkStreamedIn, theEvent)
 
 		freeIdTimers[id] = nil
 
-	end, FREE_ID_DELAY, 1, id2, theEvent)
+		currFreeIdDelay = currFreeIdDelay + FREE_ID_DELAY_STEP
+
+	end, currFreeIdDelay, 1, id2, theEvent)
 end
 
 function freeModIfUnused(id2)
