@@ -98,9 +98,9 @@ If you want to re-spawn a player and keep its custom skin ID, you need to unset 
 
 ```lua
 local data_name = exports.newmodels:getDataNameFromType("player")
-local id = tonumber(getElementData(player, data_name))
+local id = tonumber(getElementData(thePlayer, data_name))
 if id then
-  removeElementData(player, data_name)
-  setElementData(source, data_name, id)
+  removeElementData(thePlayer, data_name)
+  setElementData(thePlayer, data_name, id)
 end
 ```
