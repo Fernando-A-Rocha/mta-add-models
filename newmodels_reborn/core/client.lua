@@ -14,7 +14,7 @@ local function applyElementCustomModel(element)
         handling = getVehicleHandling(element)
     end
 
-    setElementModel(element, loadedModel.id) 
+    _setElementModel(element, loadedModel.id) 
 
     if upgrades then
         for _, v in pairs(upgrades) do
@@ -80,7 +80,7 @@ local function loadCustomModel(customModel, elementToApply)
         elementTypes = { "object", "pickup" }
     end
     
-    loadedModels[customModel] = { id = allocatedModel, elements = { txd = txd, dff = dff, col = col }, elementTypes = { elementTypes } }
+    loadedModels[customModel] = { id = allocatedModel, baseModel = customInfo.baseModel, elements = { txd = txd, dff = dff, col = col }, elementTypes = elementTypes }
     
     if isElement(elementToApply) then
         applyElementCustomModel(elementToApply)
@@ -99,9 +99,7 @@ local function countStreamedElementsWithCustomModel(elementTypes, customModel)
     return count
 end
 
-local function freeAllocatedModel(customModel)
-    local loadedModel = loadedModels[customModel]
-    if not loadedModel then return end
+local function freeAllocatedModel(customModel, loadedModel)
     engineRestoreCOL(loadedModel.id)
     engineRestoreModel(loadedModel.id)
     engineFreeModel(loadedModel.id)
@@ -115,7 +113,7 @@ local function freeAllocatedModelIfUnused(customModel)
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
     if countStreamedElementsWithCustomModel(loadedModel.elementTypes, customModel) == 0 then
-        freeAllocatedModel(customModel)
+        freeAllocatedModel(customModel, loadedModel)
     end
 end
 
@@ -129,19 +127,38 @@ local function setElementCustomModel(veh)
     end
 end
 
-addEventHandler("onClientElementDataChange", root, function(key, oldValue, newValue)
+addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel, newCustomModel)
     if not isValidElement(source) then return end
     if key ~= CUSTOM_MODEL_DATA_KEY then return end
-    if not newValue then
-        local customModel = getElementData(source, CUSTOM_MODEL_DATA_KEY)
-        if not customModel then return end
-        freeAllocatedModel(customModel)
+    prevCustomModel = tonumber(prevCustomModel)
+
+    -- Get the base model of the previous custom model the element has
+    local prevLoadedModelBaseModel
+    if prevCustomModel then
+        local prevLoadedModel = loadedModels[prevCustomModel]
+        if prevLoadedModel then
+            prevLoadedModelBaseModel = prevLoadedModel.baseModel
+        end
+    end
+
+    if not newCustomModel then
+        -- If resetting the custom model, free the allocated model if it's not used by any other element
+        local loadedModel = loadedModels[newCustomModel]
+        if loadedModel then
+            freeAllocatedModel(newCustomModel, loadedModel)
+        end
     else
         setElementCustomModel(source)
     end
-    oldValue = tonumber(oldValue)
-    if oldValue then
-        freeAllocatedModelIfUnused(oldValue)
+    if prevCustomModel then
+
+        -- Force-set the base model of the previous custom model if resetting the custom model
+        if (not newCustomModel) and prevLoadedModelBaseModel then
+            _setElementModel(source, prevLoadedModelBaseModel)
+        end
+
+        -- Free the previous custom model if it's not used by any other element
+        freeAllocatedModelIfUnused(prevCustomModel)
     end
 end)
 

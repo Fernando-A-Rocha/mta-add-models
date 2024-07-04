@@ -1,13 +1,17 @@
+CUSTOM_MODEL_DATA_KEY = "newmodels_simple:customModel"
+ELEMENT_TYPES = { "vehicle", "ped", "player", "object", "pickup" }
+
 customModels = {}
 
-local _getElementModel = getElementModel
-local _setElementModel = setElementModel
-local _createObject = createObject
-local _createVehicle = createVehicle
-local _getVehicleType = getVehicleType
-local _createPed = createPed
-local _createPickup = createPickup
-local _setPickupType = setPickupType
+_createObject = createObject
+_createVehicle = createVehicle
+_getVehicleType = getVehicleType
+_createPed = createPed
+_createPickup = createPickup
+_setPickupType = setPickupType
+
+_getElementModel = getElementModel
+_setElementModel = setElementModel
 
 local resources = {}
 local isClientsideScript = isElement(localPlayer)
