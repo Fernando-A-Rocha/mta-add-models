@@ -1,3 +1,5 @@
+addEvent("newmodels_reborn:receiveCustomModels", true)
+
 local loadedModels = {}
 
 local function applyElementCustomModel(element)
@@ -28,25 +30,25 @@ end
 
 local function loadCustomModel(customModel, elementToApply)
     if not tonumber(customModel) then return end
-    local customInfo = CUSTOM_MODELS[customModel]
+    local customInfo = customModels[customModel]
     if not customInfo then return end
 
     if loadedModels[customModel] then return end
 
-    local allocatedModel = engineRequestModel(customInfo.type, customInfo.baseId)
+    local allocatedModel = engineRequestModel(customInfo.type, customInfo.baseModel)
     if not allocatedModel then return end
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
     
     local col, txd, dff
     if colPath then
-        col = engineLoadCOL("models/" .. colPath)
+        col = engineLoadCOL(colPath)
     end
     if txdPath then
-        txd = engineLoadTXD("models/" .. txdPath)
+        txd = engineLoadTXD(txdPath)
     end
     if dffPath then
-        dff = engineLoadDFF("models/" .. dffPath)
+        dff = engineLoadDFF(dffPath)
     end
     
     if (colPath and not col)
@@ -162,10 +164,16 @@ addEventHandler("onClientElementDestroy", root, function()
     freeAllocatedModelIfUnused(customModel)
 end)
 
-addEventHandler("onClientResourceStart", resourceRoot, function()
+local function applyCustomModelsForStreamedElements()
     for _, elementType in pairs(ELEMENT_TYPES) do
         for _, v in pairs(getElementsByType(elementType, root, true)) do
             setElementCustomModel(v)
         end
     end
-end)
+end
+
+addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(customModelsFromServer)
+    customModels = customModelsFromServer
+
+    applyCustomModelsForStreamedElements()
+end, false)

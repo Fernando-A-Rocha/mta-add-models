@@ -1,3 +1,5 @@
+customModels = {}
+
 local _getElementModel = getElementModel
 local _setElementModel = setElementModel
 local _createObject = createObject
@@ -88,9 +90,9 @@ local function setElementResource(element, theResource)
 end
 
 local function getBaseModelIdFromCustomModelId(id)
-    local customInfo = CUSTOM_MODELS[id]
+    local customInfo = customModels[id]
     if customInfo then
-        return customInfo.baseId
+        return customInfo.baseModel
     end
     return id
 end
@@ -137,8 +139,8 @@ function createVehicle(id, ...)
 end
 
 function getVehicleType(id)
-    if CUSTOM_MODELS[id] then
-        return _getVehicleType(CUSTOM_MODELS[id].baseId)
+    if customModels[id] then
+        return _getVehicleType(customModels[id].baseModel)
     end
     return _getVehicleType(id)
 end

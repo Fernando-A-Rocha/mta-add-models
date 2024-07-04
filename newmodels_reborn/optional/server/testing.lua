@@ -1,11 +1,7 @@
 addCommandHandler("testveh", function(thePlayer, cmd, id)
     id = tonumber(id)
     if not id then
-        return outputChatBox("Syntax: /"..cmd.." <custom id>")
-    end
-    local data = CUSTOM_MODELS[id]
-    if not data then
-        return outputChatBox("Invalid custom ID.")
+        return outputChatBox("Syntax: /"..cmd.." <default or custom id>")
     end
     local x,y,z = getElementPosition(thePlayer)
     local rx,ry,rz = getElementRotation(thePlayer)
@@ -16,17 +12,13 @@ addCommandHandler("testveh", function(thePlayer, cmd, id)
     setElementDimension(veh, getElementDimension(thePlayer))
     setElementInterior(veh, getElementInterior(thePlayer))
     setElementPosition(thePlayer, x+2, y, z)
-    outputChatBox("Vehicle created with custom ID "..id..".")
+    outputChatBox("Vehicle created with ID "..id..".")
 end, false, false)
 
 addCommandHandler("testobj", function(thePlayer, cmd, id)
     id = tonumber(id)
     if not id then
-        return outputChatBox("Syntax: /"..cmd.." <custom id>")
-    end
-    local data = CUSTOM_MODELS[id]
-    if not data then
-        return outputChatBox("Invalid custom ID.")
+        return outputChatBox("Syntax: /"..cmd.." <default or custom id>")
     end
     local x,y,z = getElementPosition(thePlayer)
     local rx,ry,rz = getElementRotation(thePlayer)
@@ -37,17 +29,13 @@ addCommandHandler("testobj", function(thePlayer, cmd, id)
     setElementDimension(veh, getElementDimension(thePlayer))
     setElementInterior(veh, getElementInterior(thePlayer))
     setElementPosition(thePlayer, x+2, y, z)
-    outputChatBox("Object created with custom ID "..id..".")
+    outputChatBox("Object created with ID "..id..".")
 end, false, false)
 
 addCommandHandler("testped", function(thePlayer, cmd, id)
     id = tonumber(id)
     if not id then
-        return outputChatBox("Syntax: /"..cmd.." <custom id>")
-    end
-    local data = CUSTOM_MODELS[id]
-    if not data then
-        return outputChatBox("Invalid custom ID.")
+        return outputChatBox("Syntax: /"..cmd.." <default or custom id>")
     end
     local x,y,z = getElementPosition(thePlayer)
     local rx,ry,rz = getElementRotation(thePlayer)
@@ -58,5 +46,16 @@ addCommandHandler("testped", function(thePlayer, cmd, id)
     setElementDimension(veh, getElementDimension(thePlayer))
     setElementInterior(veh, getElementInterior(thePlayer))
     setElementPosition(thePlayer, x+2, y, z)
-    outputChatBox("Ped created with custom ID "..id..".")
+    outputChatBox("Ped created with ID "..id..".")
+end, false, false)
+
+addCommandHandler("testskin", function(thePlayer, cmd, id)
+    id = tonumber(id)
+    if not id then
+        return outputChatBox("Syntax: /"..cmd.." <default or custom id>")
+    end
+    if not setElementModel(thePlayer, id) then
+        return outputChatBox("Failed to set skin.")
+    end
+    outputChatBox("Skin set to ID "..id..".")
 end, false, false)
