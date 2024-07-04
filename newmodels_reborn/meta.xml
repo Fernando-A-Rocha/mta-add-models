@@ -1,0 +1,34 @@
+<meta>
+    <info author="FernandoMTA" version="1.0.0" type="script" name="newmodels_reborn" description="This resource adds new vehicle/ped/object models, synceing them automatically with all players."/>
+    
+    <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
+      https://nightly.mtasa.com  -->
+    <min_mta_version client="1.6.0-9.22505.0" server="1.6.0-9.22505.0"></min_mta_version>
+
+    <!-- Scripts -->
+    <script src="custom_models.lua" type="shared"/>
+
+    <script src="optional/server/testing.lua" type="server"/>
+    <script src="optional/server/verifications.lua" type="server"/>
+
+    <script src="core/shared/constants.lua" type="shared"/>
+    <script src="core/shared/functions.lua" type="shared"/>
+    
+    <script src="core/client/loader.lua" type="client"/>
+
+    <!-- Exported functions -->
+    <export function="isDefaultID" type="shared"/>
+    <export function="createObject" type="shared"/>
+    <export function="createVehicle" type="shared"/>	
+    <export function="getVehicleType" type="shared"/>	
+    <export function="createPed" type="shared"/>
+    <export function="createPickup" type="shared"/>
+    <export function="setPickupType" type="shared"/>
+    <export function="setElementModel" type="shared"/>
+    <export function="getElementModel" type="shared"/>
+
+    <!-- Files -->
+    <file src="models/**/*.col"/>
+    <file src="models/**/*.txd"/>
+    <file src="models/**/*.dff"/>
+</meta>
