@@ -765,7 +765,7 @@ function refreshStreamedInElements()
 					if found then
 						local success, reason = setElementCustomModel(el, elementType, id)
 						if not success then
-							outputDebugString("[refreshStreamedInElements] Failed setElementCustomModel(source, '"..et.."', "..id.."): "..reason, 1)
+							outputDebugString("[refreshStreamedInElements] Failed setElementCustomModel(source, '"..elementType.."', "..id.."): "..reason, 1)
 						end
 					end
 				end

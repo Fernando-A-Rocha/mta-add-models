@@ -34,7 +34,7 @@ function setElementResource(element, theResource)
 		if type(resources[theResource]) ~= "table" then
 			resources[theResource] = {}
 		end
-		table.insert(resources[theResource], element)
+		resources[theResource][#resources[theResource]+1] = element
 		setElementParent(element, getResourceDynamicElementRoot(theResource) )
 	end
 end
@@ -155,7 +155,7 @@ function getElementModel(element)
 	local et = getElementType(element)
 	assert((et == "object" or et == "vehicle" or et == "ped" or et == "player" or et == "pickup"),
 		"Invalid element type passed: "..tostring(et))
-	return getElementData(element, dataNames[getElementType(element)]) or _getElementModel(element)
+	return getElementData(element, dataNames[et]) or _getElementModel(element)
 end
 
 -- PS. You can't set element model on a pickup
