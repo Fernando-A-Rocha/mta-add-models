@@ -1,3 +1,5 @@
+⚠️ This is the old version of `newmodels`. Visit the [main branch](https://github.com/Fernando-A-Rocha/mta-add-models/tree/main) for the newest version.
+
 ![Banner](https://i.imgur.com/R1Gno6b.png)
 
 **mta-add-models** is an MTA resource (library) which makes use of the [engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) features to add new peds (skins), vehicles and objects:
