@@ -1,4 +1,0 @@
--- See the documentation to understand how to generate the "nando_decrypter" script file
--- https://github.com/Fernando-A-Rocha/mta-nandocrypt
-
--- If you don't wish to use the NandoDecrypt system, you can delete it and remove it from meta.xml
