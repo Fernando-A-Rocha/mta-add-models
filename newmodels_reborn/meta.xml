@@ -14,7 +14,7 @@
     <script src="optional/s_testing.lua" type="server"/>
 
     <!-- Backwards compatibility with newmodels 3.3.0 -->
-    <script src="optional/shared/*.lua" type="shared"/>
+    <script src="optional/compatibility/shared/*.lua" type="shared"/>
 
     <!-- Exported functions -->
     <export function="isDefaultID" type="shared"/>

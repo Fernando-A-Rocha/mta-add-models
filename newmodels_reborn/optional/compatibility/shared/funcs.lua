@@ -10,6 +10,8 @@ OLD_DATA_NAMES.player = OLD_DATA_NAMES.ped
 
 local OLD_BASE_DATA_NAME = "baseID"
 
+local isClientsideScript = localPlayer ~= nil
+
 local function convertCustomModelInfoToOldFormat(customModelInfo)
     local baseModel = customModelInfo.baseModel
     local customModel = customModelInfo.id
@@ -32,10 +34,15 @@ function getDataNameFromType(elementType)
 end
 
 -- Rewrite this function
-function getCustomModelDataKey(elementType)
-    if type(elementType) == "string" then
+_getCustomModelDataKey = getCustomModelDataKey
+function getCustomModelDataKey(elementOrElementType)
+    if type(elementOrElementType) == "string" then
+        return OLD_DATA_NAMES[elementOrElementType]
+    elseif isElement(elementOrElementType) then
+        local elementType = getElementType(elementOrElementType)
         return OLD_DATA_NAMES[elementType]
     end
+    return getCustomModelDataKey(elementOrElementType)
 end
 
 -- Exported
@@ -64,7 +71,7 @@ end
 
 -- Exported
 function getBaseModel(element)
-    if not isElement(localPlayer) then
+    if not isClientsideScript then
         return getElementModel(element)
     else
         local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
@@ -124,7 +131,7 @@ function checkModelID(id, elementType)
     return baseModel, isCustom, dataName, OLD_BASE_DATA_NAME
 end
 
-if isElement(localPlayer) then
+if isClientsideScript then
     -- Exported
     function isClientReady() return true end -- Now the client is always ready :-)
 

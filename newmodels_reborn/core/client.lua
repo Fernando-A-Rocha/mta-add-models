@@ -213,8 +213,8 @@ addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(c
     customModels = customModelsFromServer
 
     for _, elementType in pairs(ELEMENT_TYPES) do
-        for _, v in pairs(getElementsByType(elementType, root, true)) do
-            setElementCustomModel(v)
+        for _, element in pairs(getElementsByType(elementType, root, true)) do
+            setElementCustomModel(element)
         end
     end
 end, false)
@@ -222,11 +222,11 @@ end, false)
 addEventHandler("onClientResourceStop", resourceRoot, function()
     -- Restore the base models of all elements with custom models
     for _, elementType in pairs(ELEMENT_TYPES) do
-        for _, v in pairs(getElementsByType(elementType, root, true)) do
-            local model = getElementModel(v)
+        for _, element in pairs(getElementsByType(elementType, root, true)) do
+            local model = _getElementModel(element)
             for _, loadedModel in pairs(loadedModels) do
                 if loadedModel.id == model then
-                    setElementModel(v, loadedModel.baseModel)
+                    _setElementModel(element, loadedModel.baseModel)
                     break
                 end
             end
