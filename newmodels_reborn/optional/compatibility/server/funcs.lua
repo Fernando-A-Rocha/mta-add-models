@@ -17,33 +17,28 @@ local modList = {
     object = {},
 }
 
-function sendModListAllPlayers()
+local function sendModListAllPlayers()
+
+    -- Convert and clear modList if it's not empty
     for elementType, mods in pairs(modList) do
-        for k, mod in pairs(mods) do
+        for i=#mods, 1, -1 do
+            local mod = mods[i]
             local id = mod.id
             local baseModel = mod.base_id
             local paths = mod.paths
-            local customInfo = customModels[id]
-            if customInfo then
-                customInfo.type = elementType
-                customInfo.baseModel = baseModel
-                customInfo.col = paths.col or nil
-                customInfo.txd = paths.txd or nil
-                customInfo.dff = paths.dff or nil
-                -- outputDebugString("Updating custom model for ID " .. id .. " with backwards compatible data")
-            else
-                customModels[id] = {
-                    type = elementType,
-                    baseModel = baseModel,
-                    col = paths.col or nil,
-                    txd = paths.txd or nil,
-                    dff = paths.dff or nil,
-                }
-                -- outputDebugString("Adding custom model for ID " .. id .. " with backwards compatible data")
-            end
-            table.remove(modList[elementType], k)
+            customModels[id] = {
+                type = elementType,
+                baseModel = baseModel,
+                col = paths.col or nil,
+                txd = paths.txd or nil,
+                dff = paths.dff or nil,
+                srcResourceName = mod.srcResourceName,
+            }
+            table.remove(modList[elementType],i)
         end
     end
+
+    -- Send new custom models list to all players
     triggerClientEvent("newmodels_reborn:receiveCustomModels", resourceRoot, customModels)
 end
 
@@ -144,7 +139,7 @@ function addExternalMods_IDFilenames_Legacy(sourceResName, list)
     outputDebugString(
         "You are passing deprecated modInfo tables to addExternalMods_IDFilenames. Update your code to use the new format.",
         2)
-    Async:foreach(list, function(modInfo)
+    for _, modInfo in pairs(list) do
         local elementType, id, base_id, name, path, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance =
             unpack(modInfo)
         local modInfo2 = {
@@ -164,7 +159,7 @@ function addExternalMods_IDFilenames_Legacy(sourceResName, list)
         if not worked then
             outputDebugString("addExternalMod_IDFilenames failed: " .. tostring(reason), 1)
         end
-    end)
+    end
     return true
 end
 
@@ -172,9 +167,6 @@ end
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
 	With this one you can just pass a table of mods and it calls that function for you
-
-	This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds.
-	So don't assume that they've all been added immediately after the function returns true.
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
 function addExternalMods_IDFilenames(list, onFinishEvent) -- [Exported]
@@ -215,20 +207,19 @@ function addExternalMods_IDFilenames(list, onFinishEvent) -- [Exported]
             end
         end
     end
-    Async:foreach(list, function(modInfo)
+    for _, modInfo in pairs(list) do
         local worked, reason = addExternalMod_IDFilenames(modInfo, sourceResName)
         if not worked then
             outputDebugString("addExternalMod_IDFilenames failed: " .. tostring(reason), 1)
         end
-    end, function()
-        if (onFinishEvent) then
-            if onFinishEvent.args then
-                triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
-            else
-                triggerEvent(onFinishEvent.name, onFinishEvent.source)
-            end
+    end
+    if (onFinishEvent) then
+        if onFinishEvent.args then
+            triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+        else
+            triggerEvent(onFinishEvent.name, onFinishEvent.source)
         end
-    end)
+    end
     return true
 end
 
@@ -359,12 +350,12 @@ function addExternalMod_IDFilenames(...)
         base_id = base_id,
         path = path,
         name = name,
+        srcResourceName = sourceResName,
         metaDownloadFalse = modInfo.metaDownloadFalse,
         disableAutoFree = modInfo.disableAutoFree,
         lodDistance = modInfo.lodDistance,
         filteringEnabled = modInfo.filteringEnabled,
         alphaTransparency = modInfo.alphaTransparency,
-        srcRes = sourceResName
     }
 
     fixModList()
@@ -393,7 +384,7 @@ function addExternalMods_CustomFileNames_Legacy(sourceResName, list)
     outputDebugString(
         "You are passing deprecated modInfo tables to addExternalMods_CustomFileNames. Update your code to use the new format.",
         2)
-    Async:foreach(list, function(modInfo)
+    for _, modInfo in pairs(list) do
         local elementType, id, base_id, name, path_dff, path_txd, path_col, ignoreTXD, ignoreDFF, ignoreCOL, metaDownloadFalse, disableAutoFree, lodDistance =
             unpack(modInfo)
         local modInfo2 = {
@@ -415,7 +406,7 @@ function addExternalMods_CustomFileNames_Legacy(sourceResName, list)
         if not worked then
             outputDebugString("addExternalMods_CustomFileNames failed: " .. tostring(reason), 1)
         end
-    end)
+    end
     return true
 end
 
@@ -423,9 +414,6 @@ end
 	This function exists to avoid too many exports calls of the function below from
 	external resources to add mods from those
 	With this one you can just pass a table of mods and it calls that function for you
-
-	This is an async function: mods in the list will be added gradually and if you have too many it may take several seconds.
-	So don't assume that they've all been added immediately after the function returns true.
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
 function addExternalMods_CustomFileNames(list, onFinishEvent) -- [Exported]
@@ -466,20 +454,19 @@ function addExternalMods_CustomFileNames(list, onFinishEvent) -- [Exported]
             end
         end
     end
-    Async:foreach(list, function(modInfo)
+    for _, modInfo in pairs(list) do
         local worked, reason = addExternalMod_CustomFilenames(modInfo, sourceResName)
         if not worked then
             outputDebugString("addExternalMods_CustomFileNames failed: " .. tostring(reason), 1)
         end
-    end, function()
-        if (onFinishEvent) then
-            if onFinishEvent.args then
-                triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
-            else
-                triggerEvent(onFinishEvent.name, onFinishEvent.source)
-            end
+    end
+    if (onFinishEvent) then
+        if onFinishEvent.args then
+            triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+        else
+            triggerEvent(onFinishEvent.name, onFinishEvent.source)
         end
-    end)
+    end
     return true
 end
 
@@ -641,12 +628,12 @@ function addExternalMod_CustomFilenames(...)
         base_id = base_id,
         path = paths,
         name = name,
+        srcResourceName = sourceResName,
         metaDownloadFalse = modInfo.metaDownloadFalse,
         disableAutoFree = modInfo.disableAutoFree,
         lodDistance = modInfo.lodDistance,
         filteringEnabled = modInfo.filteringEnabled,
         alphaTransparency = modInfo.alphaTransparency,
-        srcRes = sourceResName
     }
 
     fixModList()
@@ -667,10 +654,6 @@ function addExternalMod_CustomFilenames(...)
     return true
 end
 
---[[
-	This is an async function: mods in the list of IDs will be removed gradually and if you have too many it may take several seconds.
-	So don't assume that they've all been removed immediately after the function returns true.
-]]
 function removeExternalMods(list, onFinishEvent) -- [Exported]
     if not sourceResource then
         return false, "This command is meant to be called from outside resource '" .. resName .. "'"
@@ -702,81 +685,70 @@ function removeExternalMods(list, onFinishEvent) -- [Exported]
             end
         end
     end
-    Async:foreach(list, function(id)
+    for _, id in pairs(list) do
         local worked, reason = removeExternalMod(id)
         if not worked then
             outputDebugString("removeExternalMod(" .. tostring(id) .. ") failed: " .. tostring(reason), 1)
         end
-    end, function()
-        if (onFinishEvent) then
-            if onFinishEvent.args then
-                triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
-            else
-                triggerEvent(onFinishEvent.name, onFinishEvent.source)
-            end
+    end
+    if (onFinishEvent) then
+        if onFinishEvent.args then
+            triggerEvent(onFinishEvent.name, onFinishEvent.source, unpack(onFinishEvent.args))
+        else
+            triggerEvent(onFinishEvent.name, onFinishEvent.source)
         end
-    end)
+    end
     return true
 end
 
 function removeExternalMod(id) -- [Exported]
-    if not tonumber(id) then
+    id = tonumber(id)
+    if not id then
         return false, "Missing/Invalid 'id' passed: " .. tostring(id)
     end
-    id = tonumber(id)
-
-    for elementType, mods in pairs(modList) do
-        for k, mod in pairs(mods) do
-            if mod.id == id then
-                local sourceResName = mod.srcRes
-                if sourceResName then
-                    table.remove(modList[elementType], k)
-                    fixModList()
-
-                    -- Don't spam chat/debug when mass adding/removing mods
-                    if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
-
-                    if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
-                    table.insert(prevent_addrem_spam.rem[sourceResName], true)
-
-                    prevent_addrem_spam.remtimer = setTimer(function()
-                        for rname, mods2 in pairs(prevent_addrem_spam.rem) do
-                            outputDebugString("Removed " .. #mods2 .. " mods from " .. rname, 0, 211, 255, 89)
-                            prevent_addrem_spam.rem[rname] = nil
-                            sendModListAllPlayers()
-                        end
-                    end, SEND_DELAY, 1)
-
-                    return true
-                else
-                    return false, "Mod with ID " .. id .. " doesn't have a source resource"
-                end
-            end
-        end
+    local customInfo = customModels[id]
+    if not customInfo then
+        return false, "No mod with ID " .. id .. " found in modList"
     end
+    local sourceResName = customInfo.srcResourceName
+    if not sourceResName then
+        return false, "Mod with ID " .. id .. " doesn't have a source resource"
 
-    return false, "No mod with ID " .. id .. " found in modList"
+    end
+    customModels[id] = nil
+    -- Don't spam chat/debug when mass adding/removing mods
+    if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
+
+    if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
+    table.insert(prevent_addrem_spam.rem[sourceResName], true)
+
+    prevent_addrem_spam.remtimer = setTimer(function()
+        for rname, mods2 in pairs(prevent_addrem_spam.rem) do
+            outputDebugString("Removed " .. #mods2 .. " mods from " .. rname, 0, 211, 255, 89)
+            prevent_addrem_spam.rem[rname] = nil
+            sendModListAllPlayers()
+        end
+    end, SEND_DELAY, 1)
+    return true
 end
 
 addEventHandler("onResourceStop", root, function(stoppedResource, wasDeleted)
     if stoppedResource == resource then return end
+
     local stoppedResName = getResourceName(stoppedResource)
     local delCount = 0
-    for elementType, mods in pairs(modList) do
-        for k, mod in pairs(mods) do
-            local srcRes = mod.srcRes
-            if srcRes and stoppedResName == srcRes then
-                -- delete mod added by resource that was just stopped
-                table.remove(modList[elementType], k)
-                delCount = delCount + 1
-            end
+    for id, customInfo in pairs(customModels) do
+        local srcResourceName = customInfo.srcResourceName
+        if srcResourceName and stoppedResName == srcResourceName then
+            -- delete mod added by resource that was just stopped
+            customModels[id] = nil
+            delCount = delCount + 1
         end
     end
 
     if delCount > 0 then
         outputDebugString("Removed " .. delCount .. " mods because resource '" .. stoppedResName .. "' stopped", 0,
             211, 255, 89)
-        fixModList()
         sendModListAllPlayers()
     end
 end)

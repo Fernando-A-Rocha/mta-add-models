@@ -9,6 +9,16 @@
     <script src="core/shared.lua" type="shared"/>
     <script src="core/client.lua" type="client"/>
     <script src="core/server.lua" type="server"/>
+    <!-- Exported functions -->
+    <export function="isDefaultID" type="shared"/>
+    <export function="createObject" type="shared"/>
+    <export function="createVehicle" type="shared"/>	
+    <export function="getVehicleType" type="shared"/>	
+    <export function="createPed" type="shared"/>
+    <export function="createPickup" type="shared"/>
+    <export function="setPickupType" type="shared"/>
+    <export function="setElementModel" type="shared"/>
+    <export function="getElementModel" type="shared"/>
 
     <!-- Testing -->
     <script src="optional/s_testing.lua" type="server"/>
@@ -16,7 +26,6 @@
     <!-- Backwards compatibility with newmodels 3.3.0 -->
     <script src="optional/compatibility/shared/config.lua" type="shared"/>
     <script src="optional/compatibility/shared/funcs.lua" type="shared"/>
-    <script src="optional/compatibility/server/async.lua" type="server"/>
     <script src="optional/compatibility/server/funcs.lua" type="server"/>
     <!-- Exported functions (Client & Server) -->
     <export type="shared" function="getModList"/>
@@ -42,17 +51,6 @@
     <!-- <export type="client" function="forceFreeAllocated"/> -->
     <!-- <export type="client" function="forceDownloadMod"/> -->
     <!-- <export type="client" function="isBusyDownloading"/> -->
-
-    <!-- Exported functions -->
-    <export function="isDefaultID" type="shared"/>
-    <export function="createObject" type="shared"/>
-    <export function="createVehicle" type="shared"/>	
-    <export function="getVehicleType" type="shared"/>	
-    <export function="createPed" type="shared"/>
-    <export function="createPickup" type="shared"/>
-    <export function="setPickupType" type="shared"/>
-    <export function="setElementModel" type="shared"/>
-    <export function="getElementModel" type="shared"/>
 
     <!-- Files -->
     <file src="models/**/*.col"/>

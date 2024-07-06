@@ -2,15 +2,16 @@ addEvent("newmodels_reborn:receiveCustomModels", true)
 
 loadedModels = {}
 
-local FREE_ID_DELAY = 10000    -- ms
+local currFreeIdDelay = 9500 -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
-local currFreeIdDelay = FREE_ID_DELAY
 
 local function applyElementCustomModel(element)
     local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if not customModel then return end
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
+
+    if _getElementModel(element) == loadedModel.id then return end
 
     local upgrades, handling, paintjob
     if getElementType(element) == "vehicle" then
@@ -38,13 +39,23 @@ end
 
 local function loadCustomModel(customModel, elementToApply)
     if not tonumber(customModel) then return end
-    local customInfo = customModels[customModel]
-    if not customInfo then return end
 
-    if loadedModels[customModel] then return end
+    local customInfo = customModels[customModel]
+    if not customInfo then
+        outputDebugString("Trying to load custom model " .. customModel .. " that does not exist", 2)
+        return
+    end
+
+    if loadedModels[customModel] then
+        outputDebugString("Trying to load custom model " .. customModel .. " that is already loaded", 1)
+        return
+    end
 
     local allocatedModel = engineRequestModel(customInfo.type, customInfo.baseModel)
-    if not allocatedModel then return end
+    if not allocatedModel then
+        outputDebugString("Failed to load custom model " .. customModel .. " due to model allocation failure", 1)
+        return
+    end
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
 
@@ -66,6 +77,7 @@ local function loadCustomModel(customModel, elementToApply)
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
         engineFreeModel(allocatedModel)
+        outputDebugString("Failed to load custom model " .. customModel .. " due to col/txd/dff loading failure", 1)
         return
     end
 
@@ -78,6 +90,7 @@ local function loadCustomModel(customModel, elementToApply)
         engineRestoreCOL(allocatedModel)
         engineRestoreModel(allocatedModel)
         engineFreeModel(allocatedModel)
+        outputDebugString("Failed to load custom model " .. customModel .. " due to col/txd/dff replacing failure", 1)
         return
     end
 
@@ -117,6 +130,14 @@ end
 local function freeAllocatedModelNow(customModel)
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
+
+    -- Set freeingInProgress to prevent unexpected calls via events to the freeing functions
+    -- This is necessery because one of the restore/free functions below triggers the elements stream out and in events
+    loadedModel.freeingInProgress = true
+
+    if isTimer(loadedModel.freeAllocatedTimer) then
+        killTimer(loadedModel.freeAllocatedTimer)
+    end
     engineRestoreCOL(loadedModel.id)
     engineRestoreModel(loadedModel.id)
     engineFreeModel(loadedModel.id)
@@ -125,10 +146,13 @@ local function freeAllocatedModelNow(customModel)
     if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
 
     -- Unset loadedModel info
+    print(eventName, "freeAllocatedModelNow", customModel)
     loadedModels[customModel] = nil
 end
 
 local function freeAllocatedModel(customModel, loadedModel)
+    if loadedModel.freeingInProgress then return end
+
     if isTimer(loadedModel.freeAllocatedTimer) then
         killTimer(loadedModel.freeAllocatedTimer)
     end
@@ -211,7 +235,24 @@ addEventHandler("onClientElementDestroy", root, function()
     freeAllocatedModelIfUnused(customModel)
 end)
 
+local function restoreElementBaseModels()
+    -- Restore the base models of all elements with custom models
+    for _, elementType in pairs(ELEMENT_TYPES) do
+        for _, element in pairs(getElementsByType(elementType, root, true)) do
+            local model = _getElementModel(element)
+            for _, loadedModel in pairs(loadedModels) do
+                if loadedModel.id == model then
+                    _setElementModel(element, loadedModel.baseModel)
+                    break
+                end
+            end
+        end
+    end
+end
+
 addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(customModelsFromServer)
+    restoreElementBaseModels()
+
     -- Unload all loaded models
     for customModel, _ in pairs(loadedModels) do
         freeAllocatedModelNow(customModel)
@@ -227,16 +268,5 @@ addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(c
 end, false)
 
 addEventHandler("onClientResourceStop", resourceRoot, function()
-    -- Restore the base models of all elements with custom models
-    for _, elementType in pairs(ELEMENT_TYPES) do
-        for _, element in pairs(getElementsByType(elementType, root, true)) do
-            local model = _getElementModel(element)
-            for _, loadedModel in pairs(loadedModels) do
-                if loadedModel.id == model then
-                    _setElementModel(element, loadedModel.baseModel)
-                    break
-                end
-            end
-        end
-    end
+    restoreElementBaseModels()
 end, false)
