@@ -85,7 +85,7 @@ local function loadClass()
 
             allocate = function(instance)
                 local smt = getmetatable(temp)
-                local mt = {__index = smt.__index}
+                local mt = { __index = smt.__index }
 
                 function mt:__newindex(key, value)
                     if self.__setattr__ then
@@ -100,6 +100,7 @@ local function loadClass()
                         function smt.eq(a, b)
                             return a.__cmp__(a, b) == 0
                         end
+
                         function smt.lt(a, b)
                             return a.__cmp__(a, b) < 0
                         end
@@ -108,14 +109,14 @@ local function loadClass()
                     mt.__lt = smt.lt
                 end
 
-                for i, v in pairs{
+                for i, v in pairs {
                     __call__ = "__call", __len__ = "__len",
                     __add__ = "__add", __sub__ = "__sub",
                     __mul__ = "__mul", __div__ = "__div",
                     __mod__ = "__mod", __pow__ = "__pow",
                     __neg__ = "__unm", __concat__ = "__concat",
                     __str__ = "__tostring",
-                    } do
+                } do
                     if temp[i] then mt[v] = temp[i] end
                 end
 
@@ -127,7 +128,7 @@ local function loadClass()
                 if instance.__init__ then instance:__init__(...) end
                 return instance
             end
-            })
+        })
 
         for i, v in ipairs(t.__attributes__ or {}) do
             class = v(class) or class
@@ -137,7 +138,7 @@ local function loadClass()
     end
 
     local function inheritance_handler(set, name, ...)
-        local args = {...}
+        local args = { ... }
 
         for i = 1, select("#", ...) do
             if args[i] == nil then
@@ -190,7 +191,7 @@ local function loadClass()
 
 
     function class.issubclass(class, parents)
-        if parents.__class__ then parents = {parents} end
+        if parents.__class__ then parents = { parents } end
         for i, v in ipairs(parents) do
             local found = true
             if v ~= class then
@@ -222,7 +223,7 @@ local function loadClass()
         common = {}
         function common.class(name, prototype, superclass)
             prototype.__init__ = prototype.init
-            return class_generator(name, {superclass}, prototype)
+            return class_generator(name, { superclass }, prototype)
         end
 
         function common.instance(class, ...)
@@ -246,23 +247,22 @@ local class = loadClass();
 -- @dependency slither.lua https://bitbucket.org/bartbes/slither
 
 class "_Async" {
-    
+
     -- Constructor mehtod
     -- Starts timer to manage scheduler
     -- @access public
     -- @usage local asyncmanager = async();
     __init__ = function(self)
-
         self.threads = {};
-        self.resting = 50; -- in ms (resting time)
-        self.maxtime = 200; -- in ms (max thread iteration time)
-        self.current = 0;  -- starting frame (resting)
+        self.resting = 50;        -- in ms (resting time)
+        self.maxtime = 200;       -- in ms (max thread iteration time)
+        self.current = 0;         -- starting frame (resting)
         self.state = "suspended"; -- current scheduler executor state
         self.debug = false;
         self.priority = {
-            low = {500, 50},     -- better fps
-            normal = {200, 200}, -- medium
-            high = {50, 500}     -- better perfomance
+            low = { 500, 50 },   -- better fps
+            normal = { 200, 200 }, -- medium
+            high = { 50, 500 }   -- better perfomance
         };
 
         self:setPriority("normal");
@@ -271,12 +271,12 @@ class "_Async" {
 
     -- Switch scheduler state
     -- @access private
-    -- @param boolean [istimer] Identifies whether or not 
-        -- switcher was called from main loop
+    -- @param boolean [istimer] Identifies whether or not
+    -- switcher was called from main loop
     switch = function(self, istimer)
         self.state = "running";
 
-        if (self.current + 1  <= #self.threads) then
+        if (self.current + 1 <= #self.threads) then
             self.current = self.current + 1;
             self:execute(self.current);
         else
@@ -287,10 +287,10 @@ class "_Async" {
                 return;
             end
 
-            -- setTimer(function theFunction, int timeInterval, int timesToExecute) 
+            -- setTimer(function theFunction, int timeInterval, int timesToExecute)
             -- (GTA:MTA server scripting function)
             -- For other environments use alternatives.
-            setTimer(function() 
+            setTimer(function()
                 self:switch();
             end, self.resting, 1);
         end
@@ -324,7 +324,7 @@ class "_Async" {
 
 
     -- Set priority for executor
-    -- Use before you call 'iterate' or 'foreach' 
+    -- Use before you call 'iterate' or 'foreach'
     -- @access public
     -- @param string|int param1 "low"|"normal"|"high" or number to set 'resting' time
     -- @param int|void param2 number to set 'maxtime' of thread
@@ -356,21 +356,21 @@ class "_Async" {
     -- @param int from Iterate from
     -- @param int to Iterate to
     -- @param function func Iterate using func
-        -- Function func params:
-        -- @param int [i] Iteration index
+    -- Function func params:
+    -- @param int [i] Iteration index
     -- @param function [callback] Callback function, called when execution finished
     -- Usage:
-        -- @usage async:iterate(1, 10000, function(i)
-        --     outputDebugString(i);
-        -- end);
+    -- @usage async:iterate(1, 10000, function(i)
+    --     outputDebugString(i);
+    -- end);
     iterate = function(self, from, to, func, callback)
         self:add(function()
             local a = getTickCount();
             local lastresume = getTickCount();
             for i = from, to do
-                func(i); 
+                func(i);
 
-                -- int getTickCount() 
+                -- int getTickCount()
                 -- (GTA:MTA server scripting function)
                 -- For other environments use alternatives.
                 if getTickCount() > lastresume + self.maxtime then
@@ -393,22 +393,22 @@ class "_Async" {
     -- @access public
     -- @param table array Input array
     -- @param function func Iterate using func
-        -- Function func params:
-        -- @param int [v] Iteration value
-        -- @param int [k] Iteration key
+    -- Function func params:
+    -- @param int [v] Iteration value
+    -- @param int [k] Iteration key
     -- @param function [callback] Callback function, called when execution finished
     -- Usage:
-        -- @usage async:foreach(vehicles, function(vehicle, id)
-        --     outputDebugString(vehicle.title);
-        -- end);
+    -- @usage async:foreach(vehicles, function(vehicle, id)
+    --     outputDebugString(vehicle.title);
+    -- end);
     foreach = function(self, array, func, callback)
         self:add(function()
             local a = getTickCount();
             local lastresume = getTickCount();
-            for k,v in ipairs(array) do
-                func(v,k);
+            for k, v in ipairs(array) do
+                func(v, k);
 
-                -- int getTickCount() 
+                -- int getTickCount()
                 -- (GTA:MTA server scripting function)
                 -- For other environments use alternatives.
                 if getTickCount() > lastresume + self.maxtime then
@@ -439,7 +439,7 @@ local function getInstance()
         Async.instance = _Async();
     end
 
-    return Async.instance; 
+    return Async.instance;
 end
 
 -- proxy methods for public members

@@ -63,8 +63,8 @@ end
 -- Exported
 function getModList()
     local modList = {}
-    for customModel, customInfo in pairs(customModels) do
-        modList[customModel] = convertCustomModelInfoToOldFormat(id, customInfo)
+    for id, customInfo in pairs(customModels) do
+        modList[id] = convertCustomModelInfoToOldFormat(id, customInfo)
     end
     return modList
 end
