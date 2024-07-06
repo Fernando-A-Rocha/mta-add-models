@@ -70,7 +70,7 @@ end
 local result, failReason = loadModels()
 if not result then
     outputServerLog("[loadModels] " .. failReason)
-    outputDebugString(getResourceName(resource) .. " failed to load models. See server log for details.")
+    outputDebugString("Failed to load models. See server log for details.", 1)
     return
 end
 
