@@ -11,11 +11,6 @@ OLD_DATA_NAMES.player = OLD_DATA_NAMES.ped
 
 OLD_BASE_DATA_NAME = "baseID"
 
-LINKED_RESOURCES = {
-	-- { name = "sampobj_reloaded", start = true, stop = true },
-	-- { name = "vehicle_manager", start = true, stop = true },
-}
-
 -- NandoCrypt | https://github.com/Fernando-A-Rocha/mta-nandocrypt
 -- The decrypt function needs to be named ncDecrypt inside a decrypter script (named nando_decrypter by default)
 ENABLE_NANDOCRYPT = true

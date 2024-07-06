@@ -42,7 +42,7 @@ function getCustomModelDataKey(elementOrElementType)
         local elementType = getElementType(elementOrElementType)
         return OLD_DATA_NAMES[elementType]
     end
-    return getCustomModelDataKey(elementOrElementType)
+    return _getCustomModelDataKey(elementOrElementType)
 end
 
 -- Exported

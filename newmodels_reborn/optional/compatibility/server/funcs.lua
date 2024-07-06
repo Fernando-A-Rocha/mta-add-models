@@ -30,7 +30,7 @@ function sendModListAllPlayers()
                 customInfo.col = paths.col or nil
                 customInfo.txd = paths.txd or nil
                 customInfo.dff = paths.dff or nil
-                outputDebugString("Updating custom model for ID " .. id .. " with backwards compatible data")
+                -- outputDebugString("Updating custom model for ID " .. id .. " with backwards compatible data")
             else
                 customModels[id] = {
                     type = elementType,
@@ -39,9 +39,9 @@ function sendModListAllPlayers()
                     txd = paths.txd or nil,
                     dff = paths.dff or nil,
                 }
-                outputDebugString("Adding custom model for ID " .. id .. " with backwards compatible data")
+                -- outputDebugString("Adding custom model for ID " .. id .. " with backwards compatible data")
             end
-            modList[k] = nil
+            table.remove(modList[elementType], k)
         end
     end
     triggerClientEvent("newmodels_reborn:receiveCustomModels", resourceRoot, customModels)
@@ -81,9 +81,6 @@ local function fixModList()
             modList[elementType][k].paths = ((type(mod.path) == "table" and mod.path) or (getActualModPaths(mod.path, mod.id)))
         end
     end
-
-    modList.player = table.copy(modList.ped, true)
-    modList.pickup = table.copy(modList.object, true)
     return true
 end
 
@@ -729,32 +726,30 @@ function removeExternalMod(id) -- [Exported]
     id = tonumber(id)
 
     for elementType, mods in pairs(modList) do
-        if not (elementType == "player" or elementType == "pickup") then
-            for k, mod in pairs(mods) do
-                if mod.id == id then
-                    local sourceResName = mod.srcRes
-                    if sourceResName then
-                        table.remove(modList[elementType], k)
-                        fixModList()
+        for k, mod in pairs(mods) do
+            if mod.id == id then
+                local sourceResName = mod.srcRes
+                if sourceResName then
+                    table.remove(modList[elementType], k)
+                    fixModList()
 
-                        -- Don't spam chat/debug when mass adding/removing mods
-                        if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
+                    -- Don't spam chat/debug when mass adding/removing mods
+                    if isTimer(prevent_addrem_spam.remtimer) then killTimer(prevent_addrem_spam.remtimer) end
 
-                        if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
-                        table.insert(prevent_addrem_spam.rem[sourceResName], true)
+                    if not prevent_addrem_spam.rem[sourceResName] then prevent_addrem_spam.rem[sourceResName] = {} end
+                    table.insert(prevent_addrem_spam.rem[sourceResName], true)
 
-                        prevent_addrem_spam.remtimer = setTimer(function()
-                            for rname, mods2 in pairs(prevent_addrem_spam.rem) do
-                                outputDebugString("Removed " .. #mods2 .. " mods from " .. rname, 0, 211, 255, 89)
-                                prevent_addrem_spam.rem[rname] = nil
-                                sendModListAllPlayers()
-                            end
-                        end, SEND_DELAY, 1)
+                    prevent_addrem_spam.remtimer = setTimer(function()
+                        for rname, mods2 in pairs(prevent_addrem_spam.rem) do
+                            outputDebugString("Removed " .. #mods2 .. " mods from " .. rname, 0, 211, 255, 89)
+                            prevent_addrem_spam.rem[rname] = nil
+                            sendModListAllPlayers()
+                        end
+                    end, SEND_DELAY, 1)
 
-                        return true
-                    else
-                        return false, "Mod with ID " .. id .. " doesn't have a source resource"
-                    end
+                    return true
+                else
+                    return false, "Mod with ID " .. id .. " doesn't have a source resource"
                 end
             end
         end
@@ -762,6 +757,29 @@ function removeExternalMod(id) -- [Exported]
 
     return false, "No mod with ID " .. id .. " found in modList"
 end
+
+addEventHandler("onResourceStop", root, function(stoppedResource, wasDeleted)
+    if stoppedResource == resource then return end
+    local stoppedResName = getResourceName(stoppedResource)
+    local delCount = 0
+    for elementType, mods in pairs(modList) do
+        for k, mod in pairs(mods) do
+            local srcRes = mod.srcRes
+            if srcRes and stoppedResName == srcRes then
+                -- delete mod added by resource that was just stopped
+                table.remove(modList[elementType], k)
+                delCount = delCount + 1
+            end
+        end
+    end
+
+    if delCount > 0 then
+        outputDebugString("Removed " .. delCount .. " mods because resource '" .. stoppedResName .. "' stopped", 0,
+            211, 255, 89)
+        fixModList()
+        sendModListAllPlayers()
+    end
+end)
 
 addCommandHandler(string.lower(resName), function(thePlayer)
     local version = getResourceInfo(resource, "version") or false

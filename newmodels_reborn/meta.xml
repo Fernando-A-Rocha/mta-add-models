@@ -18,6 +18,30 @@
     <script src="optional/compatibility/shared/funcs.lua" type="shared"/>
     <script src="optional/compatibility/server/async.lua" type="server"/>
     <script src="optional/compatibility/server/funcs.lua" type="server"/>
+    <!-- Exported functions (Client & Server) -->
+    <export type="shared" function="getModList"/>
+    <export type="shared" function="getDataNameFromType"/>
+    <export type="shared" function="getBaseModelDataName"/>
+    <export type="shared" function="getBaseModel"/>
+    <export type="shared" function="getModDataFromID"/>
+    <export type="shared" function="isDefaultID"/>
+    <export type="shared" function="isCustomModID"/>
+    <export type="shared" function="isRightModType"/>
+    <export type="shared" function="checkModelID"/>
+    <!-- Exported functions (Server only) -->
+    <export type="server" function="addExternalMod_IDFilenames"/>
+    <export type="server" function="addExternalMods_IDFilenames"/>
+    <export type="server" function="addExternalMod_CustomFilenames"/>
+    <export type="server" function="addExternalMods_CustomFileNames"/>
+    <export type="server" function="removeExternalMod"/>
+    <export type="server" function="removeExternalMods"/>
+    <!-- Exported functions (Client only) -->
+    <export type="client" function="isClientReady"/>
+    <export type="client" function="isModAllocated"/>
+    <!-- <export type="client" function="forceAllocate"/> -->
+    <!-- <export type="client" function="forceFreeAllocated"/> -->
+    <!-- <export type="client" function="forceDownloadMod"/> -->
+    <!-- <export type="client" function="isBusyDownloading"/> -->
 
     <!-- Exported functions -->
     <export function="isDefaultID" type="shared"/>
