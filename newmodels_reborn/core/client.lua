@@ -2,6 +2,10 @@ addEvent("newmodels_reborn:receiveCustomModels", true)
 
 local loadedModels = {}
 
+local FREE_ID_DELAY = 10000 -- ms
+local FREE_ID_DELAY_STEP = 500 -- ms
+local currFreeIdDelay = FREE_ID_DELAY
+
 local function applyElementCustomModel(element)
     local customModel = tonumber(getElementData(element, CUSTOM_MODEL_DATA_KEY))
     if not customModel then return end
@@ -84,7 +88,13 @@ local function loadCustomModel(customModel, elementToApply)
         elementTypes = { "object", "pickup" }
     end
     
-    loadedModels[customModel] = { id = allocatedModel, baseModel = customInfo.baseModel, elements = { txd = txd, dff = dff, col = col }, elementTypes = elementTypes }
+    -- Set loadedModel info
+    loadedModels[customModel] = {
+        id = allocatedModel, baseModel = customInfo.baseModel,
+        elementTypes = elementTypes,
+        freeAllocatedTimer = nil,
+        elements = { txd = txd, dff = dff, col = col }
+    }
     
     if isElement(elementToApply) then
         applyElementCustomModel(elementToApply)
@@ -104,13 +114,27 @@ local function countStreamedElementsWithCustomModel(elementTypes, customModel)
 end
 
 local function freeAllocatedModel(customModel, loadedModel)
-    engineRestoreCOL(loadedModel.id)
-    engineRestoreModel(loadedModel.id)
-    engineFreeModel(loadedModel.id)
-    if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
-    if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
-    if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
-    loadedModels[customModel] = nil
+    if isTimer(loadedModel.freeAllocatedTimer) then
+        killTimer(loadedModel.freeAllocatedTimer)
+    end
+    -- Do not free all models at once, delay each model by a bit
+    currFreeIdDelay = currFreeIdDelay + FREE_ID_DELAY_STEP
+    loadedModel.freeAllocatedTimer = setTimer(function()
+        if not loadedModels[customModel] then
+            return -- Unexpected behavior
+        end
+        engineRestoreCOL(loadedModel.id)
+        engineRestoreModel(loadedModel.id)
+        engineFreeModel(loadedModel.id)
+        if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
+        if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
+        if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
+    
+        -- Unset loadedModel info
+        loadedModels[customModel] = nil
+        
+        currFreeIdDelay = currFreeIdDelay - FREE_ID_DELAY_STEP
+    end, currFreeIdDelay, 1)
 end
 
 local function freeAllocatedModelIfUnused(customModel)
