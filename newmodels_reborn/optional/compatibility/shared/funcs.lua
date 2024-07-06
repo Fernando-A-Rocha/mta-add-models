@@ -1,4 +1,6 @@
 -- Backwards compatibility with newmodels 3.3.0
+-- Exported functions from old newmodels working with the new system
+-- WIP
 
 local OLD_DATA_NAMES = {
     ped = "skinID",
