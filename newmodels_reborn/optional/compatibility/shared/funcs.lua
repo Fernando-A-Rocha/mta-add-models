@@ -1,22 +1,20 @@
 -- Backwards compatibility with newmodels 3.3.0
 -- Exported functions from old newmodels working with the new system
--- WIP
-
-local OLD_DATA_NAMES = {
-    ped = "skinID",
-    vehicle = "vehicleID",
-    object = "objectID",
-}
-OLD_DATA_NAMES.pickup = OLD_DATA_NAMES.object
-OLD_DATA_NAMES.player = OLD_DATA_NAMES.ped
-
-local OLD_BASE_DATA_NAME = "baseID"
 
 local isClientsideScript = localPlayer ~= nil
 
-local function convertCustomModelInfoToOldFormat(customModelInfo)
+function isElementTypeSupported(et)
+	for type, _ in pairs(OLD_DATA_NAMES) do
+		if et == type then
+			return true
+		end
+	end
+
+	return false, "added "..et.." mods are not yet supported"
+end
+
+local function convertCustomModelInfoToOldFormat(customModel, customModelInfo)
     local baseModel = customModelInfo.baseModel
-    local customModel = customModelInfo.id
     local colPath, txdPath, dffPath = customModelInfo.col, customModelInfo.txd, customModelInfo.dff
     local mod = {
         id = customModel,
@@ -58,7 +56,7 @@ function getModDataFromID(id)
     if not id then return end
     local customInfo = customModels[id]
     if not customInfo then return end
-    local mod = convertCustomModelInfoToOldFormat(customInfo)
+    local mod = convertCustomModelInfoToOldFormat(id, customInfo)
     return mod, customInfo.type
 end
 
@@ -66,7 +64,7 @@ end
 function getModList()
     local modList = {}
     for customModel, customInfo in pairs(customModels) do
-        modList[customModel] = convertCustomModelInfoToOldFormat(customInfo)
+        modList[customModel] = convertCustomModelInfoToOldFormat(id, customInfo)
     end
     return modList
 end

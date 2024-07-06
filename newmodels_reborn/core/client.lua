@@ -114,6 +114,20 @@ local function countStreamedElementsWithCustomModel(elementTypes, customModel)
     return count
 end
 
+local function freeAllocatedModelNow(customModel)
+    local loadedModel = loadedModels[customModel]
+    if not loadedModel then return end
+    engineRestoreCOL(loadedModel.id)
+    engineRestoreModel(loadedModel.id)
+    engineFreeModel(loadedModel.id)
+    if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
+    if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
+    if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
+
+    -- Unset loadedModel info
+    loadedModels[customModel] = nil
+end
+
 local function freeAllocatedModel(customModel, loadedModel)
     if isTimer(loadedModel.freeAllocatedTimer) then
         killTimer(loadedModel.freeAllocatedTimer)
@@ -121,19 +135,7 @@ local function freeAllocatedModel(customModel, loadedModel)
     -- Do not free all models at once, delay each model by a bit
     currFreeIdDelay = currFreeIdDelay + FREE_ID_DELAY_STEP
     loadedModel.freeAllocatedTimer = setTimer(function()
-        if not loadedModels[customModel] then
-            return -- Unexpected behavior
-        end
-        engineRestoreCOL(loadedModel.id)
-        engineRestoreModel(loadedModel.id)
-        engineFreeModel(loadedModel.id)
-        if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
-        if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
-        if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
-
-        -- Unset loadedModel info
-        loadedModels[customModel] = nil
-
+        freeAllocatedModelNow(customModel)
         currFreeIdDelay = currFreeIdDelay - FREE_ID_DELAY_STEP
     end, currFreeIdDelay, 1)
 end
@@ -210,6 +212,11 @@ addEventHandler("onClientElementDestroy", root, function()
 end)
 
 addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(customModelsFromServer)
+    -- Unload all loaded models
+    for customModel, _ in pairs(loadedModels) do
+        freeAllocatedModelNow(customModel)
+    end
+
     customModels = customModelsFromServer
 
     for _, elementType in pairs(ELEMENT_TYPES) do

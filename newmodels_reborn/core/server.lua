@@ -79,4 +79,3 @@ addEventHandler("onPlayerResourceStart", root, function(res)
         triggerClientEvent(source, "newmodels_reborn:receiveCustomModels", resourceRoot, customModels)
     end
 end)
-
