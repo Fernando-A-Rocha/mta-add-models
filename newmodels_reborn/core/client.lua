@@ -8,10 +8,11 @@ local function applyElementCustomModel(element)
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
 
-    local upgrades, handling
+    local upgrades, handling, paintjob
     if getElementType(element) == "vehicle" then
         upgrades = getVehicleUpgrades(element)
         handling = getVehicleHandling(element)
+        paintjob = getVehiclePaintjob(element)
     end
 
     _setElementModel(element, loadedModel.id) 
@@ -25,6 +26,9 @@ local function applyElementCustomModel(element)
         for k, v in pairs(handling) do
             setVehicleHandling(element, k, v)
         end
+    end
+    if paintjob then
+        setVehiclePaintjob(element, paintjob)
     end
 end
 
@@ -89,7 +93,7 @@ end
 
 local function countStreamedElementsWithCustomModel(elementTypes, customModel)
     local count = 0
-    for k, elementType in pairs(elementTypes) do
+    for _, elementType in pairs(elementTypes) do
         for _, v in pairs(getElementsByType(elementType, root, true)) do
             if getElementData(v, CUSTOM_MODEL_DATA_KEY) == customModel then
                 count = count + 1
@@ -181,16 +185,12 @@ addEventHandler("onClientElementDestroy", root, function()
     freeAllocatedModelIfUnused(customModel)
 end)
 
-local function applyCustomModelsForStreamedElements()
+addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(customModelsFromServer)
+    customModels = customModelsFromServer
+
     for _, elementType in pairs(ELEMENT_TYPES) do
         for _, v in pairs(getElementsByType(elementType, root, true)) do
             setElementCustomModel(v)
         end
     end
-end
-
-addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(customModelsFromServer)
-    customModels = customModelsFromServer
-
-    applyCustomModelsForStreamedElements()
 end, false)
