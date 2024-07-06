@@ -1,13 +1,13 @@
 addEvent("newmodels_reborn:receiveCustomModels", true)
 
-local loadedModels = {}
+loadedModels = {}
 
-local FREE_ID_DELAY = 10000 -- ms
+local FREE_ID_DELAY = 10000    -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 local currFreeIdDelay = FREE_ID_DELAY
 
 local function applyElementCustomModel(element)
-    local customModel = tonumber(getElementData(element, CUSTOM_MODEL_DATA_KEY))
+    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if not customModel then return end
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
@@ -19,7 +19,7 @@ local function applyElementCustomModel(element)
         paintjob = getVehiclePaintjob(element)
     end
 
-    _setElementModel(element, loadedModel.id) 
+    _setElementModel(element, loadedModel.id)
 
     if upgrades then
         for _, v in pairs(upgrades) do
@@ -47,7 +47,7 @@ local function loadCustomModel(customModel, elementToApply)
     if not allocatedModel then return end
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
-    
+
     local col, txd, dff
     if colPath then
         col = engineLoadCOL(colPath)
@@ -58,10 +58,10 @@ local function loadCustomModel(customModel, elementToApply)
     if dffPath then
         dff = engineLoadDFF(dffPath)
     end
-    
+
     if (colPath and not col)
-    or (txdPath and not txd)
-    or (dffPath and not dff) then
+        or (txdPath and not txd)
+        or (dffPath and not dff) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
@@ -70,8 +70,8 @@ local function loadCustomModel(customModel, elementToApply)
     end
 
     if (col and not engineReplaceCOL(col, allocatedModel))
-    or (txd and not engineImportTXD(txd, allocatedModel))
-    or (dff and not engineReplaceModel(dff, allocatedModel)) then
+        or (txd and not engineImportTXD(txd, allocatedModel))
+        or (dff and not engineReplaceModel(dff, allocatedModel)) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
@@ -87,15 +87,16 @@ local function loadCustomModel(customModel, elementToApply)
     elseif customInfo.type == "object" then
         elementTypes = { "object", "pickup" }
     end
-    
+
     -- Set loadedModel info
     loadedModels[customModel] = {
-        id = allocatedModel, baseModel = customInfo.baseModel,
+        id = allocatedModel,
+        baseModel = customInfo.baseModel,
         elementTypes = elementTypes,
         freeAllocatedTimer = nil,
         elements = { txd = txd, dff = dff, col = col }
     }
-    
+
     if isElement(elementToApply) then
         applyElementCustomModel(elementToApply)
     end
@@ -105,7 +106,7 @@ local function countStreamedElementsWithCustomModel(elementTypes, customModel)
     local count = 0
     for _, elementType in pairs(elementTypes) do
         for _, v in pairs(getElementsByType(elementType, root, true)) do
-            if getElementData(v, CUSTOM_MODEL_DATA_KEY) == customModel then
+            if getElementData(v, getCustomModelDataKey(elementType)) == customModel then
                 count = count + 1
             end
         end
@@ -129,10 +130,10 @@ local function freeAllocatedModel(customModel, loadedModel)
         if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
         if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
         if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
-    
+
         -- Unset loadedModel info
         loadedModels[customModel] = nil
-        
+
         currFreeIdDelay = currFreeIdDelay - FREE_ID_DELAY_STEP
     end, currFreeIdDelay, 1)
 end
@@ -145,19 +146,19 @@ local function freeAllocatedModelIfUnused(customModel)
     end
 end
 
-local function setElementCustomModel(veh)
-    local customModel = getElementData(veh, CUSTOM_MODEL_DATA_KEY)
+local function setElementCustomModel(element)
+    local customModel = getElementData(element, getCustomModelDataKey(element))
     if not customModel then return end
     if not loadedModels[customModel] then
-        loadCustomModel(customModel, veh)
+        loadCustomModel(customModel, element)
     else
-        applyElementCustomModel(veh)
+        applyElementCustomModel(element)
     end
 end
 
 addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel, newCustomModel)
     if not isValidElement(source) then return end
-    if key ~= CUSTOM_MODEL_DATA_KEY then return end
+    if key ~= getCustomModelDataKey(source) then return end
     prevCustomModel = tonumber(prevCustomModel)
 
     -- Get the base model of the previous custom model the element has
@@ -179,7 +180,6 @@ addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel
         setElementCustomModel(source)
     end
     if prevCustomModel then
-
         -- Force-set the base model of the previous custom model if resetting the custom model
         if (not newCustomModel) and prevLoadedModelBaseModel then
             _setElementModel(source, prevLoadedModelBaseModel)
@@ -197,14 +197,14 @@ end)
 
 addEventHandler("onClientElementStreamOut", root, function()
     if not isValidElement(source) then return end
-    local customModel = getElementData(source, CUSTOM_MODEL_DATA_KEY)
+    local customModel = getElementData(source, getCustomModelDataKey(source))
     if not customModel then return end
     freeAllocatedModelIfUnused(customModel)
 end)
 
 addEventHandler("onClientElementDestroy", root, function()
     if not isValidElement(source) then return end
-    local customModel = getElementData(source, CUSTOM_MODEL_DATA_KEY)
+    local customModel = getElementData(source, getCustomModelDataKey(source))
     if not customModel then return end
     freeAllocatedModelIfUnused(customModel)
 end)
@@ -215,6 +215,21 @@ addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(c
     for _, elementType in pairs(ELEMENT_TYPES) do
         for _, v in pairs(getElementsByType(elementType, root, true)) do
             setElementCustomModel(v)
+        end
+    end
+end, false)
+
+addEventHandler("onClientResourceStop", resourceRoot, function()
+    -- Restore the base models of all elements with custom models
+    for _, elementType in pairs(ELEMENT_TYPES) do
+        for _, v in pairs(getElementsByType(elementType, root, true)) do
+            local model = getElementModel(v)
+            for _, loadedModel in pairs(loadedModels) do
+                if loadedModel.id == model then
+                    setElementModel(v, loadedModel.baseModel)
+                    break
+                end
+            end
         end
     end
 end, false)

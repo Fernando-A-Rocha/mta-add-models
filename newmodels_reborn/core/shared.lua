@@ -1,4 +1,3 @@
-CUSTOM_MODEL_DATA_KEY = "newmodels_simple:customModel"
 ELEMENT_TYPES = { "vehicle", "ped", "player", "object", "pickup" }
 
 customModels = {}
@@ -69,6 +68,11 @@ function isDefaultID(elementType, id)
     return false
 end
 
+-- Variable is unused, it is only necessary for backwards compatibility
+function getCustomModelDataKey(elementOrElementType)
+    return "newmodels_reborn:customModel"
+end
+
 function isValidElement(element)
     local elementType = getElementType(element)
     for _, elementType2 in pairs(ELEMENT_TYPES) do
@@ -123,7 +127,7 @@ local function createElementSafe(elementType, id, ...)
         return false
     end
     if baseModel ~= id then
-        setElementData(element, CUSTOM_MODEL_DATA_KEY, id, not isClientsideScript)
+        setElementData(element, getCustomModelDataKey(elementType), id, not isClientsideScript)
     end
     return element
 end
@@ -181,12 +185,12 @@ function setPickupType(thePickup, theType, id, ammo)
     if theType and theType == 3 then
         local baseModel = getBaseModelIdFromCustomModelId(id)
         if baseModel ~= id then
-            setElementData(thePickup, CUSTOM_MODEL_DATA_KEY, id, not isClientsideScript)
+            setElementData(thePickup, getCustomModelDataKey("pickup"), id, not isClientsideScript)
             return true
         end
     end
 
-    setElementData(thePickup, CUSTOM_MODEL_DATA_KEY, nil, not isClientsideScript)
+    setElementData(thePickup, getCustomModelDataKey("pickup"), nil, not isClientsideScript)
     return _setPickupType(thePickup, theType, id, ammo)
 end
 
@@ -194,7 +198,7 @@ end
 function getElementModel(element)
     assert(isElement(element), "Invalid element passed: " .. tostring(element))
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
-    return getElementData(element, CUSTOM_MODEL_DATA_KEY) or _getElementModel(element)
+    return getElementData(element, getCustomModelDataKey(element)) or _getElementModel(element)
 end
 
 -- PS. You can't set element model on a pickup
@@ -209,9 +213,9 @@ function setElementModel(element, id)
     end
 
     if baseModel ~= id then
-        setElementData(element, CUSTOM_MODEL_DATA_KEY, id, not isClientsideScript)
+        setElementData(element, getCustomModelDataKey(element), id, not isClientsideScript)
     else
-        setElementData(element, CUSTOM_MODEL_DATA_KEY, nil, not isClientsideScript)
+        setElementData(element, getCustomModelDataKey(element), nil, not isClientsideScript)
     end
 
     return true

@@ -5,11 +5,16 @@
       https://nightly.mtasa.com  -->
     <min_mta_version client="1.6.0-9.22505.0" server="1.6.0-9.22505.0"></min_mta_version>
 
-    <!-- Scripts -->
-    <script src="optional/s_testing.lua" type="server"/> <!-- Feel free to delete this script -->
+    <!-- Main Scripts -->
     <script src="core/shared.lua" type="shared"/>
     <script src="core/client.lua" type="client"/>
     <script src="core/server.lua" type="server"/>
+
+    <!-- Testing -->
+    <script src="optional/s_testing.lua" type="server"/>
+
+    <!-- Backwards compatibility with newmodels 3.3.0 -->
+    <script src="optional/shared/*.lua" type="shared"/>
 
     <!-- Exported functions -->
     <export function="isDefaultID" type="shared"/>
