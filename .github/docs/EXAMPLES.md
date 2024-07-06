@@ -5,11 +5,10 @@
 
 Related:
 
-- [New-Models in Map Editor](/.github/docs/custom_editor/README.md)
-
 - [General Information/Guide](/.github/docs/MAIN.md)
 - [newmodels Functions & Events](/.github/docs/newmodels/FUNCS_EVENTS.md)
 - [newmodels-engine Functions & Events](/.github/docs/newmodels-engine/FUNCS_EVENTS.md)
+- [New-Models in Map Editor](/.github/docs/custom_editor/README.md)
 
 ## Adding a mod from your own resource
 
