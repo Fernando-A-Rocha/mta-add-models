@@ -1,6 +1,6 @@
 ![Newmodels Map Editor Banner](https://i.imgur.com/ln6mrLr.png)
 
-The Newmodels Map Editor Project consits of **🧬experimental🧬** customized MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels ([mta-add-models Project](https://github.com/Fernando-A-Rocha/mta-add-models#readme)).
+The Newmodels Map Editor Project consits of **🧬experimental🧬** customized MTA:SA Map Editor resources to support new model IDs for vehicles, objects and skins using newmodels ([mta-add-models Project](/README.md)).
 
 MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/#comment-1003395)
 
