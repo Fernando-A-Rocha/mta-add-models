@@ -131,28 +131,19 @@ local function freeAllocatedModelNow(customModel)
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
 
-    -- Set freeingInProgress to prevent unexpected calls via events to the freeing functions
-    -- This is necessery because one of the restore/free functions below triggers the elements stream out and in events
-    loadedModel.freeingInProgress = true
-
     if isTimer(loadedModel.freeAllocatedTimer) then
         killTimer(loadedModel.freeAllocatedTimer)
     end
-    engineRestoreCOL(loadedModel.id)
-    engineRestoreModel(loadedModel.id)
     engineFreeModel(loadedModel.id)
     if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
     if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
     if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
 
     -- Unset loadedModel info
-    print(eventName, "freeAllocatedModelNow", customModel)
     loadedModels[customModel] = nil
 end
 
 local function freeAllocatedModel(customModel, loadedModel)
-    if loadedModel.freeingInProgress then return end
-
     if isTimer(loadedModel.freeAllocatedTimer) then
         killTimer(loadedModel.freeAllocatedTimer)
     end
