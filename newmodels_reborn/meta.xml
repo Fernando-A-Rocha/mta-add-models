@@ -19,6 +19,7 @@
     <export function="setPickupType" type="shared"/>
     <export function="setElementModel" type="shared"/>
     <export function="getElementModel" type="shared"/>
+    <export function="getLoadedModels" type="client"/>
 
     <!-- Testing -->
     <script src="optional/c_testing.lua" type="client"/>
