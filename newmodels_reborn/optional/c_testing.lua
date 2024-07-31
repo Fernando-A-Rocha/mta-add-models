@@ -60,7 +60,7 @@ local function drawDebug()
     dxDrawText(drawStr, SW/2, 30, SW, 0, 0xFFFFFFFF, 1, "default-bold")
 end
 
-addCommandHandler("newmodelsdebug", function(cmd)
+local function toggleDebugView(cmd)
     if not enabled then
         if not (debugTimer) or (not isTimer(debugTimer)) then debugTimer = setTimer(updateDebugStr, 1000, 0) end
         addEventHandler("onClientRender", root, drawDebug, false)
@@ -70,4 +70,6 @@ addCommandHandler("newmodelsdebug", function(cmd)
     end
     enabled = not enabled
     outputChatBox(cmd .. " => " .. tostring(enabled))
-end, false)
+end
+addCommandHandler("newmodelsdebug", toggleDebugView, false)
+executeCommandHandler("newmodelsdebug")
