@@ -43,14 +43,10 @@ local function pairsByKeys(t)
 end
 
 local function getElementCustomModelString(element)
-    local customModel = tonumber(getElementData(element, getCustomModelDataKey("vehicle")))
+    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if customModel and customModels[customModel] then
         local name, baseModel = customModels[customModel].name, customModels[customModel].baseModel
-        if name then
-            return ("%d \"%s\" (%d)"):format(customModel, name, baseModel)
-        else
-            return ("%d (%d)"):format(customModel, baseModel)
-        end
+        return ("%d \"%s\" (%d)"):format(customModel, name, baseModel)
     else
         return ("%d"):format(getElementModel(element))
     end
@@ -59,9 +55,7 @@ end
 local function updateDebugViewInfo()
     local loadedModelsStr = ""
     for customModel, v in pairsByKeys(loadedModels) do
-        local str
-        if v.name then str = ("%d \"%s\" (%d)"):format(customModel, v.name, v.baseModel)
-        else str = ("%d (%d)"):format(customModel, v.baseModel) end
+        local str = ("%d \"%s\" (%d)"):format(customModel, v.name, v.baseModel)
         if loadedModelsStr == "" then
             loadedModelsStr = str
         else
@@ -106,6 +100,7 @@ local function toggleDebugView(cmd)
         addEventHandler("onClientRender", root, drawDebug, false)
     else
         if debugTimer and isTimer(debugTimer) then killTimer(debugTimer); debugTimer = nil end
+        streamedElements = {}
         removeEventHandler("onClientRender", root, drawDebug)
     end
     enabled = not enabled

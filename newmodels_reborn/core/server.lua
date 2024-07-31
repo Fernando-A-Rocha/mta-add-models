@@ -79,7 +79,7 @@ local function loadModels()
                                 dff = info.dff,
                                 txd = info.txd,
                                 col = info.col,
-                                name = info.name or getVehicleNameFromModel(baseModel)
+                                name = info.name or "Unnamed"
                             }
                         end
                     end
