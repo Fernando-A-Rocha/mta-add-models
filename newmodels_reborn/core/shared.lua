@@ -97,7 +97,7 @@ local function setElementResource(element, theResource)
     end
 end
 
-local function getBaseModelIdFromCustomModelId(id)
+function getBaseModelIdFromCustomModelId(id)
     local customInfo = customModels[id]
     if customInfo then
         return customInfo.baseModel

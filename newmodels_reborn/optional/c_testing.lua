@@ -3,6 +3,7 @@ local SW = guiGetScreenSize()
 
 local debugTimer = nil
 local drawStr = ""
+local streamedElements = {}
 
 local function getElementInfoStr(element, level)
     local spaces = string.rep("----- ", level)
@@ -41,7 +42,21 @@ local function pairsByKeys(t)
     return iter
 end
 
-local function updateDebugStr()
+local function getElementCustomModelString(element)
+    local customModel = tonumber(getElementData(element, getCustomModelDataKey("vehicle")))
+    if customModel and customModels[customModel] then
+        local name, baseModel = customModels[customModel].name, customModels[customModel].baseModel
+        if name then
+            return ("%d \"%s\" (%d)"):format(customModel, name, baseModel)
+        else
+            return ("%d (%d)"):format(customModel, baseModel)
+        end
+    else
+        return ("%d"):format(getElementModel(element))
+    end
+end
+
+local function updateDebugViewInfo()
     local loadedModelsStr = ""
     for customModel, v in pairsByKeys(loadedModels) do
         local str
@@ -57,15 +72,37 @@ local function updateDebugStr()
     if loadedModelsStr ~= "" then
         drawStr = "Loaded models:\n" .. loadedModelsStr .. "\n\n" .. drawStr
     end
+
+    streamedElements = {}
+    for _, element in pairs(getElementsByType("vehicle", root, true)) do
+        streamedElements[element] = getElementCustomModelString(element)
+    end
+    for _, element in pairs(getElementsByType("object", root, true)) do
+        streamedElements[element] = getElementCustomModelString(element)
+    end
+    for _, element in pairs(getElementsByType("ped", root, true)) do
+        streamedElements[element] = getElementCustomModelString(element)
+    end
+    for _, element in pairs(getElementsByType("player", root, true)) do
+        streamedElements[element] = getElementCustomModelString(element)
+    end
 end
 
 local function drawDebug()
     dxDrawText(drawStr, SW/2, 30, SW, 0, 0xFFFFFFFF, 1, "default-bold")
+
+    for element, customModelStr in pairs(streamedElements) do
+        local x, y, z = getElementPosition(element)
+        local sx, sy = getScreenFromWorldPosition(x, y, z + 0.5)
+        if sx and sy then
+            dxDrawText(customModelStr, sx, sy, 0, 0, 0xFFFFFFFF, 1, "default")
+        end
+    end
 end
 
 local function toggleDebugView(cmd)
     if not enabled then
-        if not (debugTimer) or (not isTimer(debugTimer)) then debugTimer = setTimer(updateDebugStr, 1000, 0) end
+        if not (debugTimer) or (not isTimer(debugTimer)) then debugTimer = setTimer(updateDebugViewInfo, 1000, 0) end
         addEventHandler("onClientRender", root, drawDebug, false)
     else
         if debugTimer and isTimer(debugTimer) then killTimer(debugTimer); debugTimer = nil end
