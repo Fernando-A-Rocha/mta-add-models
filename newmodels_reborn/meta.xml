@@ -21,6 +21,14 @@
     <export function="getElementModel" type="shared"/>
     <export function="getLoadedModels" type="client"/>
 
+    <!-- Files -->
+    <file src="models/**/*.col"/>
+    <file src="models/**/*.txd"/>
+    <file src="models/**/*.dff"/>
+
+    <!-- ............................................................................... -->
+    <!-- OPTIONAL THINGS: .............................................................. -->
+
     <!-- Testing -->
     <script src="optional/c_testing.lua" type="client"/>
     <script src="optional/s_testing.lua" type="server"/>
@@ -53,9 +61,4 @@
     <!-- <export type="client" function="forceFreeAllocated"/> -->
     <!-- <export type="client" function="forceDownloadMod"/> -->
     <!-- <export type="client" function="isBusyDownloading"/> -->
-
-    <!-- Files -->
-    <file src="models/**/*.col"/>
-    <file src="models/**/*.txd"/>
-    <file src="models/**/*.dff"/>
 </meta>

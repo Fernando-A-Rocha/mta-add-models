@@ -15,11 +15,11 @@ end
 
 local function convertCustomModelInfoToOldFormat(customModel, customModelInfo)
     local baseModel = customModelInfo.baseModel
-    local colPath, txdPath, dffPath = customModelInfo.col, customModelInfo.txd, customModelInfo.dff
+    local colPath, txdPath, dffPath, name = customModelInfo.col, customModelInfo.txd, customModelInfo.dff, customModelInfo.name
     local mod = {
         id = customModel,
         base_id = baseModel,
-        name = "",
+        name = name,
         path = { col = colPath, txd = txdPath, dff = dffPath },
     }
     mod.paths = mod.path

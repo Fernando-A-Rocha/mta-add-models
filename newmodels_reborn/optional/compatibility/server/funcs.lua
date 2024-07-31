@@ -32,6 +32,7 @@ local function sendModListAllPlayers()
                 col = paths.col or nil,
                 txd = paths.txd or nil,
                 dff = paths.dff or nil,
+                name = mod.name,
                 srcResourceName = mod.srcResourceName,
             }
             table.remove(modList[elementType],i)
@@ -56,18 +57,6 @@ local function getActualModPaths(folder, id)
         dff = path .. ".dff",
         col = path .. ".col",
     }
-end
-
-function table.copy(tab, recursive)
-    local ret = {}
-    for key, value in pairs(tab) do
-        if (type(value) == "table") and recursive then
-            ret[key] = table.copy(value)
-        else
-            ret[key] = value
-        end
-    end
-    return ret
 end
 
 local function fixModList()

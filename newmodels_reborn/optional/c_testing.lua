@@ -44,10 +44,13 @@ end
 local function updateDebugStr()
     local loadedModelsStr = ""
     for customModel, v in pairsByKeys(loadedModels) do
+        local str
+        if v.name then str = ("%d \"%s\" (%d)"):format(customModel, v.name, v.baseModel)
+        else str = ("%d (%d)"):format(customModel, v.baseModel) end
         if loadedModelsStr == "" then
-            loadedModelsStr = ("%d (%d)"):format(customModel, v.baseModel)
+            loadedModelsStr = str
         else
-            loadedModelsStr = loadedModelsStr .. (", %d (%d)"):format(customModel, v.baseModel)
+            loadedModelsStr = loadedModelsStr .. ", " .. str
         end
     end
     drawStr = getElementChidrenStr(resourceRoot, 0)

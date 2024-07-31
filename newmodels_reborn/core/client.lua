@@ -107,6 +107,7 @@ local function loadCustomModel(customModel, elementToApply)
     loadedModels[customModel] = {
         id = allocatedModel,
         baseModel = customInfo.baseModel,
+        name = customInfo.name,
         elementTypes = elementTypes,
         freeAllocatedTimer = nil,
         elements = { txd = txd, dff = dff, col = col }

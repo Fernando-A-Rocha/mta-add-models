@@ -26,37 +26,60 @@ local function loadModels()
                         if not filesAndFoldersInside then
                             return false, "failed to list " .. fullPath .. " directory"
                         end
-                        local filesForCustomModel = {}
-                        for _, fileInside in pairs(filesAndFoldersInside) do
-                            local fullPathInside = fullPath .. "/" .. fileInside
-                            if pathIsFile(fullPathInside) then
-                                local fileType = string.sub(fileInside, -3)
-                                if not (fileType == "dff" or fileType == "txd" or fileType == "col") then
-                                    return false, "invalid " .. modelType .. " file type: " .. fileType
+                        local customModelInfo = {}
+                        local function parseOneFile(thisFileName, thisFullPath, name)
+                            local fileType = string.sub(thisFileName, -3)
+                            if not (fileType == "dff" or fileType == "txd" or fileType == "col") then
+                                return false, "invalid " .. modelType .. " file type: " .. fileType
+                            end
+                            local customModel = tonumber(string.sub(thisFileName, 1, -5))
+                            if not customModel then
+                                return false, "invalid " .. modelType .. " custom model: " .. thisFileName
+                            end
+                            if isDefaultID(modelType, customModel) then
+                                return false, "custom " .. modelType .. " model is a default ID: " .. customModel
+                            end
+                            if customModels[customModel] then
+                                return false, "duplicate " .. modelType .. " custom model: " .. customModel
+                            end
+                            if not customModelInfo[customModel] then
+                                customModelInfo[customModel] = {}
+                            end
+                            customModelInfo[customModel][fileType] = thisFullPath
+                            if name then
+                                customModelInfo[customModel].name = name
+                            end
+                            return true
+                        end
+                        for _, fileOrFolderInside in pairs(filesAndFoldersInside) do
+                            local fullPathInside = fullPath .. "/" .. fileOrFolderInside
+                            if pathIsDirectory(fullPathInside) then
+                                local filesAndFoldersInsideThis = pathListDir(fullPathInside)
+                                if not filesAndFoldersInsideThis then
+                                    return false, "failed to list " .. fullPathInside .. " directory"
                                 end
-                                local customModel = tonumber(string.sub(fileInside, 1, -5))
-                                if not customModel then
-                                    return false, "invalid " .. modelType .. " custom model: " .. fileInside
+                                for _, fileOrFolderInsideThis in pairs(filesAndFoldersInsideThis) do
+                                    local fullPathInsideThis = fullPathInside .. "/" .. fileOrFolderInsideThis
+                                    local parsed, failReason = parseOneFile(fileOrFolderInsideThis, fullPathInsideThis, fileOrFolderInside)
+                                    if not parsed then
+                                        return false, failReason
+                                    end
                                 end
-                                if isDefaultID(modelType, customModel) then
-                                    return false, "custom " .. modelType .. " model is a default ID: " .. customModel
+                            elseif pathIsFile(fullPathInside) then
+                                local parsed, failReason = parseOneFile(fileOrFolderInside, fullPathInside)
+                                if not parsed then
+                                    return false, failReason
                                 end
-                                if customModels[customModel] then
-                                    return false, "duplicate " .. modelType .. " custom model: " .. customModel
-                                end
-                                if not filesForCustomModel[customModel] then
-                                    filesForCustomModel[customModel] = {}
-                                end
-                                filesForCustomModel[customModel][fileType] = fullPathInside
                             end
                         end
-                        for customModel, files in pairs(filesForCustomModel) do
+                        for customModel, info in pairs(customModelInfo) do
                             customModels[customModel] = {
                                 type = modelType,
                                 baseModel = baseModel,
-                                dff = files.dff,
-                                txd = files.txd,
-                                col = files.col
+                                dff = info.dff,
+                                txd = info.txd,
+                                col = info.col,
+                                name = info.name or getVehicleNameFromModel(baseModel)
                             }
                         end
                     end
