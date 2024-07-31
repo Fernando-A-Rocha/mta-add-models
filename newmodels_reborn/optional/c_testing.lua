@@ -1,5 +1,7 @@
 local enabled = false
-local SW, SH = guiGetScreenSize()
+local SW = guiGetScreenSize()
+
+local debugTimer = nil
 local drawStr = ""
 
 local function getElementInfoStr(element, level)
@@ -21,19 +23,51 @@ local function getElementChidrenStr(element, level)
     return str
 end
 
-setTimer(function()
-    drawStr = getElementChidrenStr(resourceRoot, 0)
-end, 1000, 0)
+local function pairsByKeys(t)
+    local a = {}
+    for n in pairs(t) do
+        table.insert(a, n)
+    end
+    table.sort(a)
+    local i = 0
+    local iter = function()
+        i = i + 1
+        if a[i] == nil then
+            return nil
+        else
+            return a[i], t[a[i]]
+        end
+    end
+    return iter
+end
 
-local function drawElements()
+local function updateDebugStr()
+    local loadedModelsStr = ""
+    for customModel, v in pairsByKeys(loadedModels) do
+        if loadedModelsStr == "" then
+            loadedModelsStr = ("%d (%d)"):format(customModel, v.baseModel)
+        else
+            loadedModelsStr = loadedModelsStr .. (", %d (%d)"):format(customModel, v.baseModel)
+        end
+    end
+    drawStr = getElementChidrenStr(resourceRoot, 0)
+    if loadedModelsStr ~= "" then
+        drawStr = "Loaded models:\n" .. loadedModelsStr .. "\n\n" .. drawStr
+    end
+end
+
+local function drawDebug()
     dxDrawText(drawStr, SW/2, 30, SW, 0, 0xFFFFFFFF, 1, "default-bold")
 end
 
-addCommandHandler("newmodelstest", function()
+addCommandHandler("newmodelsdebug", function(cmd)
     if not enabled then
-        addEventHandler("onClientRender", root, drawElements, false)
+        if not (debugTimer) or (not isTimer(debugTimer)) then debugTimer = setTimer(updateDebugStr, 1000, 0) end
+        addEventHandler("onClientRender", root, drawDebug, false)
     else
-        removeEventHandler("onClientRender", root, drawElements)
+        if debugTimer and isTimer(debugTimer) then killTimer(debugTimer); debugTimer = nil end
+        removeEventHandler("onClientRender", root, drawDebug)
     end
     enabled = not enabled
+    outputChatBox(cmd .. " => " .. tostring(enabled))
 end, false)
