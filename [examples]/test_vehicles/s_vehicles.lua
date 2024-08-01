@@ -32,7 +32,6 @@ addCommandHandler("myvehicle", function(player)
     end
     local model = getElementModel(vehicle)
     local baseModel = getElementBaseModel(vehicle)
-    iprint(model, baseModel)
     if model == baseModel then
         outputChatBox("This vehicle has the default model ID " .. model .. " ("..(tostring(getVehicleNameFromModel(model)) or "")..")", player, 0, 255, 0)
     else
