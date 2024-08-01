@@ -39,7 +39,7 @@ local function parseModelSettings(thisFullPath, customModel, customModelInfo, is
             end
             customModelSettings.lodDistance = lodDistance
         elseif stringStartswith(settingStr, "settings=") then
-            if isFromSettingsOption then
+            if isFromSettingsOption then -- prevent inception and recursion
                 return false, "settings option cannot point to a settings file that contains another settings option @ " .. thisFullPath
             end
             local settingsPath = settingStr:sub(10)
