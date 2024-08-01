@@ -18,3 +18,4 @@ See the example files to visualize the structure of this system
     - `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
     - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
     - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
+    - `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
