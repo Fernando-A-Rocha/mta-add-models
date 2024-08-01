@@ -22,8 +22,12 @@ Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/rele
 
 Access the [Documentation file](/.github/doc/DOCUMENTATION.md) to learn about this resource and how to use it.
 
+## Media
+
+![Screenshot 1](/.github/img/ss1.jpg)
+
 ## Final Note
 
-Feel free to update the documentation in this repository and contribute to the code via pull requests.
+Feel free to update the documentation in this repository, and contribute to the code via pull requests.
 
-Thank you for reading, have fun!
+Thank you for reading. Have fun! 🎉
