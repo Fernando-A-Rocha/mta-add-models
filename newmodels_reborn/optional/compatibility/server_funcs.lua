@@ -1,5 +1,5 @@
 -- Backwards compatibility with newmodels 3.3.0
--- Exported functions from old newmodels working with the new system
+-- Exported functions & serverside logic from old newmodels working with the new system
 
 local resName = getResourceName(resource)
 
@@ -167,7 +167,7 @@ end
 	With this one you can just pass a table of mods and it calls that function for you
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
-function addExternalMods_IDFilenames(list, onFinishEvent) -- [Exported]
+function addExternalMods_IDFilenames(list, onFinishEvent)
     if not sourceResource then
         return false, "This command is meant to be called from outside resource '" .. resName .. "'"
     end
@@ -225,7 +225,6 @@ end
 	The difference between this function and addExternalMod_CustomFilenames is that
 	you pass a folder path in 'path' and it will search for ID.dff ID.txd etc
 ]]
--- [Exported]
 function addExternalMod_IDFilenames(...)
     -- Backwards compatibility for old arguments
     local args = { ... }
@@ -414,7 +413,7 @@ end
 	With this one you can just pass a table of mods and it calls that function for you
 	Also, please note that if any of your mods has an invalid parameter, an error will be output and it won't get added.
 ]]
-function addExternalMods_CustomFileNames(list, onFinishEvent) -- [Exported]
+function addExternalMods_CustomFileNames(list, onFinishEvent)
     if not sourceResource then
         return false, "This command is meant to be called from outside resource '" .. resName .. "'"
     end
@@ -472,7 +471,6 @@ end
 	The difference between this function and addExternalMod_IDFilenames is that
 	you pass directly individual file paths for dff, txd and col files
 ]]
--- [Exported]
 function addExternalMod_CustomFilenames(...)
     -- Backwards compatibility for old arguments
     local args = { ... }
@@ -652,7 +650,7 @@ function addExternalMod_CustomFilenames(...)
     return true
 end
 
-function removeExternalMods(list, onFinishEvent) -- [Exported]
+function removeExternalMods(list, onFinishEvent)
     if not sourceResource then
         return false, "This command is meant to be called from outside resource '" .. resName .. "'"
     end
@@ -699,7 +697,7 @@ function removeExternalMods(list, onFinishEvent) -- [Exported]
     return true
 end
 
-function removeExternalMod(id) -- [Exported]
+function removeExternalMod(id)
     id = tonumber(id)
     if not id then
         return false, "Missing/Invalid 'id' passed: " .. tostring(id)

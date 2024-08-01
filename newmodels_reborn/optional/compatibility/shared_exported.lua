@@ -2,7 +2,7 @@
 
 -- Backwards compatibility with newmodels 3.3.0
 
--- Configurable variables
+-- Configurable variables ---------------------------------------------------------------------------------------------------------------------
 
 OLD_DATA_NAMES = {
     ped = "skinID",
@@ -19,7 +19,7 @@ OLD_BASE_DATA_NAME = "baseID"
 ENABLE_NANDOCRYPT = true
 NANDOCRYPT_EXT = ".nandocrypt"
 
--- Exported functions from old newmodels working with the new system
+-- Exported functions from old newmodels working with the new system --------------------------------------------------------------------------
 
 local isClientsideScript = localPlayer ~= nil
 
@@ -36,7 +36,6 @@ local function convertCustomModelInfoToOldFormat(customModel, customModelInfo)
     return mod
 end
 
--- Exported
 function getDataNameFromType(elementType)
     if type(elementType) == "string" then
         return OLD_DATA_NAMES[elementType]
@@ -55,12 +54,10 @@ function getCustomModelDataKey(elementOrElementType)
     return _getCustomModelDataKey(elementOrElementType)
 end
 
--- Exported
 function getBaseModelDataName()
     return OLD_BASE_DATA_NAME
 end
 
--- Exported
 function getModDataFromID(id)
     id = tonumber(id)
     if not id then return end
@@ -70,7 +67,6 @@ function getModDataFromID(id)
     return mod, customInfo.type
 end
 
--- Exported
 function getModList()
     local modList = {}
     for id, customInfo in pairs(customModels) do
@@ -79,7 +75,6 @@ function getModList()
     return modList
 end
 
--- Exported
 function getBaseModel(element)
     if not isClientsideScript then
         return getElementModel(element)
@@ -93,14 +88,12 @@ function getBaseModel(element)
     end
 end
 
--- Exported
 function isCustomModID(id)
     local mod, modType = getModDataFromID(id)
     if not mod then return false end
     return true, mod, modType
 end
 
--- Exported
 function isRightModType(et, modEt)
     if et == modEt then
         return true
@@ -114,7 +107,6 @@ function isRightModType(et, modEt)
     return false
 end
 
--- Exported
 function checkModelID(id, elementType)
     assert(tonumber(id), "Non-number ID passed")
     assert(
@@ -142,10 +134,8 @@ function checkModelID(id, elementType)
 end
 
 if isClientsideScript then
-    -- Exported
     function isClientReady() return true end -- Now the client is always ready :-)
 
-    -- Exported
     function isModAllocated(id)
         id = tonumber(id)
         if not id then return end

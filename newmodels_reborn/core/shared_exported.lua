@@ -1,9 +1,10 @@
 -- !! THIS SCRIPT IS ENTIRELY EXPORTED !!
 
+local isClientsideScript = localPlayer ~= nil
+
 VALID_ELEMENT_TYPES = { "vehicle", "ped", "player", "object", "pickup" }
 
 local resources = {}
-local isClientsideScript = localPlayer ~= nil
 
 _createObject = createObject
 _createVehicle = createVehicle
