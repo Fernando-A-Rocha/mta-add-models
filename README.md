@@ -16,7 +16,7 @@ Visit the [Thread on the MTA Forum](https://forum.mtasa.com/topic/133212-rel-add
 
 ## Download
 
-Get the [latest version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the Releases section.
+Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the Releases section.
 
 ## Tutorial
 
