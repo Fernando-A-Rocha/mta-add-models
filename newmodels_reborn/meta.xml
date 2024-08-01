@@ -37,6 +37,7 @@
     <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
 
     <!-- Debugging / Testing -->
+    <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
     <script src="scripts/optional/debug/c_debug.lua" type="client"/>
     <script src="scripts/optional/debug/s_debug.lua" type="server"/>
 

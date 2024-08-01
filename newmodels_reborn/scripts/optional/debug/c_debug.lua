@@ -107,4 +107,7 @@ local function toggleDebugView(cmd)
     outputChatBox(cmd .. " => " .. tostring(enabled))
 end
 addCommandHandler("newmodelsdebug", toggleDebugView, false)
-executeCommandHandler("newmodelsdebug")
+
+if (DEBUG_VIEW_ON_BY_DEFAULT) then
+    executeCommandHandler("newmodelsdebug")
+end
