@@ -16,8 +16,8 @@ local function createVehicles()
         if vehicle then
             setElementInterior(vehicle, interior)
             setElementDimension(vehicle, dimension)
+            print("#" .. i .. " - Created vehicle with ID " .. model .. " at " .. x .. ", " .. y .. ", " .. z)
         end
-        print("#" .. i .. " - Created vehicle with ID " .. model .. " at " .. x .. ", " .. y .. ", " .. z)
     end
 end
-addEventHandler("onResourceStart", resourceRoot, createVehicles)
+addEventHandler("onResourceStart", resourceRoot, createVehicles, false)
