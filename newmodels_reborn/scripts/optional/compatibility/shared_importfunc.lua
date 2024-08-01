@@ -7,7 +7,7 @@ _import = import
 function import()
     local str = _import()
     if not exportScriptString then
-        local f = fileOpen("optional/compatibility/shared_exported.lua", true)
+        local f = fileOpen("scripts/optional/compatibility/shared_exported.lua", true)
         if not f then
             return error("Failed to open file.")
         end

@@ -1,5 +1,5 @@
 -- !! THIS SCRIPT IS ENTIRELY EXPORTED !!
--- Check core/shared_exported.lua for the original script
+-- Check scripts/core/shared_exported.lua for the original script
 
 -- Backwards compatibility with newmodels 3.3.0
 

@@ -6,7 +6,7 @@ function import()
         return error("This function can only be called from another resource.")
     end
     if not exportScriptString then
-        local f = fileOpen("core/shared_exported.lua", true)
+        local f = fileOpen("scripts/core/shared_exported.lua", true)
         if not f then
             return error("Failed to open file.")
         end
