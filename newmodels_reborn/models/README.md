@@ -2,7 +2,7 @@ Model files (ending in `.dff`/`.col`/`.txd`) must be placed in this `models` fol
 
 See the example files to visualize the structure of this system
 
-- Vehicles must be placed in the `vehicle`, Skins in `ped`, and Objects in `object` folders
+- Vehicles must be placed in the `vehicle` folder, Skins in `ped`, and Objects in `object`
 
 - Inside the type folder, you must create a folder with the base model ID of the new model (e.g. `490`, which is FBI Rancher)
 
