@@ -1,2 +1,1 @@
-txd=object/1337/boxes.txd
-lodDistance=300
+settings=object/1337/boxes.txt

@@ -19,3 +19,4 @@ See the example files to visualize the structure of this system
   - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
   - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
   - `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
+  - `settings=PATH_TO_ANOTHER_SETTINGS_FILE_INSIDE_models_FOLDER` (in case you want to share the same settings between multiple models)

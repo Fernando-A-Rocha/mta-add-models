@@ -10,9 +10,65 @@ local CUSTOM_MODEL_SETTINGS = {
 --   - dff=path
 --   - col=path
 --   - lodDistance=number
+--   - settings=path
 
 local function stringStartswith(str, start)
     return str:sub(1, #start) == start
+end
+
+local function parseModelSettings(thisFullPath, customModel, customModelInfo, isFromSettingsOption)
+    local customModelSettings = {}
+    local file = fileOpen(thisFullPath, true)
+    if not file then
+        return false, "failed to open file: " .. thisFullPath
+    end
+    local info = fileGetContents(file, false)
+    fileClose(file)
+    if not info then
+        return false, "failed to read file: " .. thisFullPath
+    end
+    local lines = split(info, "\n")
+    for _, settingStr in pairs(lines) do
+        settingStr = settingStr:gsub("\r", "")
+        if CUSTOM_MODEL_SETTINGS[settingStr] then
+            customModelSettings[settingStr] = true
+        elseif stringStartswith(settingStr, "lodDistance=") then
+            local lodDistance = tonumber(settingStr:sub(13))
+            if not lodDistance then
+                return false, "invalid lodDistance value: " .. settingStr
+            end
+            customModelSettings.lodDistance = lodDistance
+        elseif stringStartswith(settingStr, "settings=") then
+            if isFromSettingsOption then
+                return false, "settings option cannot point to a settings file that contains another settings option @ " .. thisFullPath
+            end
+            local settingsPath = settingStr:sub(10)
+            local settingsFullPath = "models/" .. settingsPath
+            if not fileExists(settingsFullPath) then
+                return false, "settings file not found: " .. settingsPath
+            end
+            local settingsInfo = parseModelSettings(settingsFullPath, customModel, customModelInfo, true)
+            if not settingsInfo then
+                return false, "failed to parse settings file: " .. settingsPath
+            end
+            return settingsInfo
+        else
+            for _, settingModelType in pairs({"txd", "dff", "col"}) do
+                if stringStartswith(settingStr, settingModelType.."=") then
+                    local settingModelPath = settingStr:sub(#settingModelType + 2)
+                    local settingModelFullPath = "models/" .. settingModelPath
+                    if not fileExists(settingModelFullPath) then
+                        return false, "setting " .. settingModelType .. " file not found: " .. settingModelPath
+                    end
+                    if customModelInfo[customModel][settingModelType] then
+                        return false, "duplicate " .. settingModelType .. " file for custom model: " .. customModel
+                    end
+                    customModelInfo[customModel][settingModelType] = settingModelFullPath
+                end
+            end
+        end
+    end
+    return customModelSettings
 end
 
 local function loadModels()
@@ -58,42 +114,9 @@ local function loadModels()
                                         customModelInfo[customModel] = {}
                                     end
                                     if fileType == "txt" then
-                                        local file = fileOpen(thisFullPath, true)
-                                        if not file then
-                                            return false, "failed to open file: " .. thisFullPath
-                                        end
-                                        local info = fileGetContents(file, false)
-                                        fileClose(file)
-                                        if not info then
-                                            return false, "failed to read file: " .. thisFullPath
-                                        end
-                                        local customModelSettings = {}
-                                        local lines = split(info, "\n")
-                                        for _, settingStr in pairs(lines) do
-                                            settingStr = settingStr:gsub("\r", "")
-                                            if CUSTOM_MODEL_SETTINGS[settingStr] then
-                                                customModelSettings[settingStr] = true
-                                            elseif stringStartswith(settingStr, "lodDistance=") then
-                                                local lodDistance = tonumber(settingStr:sub(13))
-                                                if not lodDistance then
-                                                    return false, "invalid lodDistance value: " .. settingStr
-                                                end
-                                                customModelSettings.lodDistance = lodDistance
-                                            else
-                                                for _, settingModelType in pairs({"txd", "dff", "col"}) do
-                                                    if stringStartswith(settingStr, settingModelType.."=") then
-                                                        local settingModelPath = settingStr:sub(#settingModelType + 2)
-                                                        local settingModelFullPath = "models/" .. settingModelPath
-                                                        if not fileExists(settingModelFullPath) then
-                                                            return false, "setting " .. settingModelType .. " file not found: " .. settingModelPath
-                                                        end
-                                                        if customModelInfo[customModel][settingModelType] then
-                                                            return false, "duplicate " .. settingModelType .. " file for custom " .. modelType .. " model: " .. customModel
-                                                        end
-                                                        customModelInfo[customModel][settingModelType] = settingModelFullPath
-                                                    end
-                                                end
-                                            end
+                                        local customModelSettings, failReason = parseModelSettings(thisFullPath, customModel, customModelInfo)
+                                        if not customModelSettings then
+                                            return false, failReason
                                         end
                                         customModelInfo[customModel].settings = customModelSettings
                                     else
@@ -140,6 +163,7 @@ local function loadModels()
                                 name = info.name or "Unnamed",
                                 settings = info.settings or {},
                             }
+                            if modelType == "object" then iprint(customModel, customModels[customModel]) end
                         end
                     end
                 end

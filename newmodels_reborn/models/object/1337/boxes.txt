@@ -1,0 +1,2 @@
+txd=object/1337/boxes.txd
+lodDistance=300
