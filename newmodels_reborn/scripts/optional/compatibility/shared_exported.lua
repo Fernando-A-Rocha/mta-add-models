@@ -77,17 +77,7 @@ function getModList()
 end
 
 function getBaseModel(element)
-    if not isClientsideScript then
-        return getElementModel(element)
-    else
-        local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
-        if customModel then
-            local customModelInfo = getSharedCustomModelsTable()[customModel]
-            return customModelInfo and customModelInfo.baseModel or nil
-        else
-            return getElementModel(element)
-        end
-    end
+    return getElementBaseModel(element)
 end
 
 function isCustomModID(id)

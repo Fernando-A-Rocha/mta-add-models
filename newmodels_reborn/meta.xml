@@ -22,6 +22,7 @@
     <export function="setPickupType" type="shared"/>
     <export function="setElementModel" type="shared"/>
     <export function="getElementModel" type="shared"/>
+    <export function="getElementBaseModel" type="shared"/>
     <export function="getBaseModelIdFromCustomModelId" type="shared"/>
     <export function="import" type="shared"/>
 

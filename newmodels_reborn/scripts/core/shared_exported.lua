@@ -215,7 +215,19 @@ end
 function getElementModel(element)
     assert(isElement(element), "Invalid element passed: " .. tostring(element))
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
-    return getElementData(element, getCustomModelDataKey(element)) or _getElementModel(element)
+    return tonumber(getElementData(element, getCustomModelDataKey(element))) or _getElementModel(element)
+end
+
+function getElementBaseModel(element)
+    if not isClientsideScript then
+        return getElementModel(element)
+    end
+    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
+    if not customModel then
+        return getElementModel(element)
+    end
+    local customModelInfo = getSharedCustomModelsTable()[customModel]
+    return customModelInfo and customModelInfo.baseModel or nil
 end
 
 -- PS. You can't set element model on a pickup
