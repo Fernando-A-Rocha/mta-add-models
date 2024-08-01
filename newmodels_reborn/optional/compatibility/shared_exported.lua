@@ -1,5 +1,5 @@
 -- !! THIS SCRIPT IS ENTIRELY EXPORTED !!
--- Variable IS_IMPORTED will be true if this script is imported by another resource
+-- Check core/shared_exported.lua for the original script
 
 -- Backwards compatibility with newmodels 3.3.0
 
