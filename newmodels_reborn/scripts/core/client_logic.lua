@@ -183,7 +183,6 @@ end
 
 local function freeAllocatedModel(customModel, loadedModel)
     if loadedModel.disableAutoFree then
-        print("Not freeing custom model " .. customModel .. " because it has disableAutoFree set")
         return
     end
 

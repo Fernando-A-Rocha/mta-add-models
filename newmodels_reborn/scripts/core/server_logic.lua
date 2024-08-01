@@ -69,7 +69,6 @@ local function loadModels()
                                         end
                                     end
                                     customModelInfo[customModel].settings = customModelSettings
-                                    iprint(customModelSettings)
                                 else
                                     customModelInfo[customModel][fileType] = thisFullPath
                                     if name then
