@@ -1,3 +1,9 @@
+local CUSTOM_MODEL_SETTINGS = {
+    ["disableAutoFree"] = true,
+    ["disableTextureFiltering"] = true,
+    ["enableAlphaTransparency"] = true,
+}
+
 local function loadModels()
     if not pathIsDirectory("models") then
         return false, "models directory not found"
@@ -29,25 +35,47 @@ local function loadModels()
                         local customModelInfo = {}
                         local function parseOneFile(thisFileName, thisFullPath, name)
                             local fileType = string.sub(thisFileName, -3)
-                            if not (fileType == "dff" or fileType == "txd" or fileType == "col") then
-                                return false, "invalid " .. modelType .. " file type: " .. fileType
-                            end
-                            local customModel = tonumber(string.sub(thisFileName, 1, -5))
-                            if not customModel then
-                                return false, "invalid " .. modelType .. " custom model: " .. thisFileName
-                            end
-                            if isDefaultID(modelType, customModel) then
-                                return false, "custom " .. modelType .. " model is a default ID: " .. customModel
-                            end
-                            if customModels[customModel] then
-                                return false, "duplicate " .. modelType .. " custom model: " .. customModel
-                            end
-                            if not customModelInfo[customModel] then
-                                customModelInfo[customModel] = {}
-                            end
-                            customModelInfo[customModel][fileType] = thisFullPath
-                            if name then
-                                customModelInfo[customModel].name = name
+                            if (fileType == "dff" or fileType == "txd" or fileType == "col" or fileType == "txt") then
+                                local customModel = tonumber(string.sub(thisFileName, 1, -5))
+                                if not customModel then
+                                    return false, "invalid " .. modelType .. " custom model: " .. thisFileName
+                                end
+                                if not customModelInfo[customModel] then
+                                    if isDefaultID(modelType, customModel) then
+                                        return false, "custom " .. modelType .. " model is a default ID: " .. customModel
+                                    end
+                                    if customModels[customModel] then
+                                        return false, "duplicate " .. modelType .. " custom model: " .. customModel
+                                    end
+                                    customModelInfo[customModel] = {}
+                                end
+                                if fileType == "txt" then
+                                    local file = fileOpen(thisFullPath, true)
+                                    if not file then
+                                        return false, "failed to open file: " .. thisFullPath
+                                    end
+                                    local info = fileGetContents(file, false)
+                                    fileClose(file)
+                                    if not info then
+                                        return false, "failed to read file: " .. thisFullPath
+                                    end
+                                    local customModelSettings = {}
+                                    local lines = split(info, "\n")
+                                    for _, settingName in pairs(lines) do
+                                        settingName = settingName:gsub("\r", "")
+                                        local settingType = CUSTOM_MODEL_SETTINGS[settingName]
+                                        if settingType then
+                                            customModelSettings[settingName] = true
+                                        end
+                                    end
+                                    customModelInfo[customModel].settings = customModelSettings
+                                    iprint(customModelSettings)
+                                else
+                                    customModelInfo[customModel][fileType] = thisFullPath
+                                    if name then
+                                        customModelInfo[customModel].name = name
+                                    end
+                                end
                             end
                             return true
                         end
@@ -79,7 +107,8 @@ local function loadModels()
                                 dff = info.dff,
                                 txd = info.txd,
                                 col = info.col,
-                                name = info.name or "Unnamed"
+                                name = info.name or "Unnamed",
+                                settings = info.settings or {},
                             }
                         end
                     end

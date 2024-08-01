@@ -3,7 +3,7 @@
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
       https://nightly.mtasa.com  -->
-    <min_mta_version client="1.6.0-9.22505.0" server="1.6.0-9.22505.0"></min_mta_version>
+    <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"></min_mta_version>
 
     <!-- Main Scripts -->
     <script src="scripts/core/shared_local.lua" type="shared"/>

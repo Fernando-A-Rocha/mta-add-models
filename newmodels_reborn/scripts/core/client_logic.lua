@@ -4,7 +4,7 @@ loadedModels = {}
 
 local reusableModelElements = {}
 
-local currFreeIdDelay = 9500 -- ms
+local currFreeIdDelay = 9500   -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
 local function applyElementCustomModel(element)
@@ -61,20 +61,22 @@ local function loadCustomModel(customModel, elementToApply)
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
 
+    local disableTextureFiltering = customInfo.settings.disableTextureFiltering
+
     local col, txd, dff
     if colPath then
         col = reusableModelElements[colPath] or engineLoadCOL(colPath)
     end
     if txdPath then
-        txd = reusableModelElements[txdPath] or engineLoadTXD(txdPath)
+        txd = reusableModelElements[txdPath] or engineLoadTXD(txdPath, disableTextureFiltering and false or nil)
     end
     if dffPath then
         dff = reusableModelElements[dffPath] or engineLoadDFF(dffPath)
     end
 
     if (colPath and not col)
-    or (txdPath and not txd)
-    or (dffPath and not dff) then
+        or (txdPath and not txd)
+        or (dffPath and not dff) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
@@ -83,9 +85,11 @@ local function loadCustomModel(customModel, elementToApply)
         return
     end
 
+    local enableAlphaTransparency = customInfo.settings.enableAlphaTransparency
+
     if (col and not engineReplaceCOL(col, allocatedModel))
-    or (txd and not engineImportTXD(txd, allocatedModel))
-    or (dff and not engineReplaceModel(dff, allocatedModel)) then
+        or (txd and not engineImportTXD(txd, allocatedModel))
+        or (dff and not engineReplaceModel(dff, allocatedModel, enableAlphaTransparency or nil)) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
@@ -113,6 +117,8 @@ local function loadCustomModel(customModel, elementToApply)
         reusableModelElements[dffPath] = dff
     end
 
+    local disableAutoFree = customInfo.settings.disableAutoFree
+
     -- Set loadedModel info
     loadedModels[customModel] = {
         id = allocatedModel,
@@ -120,7 +126,8 @@ local function loadCustomModel(customModel, elementToApply)
         name = customInfo.name,
         elementTypes = elementTypes,
         freeAllocatedTimer = nil,
-        modelPaths = { txd = txdPath, dff = dffPath, col = colPath }
+        modelPaths = { txd = txdPath, dff = dffPath, col = colPath },
+        disableAutoFree = disableAutoFree or false,
     }
 
     if isElement(elementToApply) then
@@ -150,7 +157,7 @@ local function freeAllocatedModelNow(customModel)
     engineFreeModel(loadedModel.id)
 
     -- Destroy model elements unless used by another loaded model
-    for _, modelType in pairs({"dff", "txd", "col"}) do
+    for _, modelType in pairs({ "dff", "txd", "col" }) do
         local modelPath = loadedModel.modelPaths[modelType]
         if modelPath and reusableModelElements[modelPath] then
             -- Check if another loaded model uses this model element
@@ -175,6 +182,11 @@ local function freeAllocatedModelNow(customModel)
 end
 
 local function freeAllocatedModel(customModel, loadedModel)
+    if loadedModel.disableAutoFree then
+        print("Not freeing custom model " .. customModel .. " because it has disableAutoFree set")
+        return
+    end
+
     if isTimer(loadedModel.freeAllocatedTimer) then
         killTimer(loadedModel.freeAllocatedTimer)
     end

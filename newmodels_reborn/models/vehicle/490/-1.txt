@@ -1,0 +1,3 @@
+disableAutoFree
+disableTextureFiltering
+enableAlphaTransparency
