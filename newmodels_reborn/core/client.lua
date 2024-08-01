@@ -2,6 +2,8 @@ addEvent("newmodels_reborn:receiveCustomModels", true)
 
 loadedModels = {}
 
+local reusableModelElements = {}
+
 local currFreeIdDelay = 9500 -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
@@ -63,18 +65,18 @@ local function loadCustomModel(customModel, elementToApply)
 
     local col, txd, dff
     if colPath then
-        col = engineLoadCOL(colPath)
+        col = reusableModelElements[colPath] or engineLoadCOL(colPath)
     end
     if txdPath then
-        txd = engineLoadTXD(txdPath)
+        txd = reusableModelElements[txdPath] or engineLoadTXD(txdPath)
     end
     if dffPath then
-        dff = engineLoadDFF(dffPath)
+        dff = reusableModelElements[dffPath] or engineLoadDFF(dffPath)
     end
 
     if (colPath and not col)
-        or (txdPath and not txd)
-        or (dffPath and not dff) then
+    or (txdPath and not txd)
+    or (dffPath and not dff) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
@@ -84,8 +86,8 @@ local function loadCustomModel(customModel, elementToApply)
     end
 
     if (col and not engineReplaceCOL(col, allocatedModel))
-        or (txd and not engineImportTXD(txd, allocatedModel))
-        or (dff and not engineReplaceModel(dff, allocatedModel)) then
+    or (txd and not engineImportTXD(txd, allocatedModel))
+    or (dff and not engineReplaceModel(dff, allocatedModel)) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end
@@ -103,6 +105,16 @@ local function loadCustomModel(customModel, elementToApply)
         elementTypes = { "object", "pickup" }
     end
 
+    if col then
+        reusableModelElements[colPath] = col
+    end
+    if txd then
+        reusableModelElements[txdPath] = txd
+    end
+    if dff then
+        reusableModelElements[dffPath] = dff
+    end
+
     -- Set loadedModel info
     loadedModels[customModel] = {
         id = allocatedModel,
@@ -110,7 +122,7 @@ local function loadCustomModel(customModel, elementToApply)
         name = customInfo.name,
         elementTypes = elementTypes,
         freeAllocatedTimer = nil,
-        elements = { txd = txd, dff = dff, col = col }
+        modelPaths = { txd = txdPath, dff = dffPath, col = colPath }
     }
 
     if isElement(elementToApply) then
@@ -138,9 +150,27 @@ local function freeAllocatedModelNow(customModel)
         killTimer(loadedModel.freeAllocatedTimer)
     end
     engineFreeModel(loadedModel.id)
-    if isElement(loadedModel.elements.col) then destroyElement(loadedModel.elements.col) end
-    if isElement(loadedModel.elements.txd) then destroyElement(loadedModel.elements.txd) end
-    if isElement(loadedModel.elements.dff) then destroyElement(loadedModel.elements.dff) end
+
+    -- Destroy model elements unless used by another loaded model
+    for _, modelType in pairs({"dff", "txd", "col"}) do
+        local modelPath = loadedModel.modelPaths[modelType]
+        if modelPath and reusableModelElements[modelPath] then
+            -- Check if another loaded model uses this model element
+            local isUsed = false
+            for customModel2, loadedModel2 in pairs(loadedModels) do
+                if customModel2 ~= customModel and loadedModel2.modelPaths[modelType] == modelPath then
+                    isUsed = true
+                    break
+                end
+            end
+            if not isUsed then
+                if isElement(reusableModelElements[modelPath]) then
+                    destroyElement(reusableModelElements[modelPath])
+                end
+                reusableModelElements[modelPath] = nil
+            end
+        end
+    end
 
     -- Unset loadedModel info
     loadedModels[customModel] = nil
