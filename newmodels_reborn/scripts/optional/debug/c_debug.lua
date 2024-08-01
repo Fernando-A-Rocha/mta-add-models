@@ -89,7 +89,7 @@ local function drawDebug()
         local x, y, z = getElementPosition(element)
         local sx, sy = getScreenFromWorldPosition(x, y, z + 0.5)
         if sx and sy then
-            dxDrawText(customModelStr[1], sx, sy, 0, 0, customModelStr[2] or 0xFFFFFFFF, 1, "default")
+            dxDrawText(customModelStr[1], sx, sy, sx, sy, customModelStr[2] or 0xFFFFFFFF, 1, "default", "center")
         end
     end
 end
