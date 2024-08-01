@@ -33,6 +33,9 @@
     <!-- ............................................................................... -->
     <!-- OPTIONAL THINGS: .............................................................. -->
 
+    <!-- Update Checker (RECOMMENDED, please keep this to be warned of new releases!) -->
+    <script src="optional/update_checker/s_update_checker.lua" type="server"/>
+
     <!-- Debugging / Testing -->
     <script src="optional/debug/c_debug.lua" type="client"/>
     <script src="optional/debug/s_debug.lua" type="server"/>
