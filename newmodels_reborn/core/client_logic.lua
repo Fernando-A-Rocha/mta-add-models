@@ -259,7 +259,7 @@ end)
 
 local function restoreElementBaseModels()
     -- Restore the base models of all elements with custom models
-    for _, elementType in pairs(ELEMENT_TYPES) do
+    for _, elementType in pairs(VALID_ELEMENT_TYPES) do
         for _, element in pairs(getElementsByType(elementType, root, true)) do
             local model = _getElementModel(element)
             for _, loadedModel in pairs(loadedModels) do
@@ -282,7 +282,7 @@ addEventHandler("newmodels_reborn:receiveCustomModels", resourceRoot, function(c
 
     customModels = customModelsFromServer
 
-    for _, elementType in pairs(ELEMENT_TYPES) do
+    for _, elementType in pairs(VALID_ELEMENT_TYPES) do
         for _, element in pairs(getElementsByType(elementType, root, true)) do
             setElementCustomModel(element)
         end

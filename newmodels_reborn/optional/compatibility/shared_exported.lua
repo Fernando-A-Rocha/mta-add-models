@@ -1,3 +1,5 @@
+-- !! THIS SCRIPT IS ENTIRELY EXPORTED !!
+
 -- Backwards compatibility with newmodels 3.3.0
 
 -- Configurable variables

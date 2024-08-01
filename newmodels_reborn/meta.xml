@@ -6,7 +6,8 @@
     <min_mta_version client="1.6.0-9.22505.0" server="1.6.0-9.22505.0"></min_mta_version>
 
     <!-- Main Scripts -->
-    <script src="core/shared.lua" type="shared"/>
+    <script src="core/shared_local.lua" type="shared"/>
+    <script src="core/shared_exported.lua" type="shared"/>
     <script src="core/client_logic.lua" type="client"/>
     <script src="core/server_logic.lua" type="server"/>
     <!-- Exported functions -->
@@ -34,7 +35,7 @@
     <script src="optional/debug/s_debug.lua" type="server"/>
 
     <!-- Backwards compatibility with newmodels 3.3.0 -->
-    <script src="optional/compatibility/shared.lua" type="shared"/>
+    <script src="optional/compatibility/shared_exported.lua" type="shared"/>
     <script src="optional/compatibility/server_funcs.lua" type="server"/>
     <!-- Exported functions (Client & Server) -->
     <export type="shared" function="getModList"/>
