@@ -220,11 +220,11 @@ end
 
 function getElementBaseModel(element)
     if not isClientsideScript then
-        return getElementModel(element)
+        return _getElementModel(element)
     end
     local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if not customModel then
-        return getElementModel(element)
+        return _getElementModel(element)
     end
     local customModelInfo = getSharedCustomModelsTable()[customModel]
     return customModelInfo and customModelInfo.baseModel or nil
