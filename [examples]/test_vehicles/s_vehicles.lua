@@ -21,3 +21,25 @@ local function createVehicles()
     end
 end
 addEventHandler("onResourceStart", resourceRoot, createVehicles, false)
+
+-- Outputs, for example:
+-- This vehicle has the custom model ID -1, which is based on the default model ID 490 (FBI Rancher)
+addCommandHandler("myvehicle", function(player)
+    local vehicle = getPedOccupiedVehicle(player)
+    if not vehicle then
+        outputChatBox("You are not in a vehicle", player, 255, 0, 0)
+        return
+    end
+    local model = getElementModel(vehicle)
+    local baseModel = getElementBaseModel(vehicle)
+    iprint(model, baseModel)
+    if model == baseModel then
+        outputChatBox("This vehicle has the default model ID " .. model .. " ("..(tostring(getVehicleNameFromModel(model)) or "")..")", player, 0, 255, 0)
+    else
+        if not baseModel then
+            outputChatBox("This vehicle has the custom model ID " .. model .. ", but the base model ID could not be determined", player, 255, 0, 0)
+            return
+        end
+        outputChatBox("This vehicle has the custom model ID " .. model .. ", which is based on the default model ID " .. baseModel .. " ("..(tostring(getVehicleNameFromModel(baseModel)) or "")..")", player, 0, 255, 0)
+    end
+end, false, false)
