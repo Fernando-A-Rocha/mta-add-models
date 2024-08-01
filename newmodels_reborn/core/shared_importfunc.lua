@@ -15,7 +15,7 @@ function import()
         if not exportScriptString or exportScriptString == "" then
             return error("Failed to read file.")
         end
-        exportScriptString = "IS_IMPORTED = true\n\n" .. exportScriptString
+        exportScriptString = exportScriptString:gsub("IS_IMPORTED = false", "IS_IMPORTED = true")
     end
     return exportScriptString
 end

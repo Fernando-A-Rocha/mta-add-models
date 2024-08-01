@@ -1,5 +1,8 @@
 -- !! THIS SCRIPT IS ENTIRELY EXPORTED !!
--- Variable IS_IMPORTED will be true if this script is imported by another resource
+
+-- Variable IS_IMPORTED will be replaced to true
+-- when this script is imported by another resource using the import() function
+IS_IMPORTED = false
 
 local isClientsideScript = localPlayer ~= nil
 
