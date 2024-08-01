@@ -12,7 +12,7 @@ In simpler terms, with this resource you can make scripts/change your scripts to
 
 ## Community
 
-Thread on the MTA Forum: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/)
+Visit the [Thread on the MTA Forum](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/) to get in touch with fellow users and developers.
 
 ## Download
 
