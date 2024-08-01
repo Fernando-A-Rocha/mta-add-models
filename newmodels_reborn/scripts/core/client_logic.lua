@@ -118,6 +118,10 @@ local function loadCustomModel(customModel, elementToApply)
     end
 
     local disableAutoFree = customInfo.settings.disableAutoFree
+    local lodDistance = customInfo.settings.lodDistance
+    if lodDistance then
+        engineSetModelLODDistance(allocatedModel, lodDistance)
+    end
 
     -- Set loadedModel info
     loadedModels[customModel] = {
@@ -154,6 +158,7 @@ local function freeAllocatedModelNow(customModel)
     if isTimer(loadedModel.freeAllocatedTimer) then
         killTimer(loadedModel.freeAllocatedTimer)
     end
+    engineResetModelLODDistance(loadedModel.id)
     engineFreeModel(loadedModel.id)
 
     -- Destroy model elements unless used by another loaded model

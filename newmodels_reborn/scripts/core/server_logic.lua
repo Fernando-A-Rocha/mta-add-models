@@ -1,11 +1,15 @@
 -- Apologies for the excess if statements, I'll clean this up later.
 
+-- Model .txt settings:
 local CUSTOM_MODEL_SETTINGS = {
     ["disableAutoFree"] = true,
     ["disableTXDTextureFiltering"] = true,
     ["enableDFFAlphaTransparency"] = true,
 }
--- Additionally, model settings .txt can contain path to txd, dff, and col files.
+--   - txd=path
+--   - dff=path
+--   - col=path
+--   - lodDistance=number
 
 local function stringStartswith(str, start)
     return str:sub(1, #start) == start
@@ -69,10 +73,16 @@ local function loadModels()
                                             settingStr = settingStr:gsub("\r", "")
                                             if CUSTOM_MODEL_SETTINGS[settingStr] then
                                                 customModelSettings[settingStr] = true
+                                            elseif stringStartswith(settingStr, "lodDistance=") then
+                                                local lodDistance = tonumber(settingStr:sub(13))
+                                                if not lodDistance then
+                                                    return false, "invalid lodDistance value: " .. settingStr
+                                                end
+                                                customModelSettings.lodDistance = lodDistance
                                             else
                                                 for _, settingModelType in pairs({"txd", "dff", "col"}) do
                                                     if stringStartswith(settingStr, settingModelType.."=") then
-                                                        local settingModelPath = settingStr:sub(5)
+                                                        local settingModelPath = settingStr:sub(#settingModelType + 2)
                                                         local settingModelFullPath = "models/" .. settingModelPath
                                                         if not fileExists(settingModelFullPath) then
                                                             return false, "setting " .. settingModelType .. " file not found: " .. settingModelPath
@@ -130,7 +140,6 @@ local function loadModels()
                                 name = info.name or "Unnamed",
                                 settings = info.settings or {},
                             }
-                            if modelType == "object" then iprint(customModels[customModel]) end
                         end
                     end
                 end
