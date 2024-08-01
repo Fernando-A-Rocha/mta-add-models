@@ -1,4 +1,3 @@
--- These are the optional model settings. Any line that doesn't contain these words is ignored.
 disableAutoFree
 disableTXDTextureFiltering
 enableDFFAlphaTransparency
