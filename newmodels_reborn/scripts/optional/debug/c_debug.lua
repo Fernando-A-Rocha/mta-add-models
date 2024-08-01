@@ -59,7 +59,7 @@ local function updateDebugViewInfo()
         if loadedModelsStr == "" then
             loadedModelsStr = str
         else
-            loadedModelsStr = loadedModelsStr .. ", " .. str
+            loadedModelsStr = str .. ", " .. loadedModelsStr
         end
     end
     drawStr = getElementChidrenStr(resourceRoot, 0)
