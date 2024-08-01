@@ -20,7 +20,7 @@ Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/rele
 
 ## Tutorial
 
-TODO
+Access the [Documentation file](/.github/doc/DOCUMENTATION.md) to learn about this resource and how to use it.
 
 ## Final Note
 
