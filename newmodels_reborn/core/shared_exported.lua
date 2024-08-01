@@ -21,6 +21,7 @@ function getSharedCustomModelsTable()
     if IS_IMPORTED then
         return exports["newmodels_reborn"]:getCustomModels()
     else
+        -- Script is being ran within this resource, so we can access the table directly
         return customModels
     end
 end
