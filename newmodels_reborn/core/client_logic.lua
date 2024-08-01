@@ -7,8 +7,6 @@ local reusableModelElements = {}
 local currFreeIdDelay = 9500 -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
-function getLoadedModels() return loadedModels end
-
 local function applyElementCustomModel(element)
     local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if not customModel then return end

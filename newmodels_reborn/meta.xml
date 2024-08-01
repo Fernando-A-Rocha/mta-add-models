@@ -7,8 +7,8 @@
 
     <!-- Main Scripts -->
     <script src="core/shared.lua" type="shared"/>
-    <script src="core/client.lua" type="client"/>
-    <script src="core/server.lua" type="server"/>
+    <script src="core/client_logic.lua" type="client"/>
+    <script src="core/server_logic.lua" type="server"/>
     <!-- Exported functions -->
     <export function="isDefaultID" type="shared"/>
     <export function="createObject" type="shared"/>
@@ -20,7 +20,6 @@
     <export function="setElementModel" type="shared"/>
     <export function="getElementModel" type="shared"/>
     <export function="getBaseModelIdFromCustomModelId" type="shared"/>
-    <export function="getLoadedModels" type="client"/>
 
     <!-- Files -->
     <file src="models/**/*.col"/>
@@ -35,9 +34,8 @@
     <script src="optional/debug/s_debug.lua" type="server"/>
 
     <!-- Backwards compatibility with newmodels 3.3.0 -->
-    <script src="optional/compatibility/shared/config.lua" type="shared"/>
-    <script src="optional/compatibility/shared/funcs.lua" type="shared"/>
-    <script src="optional/compatibility/server/funcs.lua" type="server"/>
+    <script src="optional/compatibility/shared.lua" type="shared"/>
+    <script src="optional/compatibility/server_funcs.lua" type="server"/>
     <!-- Exported functions (Client & Server) -->
     <export type="shared" function="getModList"/>
     <export type="shared" function="getDataNameFromType"/>
