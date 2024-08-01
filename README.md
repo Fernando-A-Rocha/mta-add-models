@@ -14,7 +14,7 @@ MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models
 
 ## Download
 
-TODO
+[https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest]
 
 ## Tutorial
 
