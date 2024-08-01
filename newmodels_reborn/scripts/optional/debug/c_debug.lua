@@ -94,14 +94,20 @@ local function drawDebug()
     end
 end
 
+local function handleElementDestroyed()
+    streamedElements[source] = nil
+end
+
 local function toggleDebugView(cmd)
     if not enabled then
         if not (debugTimer) or (not isTimer(debugTimer)) then debugTimer = setTimer(updateDebugViewInfo, 1000, 0) end
         addEventHandler("onClientRender", root, drawDebug, false)
+        addEventHandler("onClientElementDestroy", root, handleElementDestroyed)
     else
         if debugTimer and isTimer(debugTimer) then killTimer(debugTimer); debugTimer = nil end
         streamedElements = {}
         removeEventHandler("onClientRender", root, drawDebug)
+        removeEventHandler("onClientElementDestroy", root, handleElementDestroyed)
     end
     enabled = not enabled
     outputChatBox(cmd .. " => " .. tostring(enabled))

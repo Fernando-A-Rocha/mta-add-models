@@ -1,0 +1,4 @@
+<meta>
+    <include resource="newmodels_reborn" minversion="4.0.0"/>
+    <script src="s_vehicles.lua" type="server"/>
+</meta>
