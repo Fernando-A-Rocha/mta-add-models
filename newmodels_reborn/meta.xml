@@ -1,5 +1,5 @@
 <meta>
-    <info author="FernandoMTA" version="1.0.0" type="script" name="newmodels_reborn" description="This resource adds new vehicle/ped/object models, synceing them automatically with all players."/>
+    <info author="FernandoMTA" version="4.0.0" type="script" name="newmodels_reborn" description="Adds new vehicle/ped/object models, automatically synced with all players."/>
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
       https://nightly.mtasa.com  -->
@@ -30,9 +30,9 @@
     <!-- ............................................................................... -->
     <!-- OPTIONAL THINGS: .............................................................. -->
 
-    <!-- Testing -->
-    <script src="optional/c_testing.lua" type="client"/>
-    <script src="optional/s_testing.lua" type="server"/>
+    <!-- Debugging / Testing -->
+    <script src="optional/debug/c_debug.lua" type="client"/>
+    <script src="optional/debug/s_debug.lua" type="server"/>
 
     <!-- Backwards compatibility with newmodels 3.3.0 -->
     <script src="optional/compatibility/shared/config.lua" type="shared"/>
