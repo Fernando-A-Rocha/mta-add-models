@@ -8,9 +8,11 @@
     <!-- Main Scripts -->
     <script src="core/shared_local.lua" type="shared"/>
     <script src="core/shared_exported.lua" type="shared"/>
+    <script src="core/shared_importfunc.lua" type="shared"/>
     <script src="core/client_logic.lua" type="client"/>
     <script src="core/server_logic.lua" type="server"/>
     <!-- Exported functions -->
+    <export function="getCustomModels" type="shared"/>
     <export function="isDefaultID" type="shared"/>
     <export function="createObject" type="shared"/>
     <export function="createVehicle" type="shared"/>	
@@ -21,6 +23,7 @@
     <export function="setElementModel" type="shared"/>
     <export function="getElementModel" type="shared"/>
     <export function="getBaseModelIdFromCustomModelId" type="shared"/>
+    <export function="import" type="shared"/>
 
     <!-- Files -->
     <file src="models/**/*.col"/>
@@ -36,6 +39,7 @@
 
     <!-- Backwards compatibility with newmodels 3.3.0 -->
     <script src="optional/compatibility/shared_exported.lua" type="shared"/>
+    <script src="optional/compatibility/shared_importfunc.lua" type="shared"/>
     <script src="optional/compatibility/server_funcs.lua" type="server"/>
     <!-- Exported functions (Client & Server) -->
     <export type="shared" function="getModList"/>

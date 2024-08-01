@@ -1,4 +1,5 @@
 -- !! THIS SCRIPT IS ENTIRELY EXPORTED !!
+-- Variable IS_IMPORTED will be true if this script is imported by another resource
 
 -- Backwards compatibility with newmodels 3.3.0
 
@@ -61,7 +62,7 @@ end
 function getModDataFromID(id)
     id = tonumber(id)
     if not id then return end
-    local customInfo = customModels[id]
+    local customInfo = getSharedCustomModelsTable()[id]
     if not customInfo then return end
     local mod = convertCustomModelInfoToOldFormat(id, customInfo)
     return mod, customInfo.type
@@ -69,7 +70,7 @@ end
 
 function getModList()
     local modList = {}
-    for id, customInfo in pairs(customModels) do
+    for id, customInfo in pairs(getSharedCustomModelsTable()) do
         modList[id] = convertCustomModelInfoToOldFormat(id, customInfo)
     end
     return modList
@@ -81,7 +82,8 @@ function getBaseModel(element)
     else
         local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
         if customModel then
-            return customModels[customModel] and customModels[customModel].baseModel or nil
+            local customModelInfo = getSharedCustomModelsTable()[customModel]
+            return customModelInfo and customModelInfo.baseModel or nil
         else
             return getElementModel(element)
         end
