@@ -3,16 +3,6 @@
 
 local isClientsideScript = localPlayer ~= nil
 
-function isElementTypeSupported(et)
-	for type, _ in pairs(OLD_DATA_NAMES) do
-		if et == type then
-			return true
-		end
-	end
-
-	return false, "added "..et.." mods are not yet supported"
-end
-
 local function convertCustomModelInfoToOldFormat(customModel, customModelInfo)
     local baseModel = customModelInfo.baseModel
     local colPath, txdPath, dffPath, name = customModelInfo.col, customModelInfo.txd, customModelInfo.dff, customModelInfo.name

@@ -68,6 +68,15 @@ local function fixModList()
     return true
 end
 
+local function isElementTypeSupported(et)
+	for type, _ in pairs(OLD_DATA_NAMES) do
+		if et == type then
+			return true
+		end
+	end
+	return false, "added "..et.." mods are not yet supported"
+end
+
 local function verifyOptionalModParameters(modInfo)
     local ignoreTXD = modInfo.ignoreTXD or false
     if (type(ignoreTXD) ~= "boolean") then
