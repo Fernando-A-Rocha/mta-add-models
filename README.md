@@ -10,11 +10,13 @@ This is an MTA resource which makes use of the [engineRequestModel](https://wiki
 
 In simpler terms, with this resource you can make scripts/change your scripts to add new skin, vehicle and object IDs to your server! For example, we can now add all SA-MP objects.
 
-MTA forum thread: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/)
+## Community
+
+Thread on the MTA Forum: [link](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/)
 
 ## Download
 
-[Get the latest version from the Releases section](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest)
+Get the [latest version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the Releases section.
 
 ## Tutorial
 
