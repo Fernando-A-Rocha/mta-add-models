@@ -61,14 +61,14 @@ local function loadCustomModel(customModel, elementToApply)
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
 
-    local disableTextureFiltering = customInfo.settings.disableTextureFiltering
+    local disableTXDTextureFiltering = customInfo.settings.disableTXDTextureFiltering
 
     local col, txd, dff
     if colPath then
         col = reusableModelElements[colPath] or engineLoadCOL(colPath)
     end
     if txdPath then
-        txd = reusableModelElements[txdPath] or engineLoadTXD(txdPath, disableTextureFiltering and false or nil)
+        txd = reusableModelElements[txdPath] or engineLoadTXD(txdPath, disableTXDTextureFiltering and false or nil)
     end
     if dffPath then
         dff = reusableModelElements[dffPath] or engineLoadDFF(dffPath)
@@ -85,11 +85,11 @@ local function loadCustomModel(customModel, elementToApply)
         return
     end
 
-    local enableAlphaTransparency = customInfo.settings.enableAlphaTransparency
+    local enableDFFAlphaTransparency = customInfo.settings.enableDFFAlphaTransparency
 
     if (col and not engineReplaceCOL(col, allocatedModel))
         or (txd and not engineImportTXD(txd, allocatedModel))
-        or (dff and not engineReplaceModel(dff, allocatedModel, enableAlphaTransparency or nil)) then
+        or (dff and not engineReplaceModel(dff, allocatedModel, enableDFFAlphaTransparency or nil)) then
         if col and isElement(col) then destroyElement(col) end
         if txd and isElement(txd) then destroyElement(txd) end
         if dff and isElement(dff) then destroyElement(dff) end

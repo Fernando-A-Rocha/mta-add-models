@@ -26,6 +26,14 @@ local function sendModListAllPlayers()
             local id = mod.id
             local baseModel = mod.base_id
             local paths = mod.paths
+            local disableAutoFree = mod.disableAutoFree
+            local filteringEnabled = mod.filteringEnabled
+            local alphaTransparency = mod.alphaTransparency
+            local customSettings = {
+                disableAutoFree = disableAutoFree,
+                disableTXDTextureFiltering = filteringEnabled == false,
+                enableDFFAlphaTransparency = alphaTransparency == true,
+            }
             customModels[id] = {
                 type = elementType,
                 baseModel = baseModel,
@@ -33,6 +41,7 @@ local function sendModListAllPlayers()
                 txd = paths.txd or nil,
                 dff = paths.dff or nil,
                 name = mod.name,
+                settings = customSettings,
                 srcResourceName = mod.srcResourceName,
             }
             table.remove(modList[elementType],i)

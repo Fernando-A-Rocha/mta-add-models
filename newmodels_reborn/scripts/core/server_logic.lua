@@ -1,7 +1,7 @@
 local CUSTOM_MODEL_SETTINGS = {
     ["disableAutoFree"] = true,
-    ["disableTextureFiltering"] = true,
-    ["enableAlphaTransparency"] = true,
+    ["disableTXDTextureFiltering"] = true,
+    ["enableDFFAlphaTransparency"] = true,
 }
 
 local function loadModels()
