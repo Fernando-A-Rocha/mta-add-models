@@ -12,10 +12,10 @@ See the example files to visualize the structure of this system
 
 - **Optional:** Models can be customized with a `New ID.txt` file with the following settings (any line that doesn't contain these words is ignored):
 
-    - `disableAutoFree`
-    - `disableTXDTextureFiltering`
-    - `enableDFFAlphaTransparency`
-    - `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
-    - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
-    - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
-    - `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
+  - `disableAutoFree`
+  - `disableTXDTextureFiltering`
+  - `enableDFFAlphaTransparency`
+  - `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
+  - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
+  - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
+  - `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
