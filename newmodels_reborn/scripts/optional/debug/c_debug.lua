@@ -46,9 +46,9 @@ local function getElementCustomModelString(element)
     local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if customModel and customModels[customModel] then
         local name, baseModel = customModels[customModel].name, customModels[customModel].baseModel
-        return ("%d \"%s\" (%d)"):format(customModel, name, baseModel)
+        return {("%d \"%s\" (%d)"):format(customModel, name, baseModel), 0xffffa263}
     else
-        return ("%d"):format(getElementModel(element))
+        return {("%d"):format(getElementModel(element))}
     end
 end
 
@@ -89,7 +89,7 @@ local function drawDebug()
         local x, y, z = getElementPosition(element)
         local sx, sy = getScreenFromWorldPosition(x, y, z + 0.5)
         if sx and sy then
-            dxDrawText(customModelStr, sx, sy, 0, 0, 0xFFFFFFFF, 1, "default")
+            dxDrawText(customModelStr[1], sx, sy, 0, 0, customModelStr[2] or 0xFFFFFFFF, 1, "default")
         end
     end
 end
