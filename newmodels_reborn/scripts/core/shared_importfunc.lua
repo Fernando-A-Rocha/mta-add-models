@@ -10,7 +10,7 @@ function import()
         if not f then
             return error("Failed to open file.")
         end
-        exportScriptString = fileRead(f, fileGetSize(f))
+        exportScriptString = fileGetContents(f, true) -- verifies checksum
         fileClose(f)
         if not exportScriptString or exportScriptString == "" then
             return error("Failed to read file.")
