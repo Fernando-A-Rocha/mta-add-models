@@ -163,7 +163,6 @@ local function loadModels()
                                 name = info.name or "Unnamed",
                                 settings = info.settings or {},
                             }
-                            if modelType == "object" then iprint(customModel, customModels[customModel]) end
                         end
                     end
                 end
