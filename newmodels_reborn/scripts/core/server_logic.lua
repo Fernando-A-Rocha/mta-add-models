@@ -1,7 +1,8 @@
--- Apologies for the excess if statements, I'll clean this up later.
+-- Loading of custom models from the "models" directory.
+
 
 -- Model .txt settings:
-local CUSTOM_MODEL_SETTINGS = {
+local CUSTOM_MODEL_BOOL_SETTINGS = {
     ["disableAutoFree"] = true,
     ["disableTXDTextureFiltering"] = true,
     ["enableDFFAlphaTransparency"] = true,
@@ -16,7 +17,7 @@ local function stringStartswith(str, start)
     return str:sub(1, #start) == start
 end
 
-local function parseModelSettings(thisFullPath, customModel, customModelInfo, isFromSettingsOption)
+local function parseModelSettings(customModel, customModelInfo, thisFullPath, isFromSettingsOption)
     local customModelSettings = {}
     local file = fileOpen(thisFullPath, true)
     if not file then
@@ -30,7 +31,7 @@ local function parseModelSettings(thisFullPath, customModel, customModelInfo, is
     local lines = split(info, "\n")
     for _, settingStr in pairs(lines) do
         settingStr = settingStr:gsub("\r", "")
-        if CUSTOM_MODEL_SETTINGS[settingStr] then
+        if CUSTOM_MODEL_BOOL_SETTINGS[settingStr] then
             customModelSettings[settingStr] = true
         elseif stringStartswith(settingStr, "lodDistance=") then
             local lodDistance = tonumber(settingStr:sub(13))
@@ -47,7 +48,7 @@ local function parseModelSettings(thisFullPath, customModel, customModelInfo, is
             if not fileExists(settingsFullPath) then
                 return false, "settings file not found: " .. settingsPath
             end
-            local settingsInfo = parseModelSettings(settingsFullPath, customModel, customModelInfo, true)
+            local settingsInfo = parseModelSettings(customModel, customModelInfo, settingsFullPath, true)
             if not settingsInfo then
                 return false, "failed to parse settings file: " .. settingsPath
             end
@@ -71,6 +72,40 @@ local function parseModelSettings(thisFullPath, customModel, customModelInfo, is
     return customModelSettings
 end
 
+local function parseOneFile(customModelInfo, thisFileName, thisFullPath, name)
+    local fileType = string.sub(thisFileName, -3)
+    if (fileType == "dff" or fileType == "txd" or fileType == "col" or fileType == "txt") then
+        local customModel = tonumber(string.sub(thisFileName, 1, -5))
+        if customModel then
+            if not customModelInfo[customModel] then
+                if isDefaultID(false, customModel) then
+                    return false, "custom model is a default ID: " .. customModel
+                end
+                if customModels[customModel] then
+                    return false, "duplicate custom model: " .. customModel
+                end
+                customModelInfo[customModel] = {}
+            end
+            if fileType == "txt" then
+                local customModelSettings, failReason = parseModelSettings(customModel, customModelInfo, thisFullPath)
+                if not customModelSettings then
+                    return false, failReason
+                end
+                customModelInfo[customModel].settings = customModelSettings
+            else
+                if customModelInfo[customModel][fileType] then
+                    return false, "duplicate " .. fileType .. " file for custom model: " .. customModel
+                end
+                customModelInfo[customModel][fileType] = thisFullPath
+                if name then
+                    customModelInfo[customModel].name = name
+                end
+            end
+        end
+    end
+    return true
+end
+
 local function loadModels()
     if not pathIsDirectory("models") then
         return false, "models directory not found"
@@ -79,6 +114,7 @@ local function loadModels()
     if not filesAndFolders then
         return false, "failed to list models directory"
     end
+    local baseModelCounts = {}
     for _, modelType in pairs({"vehicle", "object", "ped"}) do
         local modelTypePath = "models/" .. modelType
         if pathIsDirectory(modelTypePath) then
@@ -91,7 +127,7 @@ local function loadModels()
                 if pathIsDirectory(fullPath) then
                     local baseModel = tonumber(fileOrFolder)
                     if baseModel then
-                        if not isDefaultID(modelType, baseModel) then
+                        if not isDefaultID(false, baseModel) then
                             return false, "invalid " .. modelType .. " base model: " .. baseModel
                         end
                         local filesAndFoldersInside = pathListDir(fullPath)
@@ -99,39 +135,6 @@ local function loadModels()
                             return false, "failed to list " .. fullPath .. " directory"
                         end
                         local customModelInfo = {}
-                        local function parseOneFile(thisFileName, thisFullPath, name)
-                            local fileType = string.sub(thisFileName, -3)
-                            if (fileType == "dff" or fileType == "txd" or fileType == "col" or fileType == "txt") then
-                                local customModel = tonumber(string.sub(thisFileName, 1, -5))
-                                if customModel then
-                                    if not customModelInfo[customModel] then
-                                        if isDefaultID(modelType, customModel) then
-                                            return false, "custom " .. modelType .. " model is a default ID: " .. customModel
-                                        end
-                                        if customModels[customModel] then
-                                            return false, "duplicate " .. modelType .. " custom model: " .. customModel
-                                        end
-                                        customModelInfo[customModel] = {}
-                                    end
-                                    if fileType == "txt" then
-                                        local customModelSettings, failReason = parseModelSettings(thisFullPath, customModel, customModelInfo)
-                                        if not customModelSettings then
-                                            return false, failReason
-                                        end
-                                        customModelInfo[customModel].settings = customModelSettings
-                                    else
-                                        if customModelInfo[customModel][fileType] then
-                                            return false, "duplicate " .. fileType .. " file for custom " .. modelType .. " model: " .. customModel
-                                        end
-                                        customModelInfo[customModel][fileType] = thisFullPath
-                                        if name then
-                                            customModelInfo[customModel].name = name
-                                        end
-                                    end
-                                end
-                            end
-                            return true
-                        end
                         for _, fileOrFolderInside in pairs(filesAndFoldersInside) do
                             local fullPathInside = fullPath .. "/" .. fileOrFolderInside
                             if pathIsDirectory(fullPathInside) then
@@ -141,26 +144,29 @@ local function loadModels()
                                 end
                                 for _, fileOrFolderInsideThis in pairs(filesAndFoldersInsideThis) do
                                     local fullPathInsideThis = fullPathInside .. "/" .. fileOrFolderInsideThis
-                                    local parsed, failReason = parseOneFile(fileOrFolderInsideThis, fullPathInsideThis, fileOrFolderInside)
+                                    local parsed, failReason = parseOneFile(customModelInfo, fileOrFolderInsideThis, fullPathInsideThis, fileOrFolderInside)
                                     if not parsed then
                                         return false, failReason
                                     end
                                 end
                             elseif pathIsFile(fullPathInside) then
-                                local parsed, failReason = parseOneFile(fileOrFolderInside, fullPathInside)
+                                local parsed, failReason = parseOneFile(customModelInfo, fileOrFolderInside, fullPathInside)
                                 if not parsed then
                                     return false, failReason
                                 end
                             end
                         end
                         for customModel, info in pairs(customModelInfo) do
+                            if not info.name then
+                                baseModelCounts[baseModel] = (baseModelCounts[baseModel] or 0) + 1
+                            end
                             customModels[customModel] = {
                                 type = modelType,
                                 baseModel = baseModel,
                                 dff = info.dff,
                                 txd = info.txd,
                                 col = info.col,
-                                name = info.name or "Unnamed",
+                                name = info.name or ("%d#%d"):format(baseModel, baseModelCounts[baseModel]),
                                 settings = info.settings or {},
                             }
                         end
