@@ -71,7 +71,10 @@ end
 function getModList()
     local modList = {}
     for id, customInfo in pairs(getSharedCustomModelsTable()) do
-        modList[id] = convertCustomModelInfoToOldFormat(id, customInfo)
+        if not modList[customInfo.type] then
+            modList[customInfo.type] = {}
+        end
+        modList[customInfo.type][#modList[customInfo.type]+1] = convertCustomModelInfoToOldFormat(id, customInfo)
     end
     return modList
 end
