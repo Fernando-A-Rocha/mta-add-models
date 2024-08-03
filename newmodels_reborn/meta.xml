@@ -13,6 +13,7 @@
     <script src="scripts/core/server_logic.lua" type="server"/>
     <!-- Exported functions -->
     <export function="getCustomModels" type="shared"/>
+    <export function="getCustomModelDataKey" type="shared"/>
     <export function="isDefaultID" type="shared"/>
     <export function="createObject" type="shared"/>
     <export function="createVehicle" type="shared"/>	
