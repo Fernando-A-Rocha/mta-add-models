@@ -23,7 +23,7 @@ Visit the [Thread on the MTA Forum](https://forum.mtasa.com/topic/133212-rel-add
 
 Read the documentation linked below, and look for the **Backwards Compatibility** section.
 
-## Tutorial
+## Docs/Tutorial
 
 Access the [Documentation file](/.github/doc/DOCUMENTATION.md) to learn about this resource and how to use it.
 
