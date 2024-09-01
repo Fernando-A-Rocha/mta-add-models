@@ -70,5 +70,5 @@ addCommandHandler("testspawn", function(thePlayer)
     if customModel then
         setElementData(thePlayer, dataName, customModel)
     end
-    outputChatBox("Player spawned with skin "..( customModel or getElementModelMTA(thePlayer) )..".", thePlayer)
+    outputChatBox("Player spawned with skin ID "..( customModel or getElementModelMTA(thePlayer) )..".", thePlayer)
 end, false, false)

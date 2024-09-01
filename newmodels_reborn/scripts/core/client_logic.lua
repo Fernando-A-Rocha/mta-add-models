@@ -139,16 +139,17 @@ local function loadCustomModel(customModel, elementToApply)
     end
 end
 
-local function countStreamedElementsWithCustomModel(elementTypes, customModel)
-    local count = 0
-    for _, elementType in pairs(elementTypes) do
-        for _, v in pairs(getElementsByType(elementType, root, true)) do
-            if getElementData(v, getCustomModelDataKey(elementType)) == customModel then
-                count = count + 1
+local function isCustomModelInUse(customModel, loadedModel)
+    if loadedModel then
+        for _, elementType in pairs(loadedModel.elementTypes) do
+            for _, v in pairs(getElementsByType(elementType, root, true)) do
+                if getElementData(v, getCustomModelDataKey(elementType)) == customModel then
+                    return true
+                end
             end
         end
     end
-    return count
+    return false
 end
 
 local function freeAllocatedModelNow(customModel)
@@ -186,7 +187,7 @@ local function freeAllocatedModelNow(customModel)
     loadedModels[customModel] = nil
 end
 
-local function freeAllocatedModel(customModel, loadedModel)
+local function freeAllocatedModel(customModel, loadedModel, onlyIfUnused)
     if loadedModel.disableAutoFree then
         return
     end
@@ -196,8 +197,11 @@ local function freeAllocatedModel(customModel, loadedModel)
     end
     -- Do not free all models at once, delay each model by a bit
     currFreeIdDelay = currFreeIdDelay + FREE_ID_DELAY_STEP
+
     loadedModel.freeAllocatedTimer = setTimer(function()
-        freeAllocatedModelNow(customModel)
+        if (not onlyIfUnused) or (onlyIfUnused and not isCustomModelInUse(customModel, loadedModel)) then
+            freeAllocatedModelNow(customModel)
+        end
         currFreeIdDelay = currFreeIdDelay - FREE_ID_DELAY_STEP
     end, currFreeIdDelay, 1)
 end
@@ -205,9 +209,7 @@ end
 local function freeAllocatedModelIfUnused(customModel)
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
-    if countStreamedElementsWithCustomModel(loadedModel.elementTypes, customModel) == 0 then
-        freeAllocatedModel(customModel, loadedModel)
-    end
+    freeAllocatedModel(customModel, loadedModel, true)
 end
 
 local function setElementCustomModel(element)
