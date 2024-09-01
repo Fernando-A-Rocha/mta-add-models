@@ -10,15 +10,15 @@ VALID_ELEMENT_TYPES = { "vehicle", "ped", "player", "object", "pickup" }
 
 local resources = {}
 
-_createObject = createObject
-_createVehicle = createVehicle
-_getVehicleType = getVehicleType
-_createPed = createPed
-_createPickup = createPickup
-_setPickupType = setPickupType
+createObjectMTA = createObject
+createVehicleMTA = createVehicle
+getVehicleTypeMTA = getVehicleType
+createPedMTA = createPed
+createPickupMTA = createPickup
+setPickupTypeMTA = setPickupType
 
-_getElementModel = getElementModel
-_setElementModel = setElementModel
+getElementModelMTA = getElementModel
+setElementModelMTA = setElementModel
 
 function getSharedCustomModelsTable()
     if IS_IMPORTED then
@@ -123,15 +123,15 @@ end
 
 local function createElementWithModel(elementType, modelid, ...)
     if elementType == "object" then
-        return _createObject(modelid, ...)
+        return createObjectMTA(modelid, ...)
     elseif elementType == "vehicle" then
-        return _createVehicle(modelid, ...)
+        return createVehicleMTA(modelid, ...)
     elseif elementType == "ped" then
-        return _createPed(modelid, ...)
+        return createPedMTA(modelid, ...)
     elseif elementType == "pickup" then
         -- Special
         local x, y, z, respawnTime, ammo = unpack({ ... })
-        return _createPickup(x, y, z, 3, modelid, respawnTime, ammo)
+        return createPickupMTA(x, y, z, 3, modelid, respawnTime, ammo)
     end
     return false
 end
@@ -165,9 +165,9 @@ end
 function getVehicleType(id)
     local customModelInfo = getSharedCustomModelsTable()[id]
     if customModelInfo then
-        return _getVehicleType(customModelInfo.baseModel)
+        return getVehicleTypeMTA(customModelInfo.baseModel)
     end
-    return _getVehicleType(id)
+    return getVehicleTypeMTA(id)
 end
 
 function createPed(id, ...)
@@ -185,7 +185,7 @@ function createPickup(x, y, z, theType, id, respawnTime, ammo)
         assert(type(id) == "number", "Invalid model ID passed: " .. tostring(id))
         pickup = createElementSafe("pickup", id, x, y, z, respawnTime, ammo)
     else
-        pickup = _createPickup(x, y, z, theType, id, respawnTime, ammo)
+        pickup = createPickupMTA(x, y, z, theType, id, respawnTime, ammo)
     end
     setElementResource(pickup, sourceResource)
     return pickup
@@ -208,23 +208,23 @@ function setPickupType(thePickup, theType, id, ammo)
     end
 
     setElementData(thePickup, getCustomModelDataKey("pickup"), nil, not isClientsideScript)
-    return _setPickupType(thePickup, theType, id, ammo)
+    return setPickupTypeMTA(thePickup, theType, id, ammo)
 end
 
 -- Returns a custom model ID (if custom) or a default model ID (if default)
 function getElementModel(element)
     assert(isElement(element), "Invalid element passed: " .. tostring(element))
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
-    return tonumber(getElementData(element, getCustomModelDataKey(element))) or _getElementModel(element)
+    return tonumber(getElementData(element, getCustomModelDataKey(element))) or getElementModelMTA(element)
 end
 
 function getElementBaseModel(element)
     if not isClientsideScript then
-        return _getElementModel(element)
+        return getElementModelMTA(element)
     end
     local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if not customModel then
-        return _getElementModel(element)
+        return getElementModelMTA(element)
     end
     local customModelInfo = getSharedCustomModelsTable()[customModel]
     return customModelInfo and customModelInfo.baseModel or nil
@@ -236,9 +236,9 @@ function setElementModel(element, id)
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
     assert(tonumber(id), "Non-number ID passed")
     local baseModel = getBaseModelIdFromCustomModelId(id)
-    local currModel = _getElementModel(element)
+    local currModel = getElementModelMTA(element)
     if currModel ~= baseModel then
-        _setElementModel(element, baseModel)
+        setElementModelMTA(element, baseModel)
     end
 
     if baseModel ~= id then

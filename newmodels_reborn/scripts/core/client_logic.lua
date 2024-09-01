@@ -13,7 +13,7 @@ local function applyElementCustomModel(element)
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
 
-    if _getElementModel(element) == loadedModel.id then return end
+    if getElementModelMTA(element) == loadedModel.id then return end
 
     local upgrades, handling, paintjob
     if getElementType(element) == "vehicle" then
@@ -22,7 +22,7 @@ local function applyElementCustomModel(element)
         paintjob = getVehiclePaintjob(element)
     end
 
-    _setElementModel(element, loadedModel.id)
+    setElementModelMTA(element, loadedModel.id)
 
     if upgrades then
         for _, v in pairs(upgrades) do
@@ -246,7 +246,7 @@ addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel
     if prevCustomModel then
         -- Force-set the base model of the previous custom model if resetting the custom model
         if (not newCustomModel) and prevLoadedModelBaseModel then
-            _setElementModel(source, prevLoadedModelBaseModel)
+            setElementModelMTA(source, prevLoadedModelBaseModel)
         end
 
         -- Free the previous custom model if it's not used by any other element
@@ -277,10 +277,10 @@ local function restoreElementBaseModels()
     -- Restore the base models of all elements with custom models
     for _, elementType in pairs(VALID_ELEMENT_TYPES) do
         for _, element in pairs(getElementsByType(elementType, root, true)) do
-            local model = _getElementModel(element)
+            local model = getElementModelMTA(element)
             for _, loadedModel in pairs(loadedModels) do
                 if loadedModel.id == model then
-                    _setElementModel(element, loadedModel.baseModel)
+                    setElementModelMTA(element, loadedModel.baseModel)
                     break
                 end
             end
