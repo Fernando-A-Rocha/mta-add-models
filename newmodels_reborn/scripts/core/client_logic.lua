@@ -143,7 +143,7 @@ local function isCustomModelInUse(customModel, loadedModel)
     if loadedModel then
         for _, elementType in pairs(loadedModel.elementTypes) do
             for _, v in pairs(getElementsByType(elementType, root, true)) do
-                if getElementData(v, getCustomModelDataKey(elementType)) == customModel then
+                if tonumber(getElementData(v, getCustomModelDataKey(elementType))) == customModel then
                     return true
                 end
             end
@@ -213,7 +213,7 @@ local function freeAllocatedModelIfUnused(customModel)
 end
 
 local function setElementCustomModel(element)
-    local customModel = getElementData(element, getCustomModelDataKey(element))
+    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
     if not customModel then return end
     if not loadedModels[customModel] then
         loadCustomModel(customModel, element)
@@ -255,14 +255,14 @@ end)
 
 addEventHandler("onClientElementStreamOut", root, function()
     if not isValidElement(source) then return end
-    local customModel = getElementData(source, getCustomModelDataKey(source))
+    local customModel = tonumber(getElementData(source, getCustomModelDataKey(source)))
     if not customModel then return end
     freeAllocatedModelIfUnused(customModel)
 end)
 
 addEventHandler("onClientElementDestroy", root, function()
     if not isValidElement(source) then return end
-    local customModel = getElementData(source, getCustomModelDataKey(source))
+    local customModel = tonumber(getElementData(source, getCustomModelDataKey(source)))
     if not customModel then return end
     freeAllocatedModelIfUnused(customModel)
 end)
