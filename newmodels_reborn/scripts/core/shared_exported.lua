@@ -20,6 +20,10 @@ setPickupTypeMTA = setPickupType
 getElementModelMTA = getElementModel
 setElementModelMTA = setElementModel
 
+function getCustomModelFromElement(element)
+    return tonumber(getElementData(element, getCustomModelDataKey(element)))
+end
+
 function getSharedCustomModelsTable()
     if IS_IMPORTED then
         return exports["newmodels_reborn"]:getCustomModels()
@@ -215,14 +219,14 @@ end
 function getElementModel(element)
     assert(isElement(element), "Invalid element passed: " .. tostring(element))
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
-    return tonumber(getElementData(element, getCustomModelDataKey(element))) or getElementModelMTA(element)
+    return getCustomModelFromElement(element) or getElementModelMTA(element)
 end
 
 function getElementBaseModel(element)
     if not isClientsideScript then
         return getElementModelMTA(element)
     end
-    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
+    local customModel = getCustomModelFromElement(element)
     if not customModel then
         return getElementModelMTA(element)
     end

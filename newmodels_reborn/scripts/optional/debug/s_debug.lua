@@ -64,7 +64,7 @@ addCommandHandler("testspawn", function(thePlayer)
     local dataName = getCustomModelDataKey("player")
     local x,y,z = getElementPosition(thePlayer)
     local _, _, rz = getElementRotation(thePlayer)
-    local customModel = tonumber(getElementData(thePlayer, dataName))
+    local customModel = getCustomModelFromElement(thePlayer)
     spawnPlayer(thePlayer, x,y,z, rz, getElementModelMTA(thePlayer), getElementInterior(thePlayer), getElementDimension(thePlayer))
     setElementData(thePlayer, dataName, nil)
     if customModel then

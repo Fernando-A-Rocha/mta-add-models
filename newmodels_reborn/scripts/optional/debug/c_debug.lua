@@ -43,7 +43,7 @@ local function pairsByKeys(t)
 end
 
 local function getElementCustomModelString(element)
-    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
+    local customModel = getCustomModelFromElement(element)
     if customModel and customModels[customModel] then
         local name, baseModel = customModels[customModel].name, customModels[customModel].baseModel
         return {("%d \"%s\" (%d)"):format(customModel, name, baseModel), 0xffffa263}

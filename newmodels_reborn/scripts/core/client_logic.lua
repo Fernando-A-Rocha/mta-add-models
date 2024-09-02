@@ -8,7 +8,7 @@ local currFreeIdDelay = 9500   -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
 local function applyElementCustomModel(element)
-    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
+    local customModel = getCustomModelFromElement(element)
     if not customModel then return end
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
@@ -142,8 +142,8 @@ end
 local function isCustomModelInUse(customModel, loadedModel)
     if loadedModel then
         for _, elementType in pairs(loadedModel.elementTypes) do
-            for _, v in pairs(getElementsByType(elementType, root, true)) do
-                if tonumber(getElementData(v, getCustomModelDataKey(elementType))) == customModel then
+            for _, element in pairs(getElementsByType(elementType, root, true)) do
+                if getCustomModelFromElement(element) == customModel then
                     return true
                 end
             end
@@ -213,7 +213,7 @@ local function freeAllocatedModelIfUnused(customModel)
 end
 
 local function setElementCustomModel(element)
-    local customModel = tonumber(getElementData(element, getCustomModelDataKey(element)))
+    local customModel = getCustomModelFromElement(element)
     if not customModel then return end
     if not loadedModels[customModel] then
         loadCustomModel(customModel, element)
@@ -224,7 +224,7 @@ end
 
 addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel, newCustomModel)
     if not isValidElement(source) then return end
-    if key ~= getCustomModelDataKey(source) then return end
+    if key ~= getCustomModelFromElement(source) then return end
     prevCustomModel = tonumber(prevCustomModel)
 
     -- Get the base model of the previous custom model the element has
@@ -255,14 +255,14 @@ end)
 
 addEventHandler("onClientElementStreamOut", root, function()
     if not isValidElement(source) then return end
-    local customModel = tonumber(getElementData(source, getCustomModelDataKey(source)))
+    local customModel = getCustomModelFromElement(source)
     if not customModel then return end
     freeAllocatedModelIfUnused(customModel)
 end)
 
 addEventHandler("onClientElementDestroy", root, function()
     if not isValidElement(source) then return end
-    local customModel = tonumber(getElementData(source, getCustomModelDataKey(source)))
+    local customModel = getCustomModelFromElement(source)
     if not customModel then return end
     freeAllocatedModelIfUnused(customModel)
 end)
