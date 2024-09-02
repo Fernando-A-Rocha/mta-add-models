@@ -236,21 +236,13 @@ addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel
         end
     end
 
-    if not newCustomModel then
-        -- If resetting the custom model, free the allocated model if it's not used by any other element
-        local loadedModel = loadedModels[newCustomModel]
-        if loadedModel then
-            freeAllocatedModel(newCustomModel, loadedModel)
-        end
-    else
+    if newCustomModel then
         setElementCustomModel(source)
+    elseif prevLoadedModelBaseModel then
+        -- Force-set the base model of the previous custom model if resetting the custom model
+        setElementModelMTA(source, prevLoadedModelBaseModel)
     end
     if prevCustomModel then
-        -- Force-set the base model of the previous custom model if resetting the custom model
-        if (not newCustomModel) and prevLoadedModelBaseModel then
-            setElementModelMTA(source, prevLoadedModelBaseModel)
-        end
-
         -- Free the previous custom model if it's not used by any other element
         freeAllocatedModelIfUnused(prevCustomModel)
     end
