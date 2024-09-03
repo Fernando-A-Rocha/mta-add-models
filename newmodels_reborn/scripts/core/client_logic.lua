@@ -139,7 +139,8 @@ local function loadCustomModel(customModel, elementToApply)
     end
 end
 
-local function isCustomModelInUse(customModel, loadedModel)
+local function isCustomModelInUse(customModel)
+    local loadedModel = loadedModels[customModel]
     if loadedModel then
         for _, elementType in pairs(loadedModel.elementTypes) do
             for _, element in pairs(getElementsByType(elementType, root, true)) do
@@ -187,29 +188,24 @@ local function freeAllocatedModelNow(customModel)
     loadedModels[customModel] = nil
 end
 
-local function freeAllocatedModel(customModel, loadedModel, onlyIfUnused)
+local function freeAllocatedModel(customModel)
+    local loadedModel = loadedModels[customModel]
+    if not loadedModel then return end
     if loadedModel.disableAutoFree then
         return
-    end
-
-    if isTimer(loadedModel.freeAllocatedTimer) then
-        killTimer(loadedModel.freeAllocatedTimer)
     end
     -- Do not free all models at once, delay each model by a bit
     currFreeIdDelay = currFreeIdDelay + FREE_ID_DELAY_STEP
 
+    if isTimer(loadedModel.freeAllocatedTimer) then
+        killTimer(loadedModel.freeAllocatedTimer)
+    end
     loadedModel.freeAllocatedTimer = setTimer(function()
-        if (not onlyIfUnused) or (onlyIfUnused and not isCustomModelInUse(customModel, loadedModel)) then
+        if not isCustomModelInUse(customModel) then
             freeAllocatedModelNow(customModel)
         end
         currFreeIdDelay = currFreeIdDelay - FREE_ID_DELAY_STEP
     end, currFreeIdDelay, 1)
-end
-
-local function freeAllocatedModelIfUnused(customModel)
-    local loadedModel = loadedModels[customModel]
-    if not loadedModel then return end
-    freeAllocatedModel(customModel, loadedModel, true)
 end
 
 local function setElementCustomModel(element)
@@ -224,7 +220,7 @@ end
 
 addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel, newCustomModel)
     if not isValidElement(source) then return end
-    if key ~= getCustomModelFromElement(source) then return end
+    if key ~= getCustomModelDataKey(source) then return end
     prevCustomModel = tonumber(prevCustomModel)
 
     -- Get the base model of the previous custom model the element has
@@ -244,7 +240,7 @@ addEventHandler("onClientElementDataChange", root, function(key, prevCustomModel
     end
     if prevCustomModel then
         -- Free the previous custom model if it's not used by any other element
-        freeAllocatedModelIfUnused(prevCustomModel)
+        freeAllocatedModel(prevCustomModel)
     end
 end)
 
@@ -257,14 +253,14 @@ addEventHandler("onClientElementStreamOut", root, function()
     if not isValidElement(source) then return end
     local customModel = getCustomModelFromElement(source)
     if not customModel then return end
-    freeAllocatedModelIfUnused(customModel)
+    freeAllocatedModel(customModel)
 end)
 
 addEventHandler("onClientElementDestroy", root, function()
     if not isValidElement(source) then return end
     local customModel = getCustomModelFromElement(source)
     if not customModel then return end
-    freeAllocatedModelIfUnused(customModel)
+    freeAllocatedModel(customModel)
 end)
 
 local function restoreElementBaseModels()
