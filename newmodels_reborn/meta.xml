@@ -37,6 +37,9 @@
 
     <!-- Update Checker (RECOMMENDED, please keep this to be warned of new releases!) -->
     <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
+    <aclrequest>
+        <right name="function.fetchRemote" access="true"/>
+    </aclrequest>
 
     <!-- Debugging / Testing -->
     <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
@@ -69,4 +72,5 @@
     <export type="client" function="isModAllocated"/>
     <!-- <export type="client" function="forceDownloadMod"/> -->
     <!-- <export type="client" function="isBusyDownloading"/> -->
+
 </meta>
