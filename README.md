@@ -20,7 +20,7 @@ Visit the [Thread on the MTA Forum](https://forum.mtasa.com/topic/133212-rel-add
 
 Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the **Releases** section.
 
-## *What if I'm using an older version?* 😮
+## *What if I already use an older version on my server?* 😮
 
 Read the documentation linked below, and look for the **Backwards Compatibility** section.
 
