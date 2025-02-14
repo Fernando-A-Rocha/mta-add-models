@@ -81,7 +81,7 @@ local vehicle = exports['newmodels_azul']:createVehicle(id, x, y, z, rx, ry, rz,
 These are good practices and general advice.
 
 - Remember that your models must work well with GTA: San Andreas in terms of optimization.
-- Always with several players and PC specs.
+- Always test with several players and different PC specifications.
 - An element created serverside with a custom model will sync its custom model to all clients.
   - Useful for spawning vehicles, setting player and NPC skins.
 - An element created clientside with a custom model will not sync to other clients, meaning only the client that ran the code will see the custom model.
