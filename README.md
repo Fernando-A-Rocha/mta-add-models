@@ -11,9 +11,9 @@ With this resource you can make scripts or change your existing scripts to add n
 
 ## What changed? ⚠️
 
-**This version (v5) provides no backwards compatibility with previous versions (v3, v4)!**
+**This version (v5) provides no guarantee that your code made for previous versions (v3, v4) will still work, but don't worry, the main concept hasn't changed.**
 
-However, it is easy to migrate from v4 (not from v3) to v5. The models folder structure remained the same, but the scripts have changed.
+It is easy to migrate from v4 (not from v3) to v5. The **models folder structure remains the same**, but the scripts have changed.
 
 This resource no longer uses and relies on the **MTA Element Data system** to sync the models to all clients! This major change was made to **improve performance** and control the sync of models more efficiently.
 
