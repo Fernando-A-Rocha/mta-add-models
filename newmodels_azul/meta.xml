@@ -1,0 +1,53 @@
+<meta>
+    <info author="FernandoMTA" version="5.0.0" type="script" name="newmodels_azul"
+    description="Adds new vehicle/ped/object models, automatically synced with all players."/>
+    
+    <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
+      https://nightly.mtasa.com  -->
+    <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"></min_mta_version>
+
+    <!-- Main Scripts -->
+    <script src="scripts/core/shared_local.lua" type="shared"/>
+    <script src="scripts/core/shared_exported.lua" type="shared"/>
+    <script src="scripts/core/shared_importfunc.lua" type="shared"/>
+    <script src="scripts/core/client_logic.lua" type="client"/>
+    <script src="scripts/core/server_logic.lua" type="server"/>
+    <!-- Exported functions -->
+    <export function="getCustomModels" type="shared"/>
+    <export function="getElementModels" type="shared"/>
+    <export function="getElementCustomModel" type="shared"/>
+    <export function="setElementCustomModel" type="shared"/>
+    <export function="isDefaultID" type="shared"/>
+    <export function="createObject" type="shared"/>
+    <export function="createVehicle" type="shared"/>	
+    <export function="getVehicleType" type="shared"/>	
+    <export function="createPed" type="shared"/>
+    <export function="createPickup" type="shared"/>
+    <export function="setPickupType" type="shared"/>
+    <export function="setElementModel" type="shared"/>
+    <export function="getElementModel" type="shared"/>
+    <export function="getElementBaseModel" type="shared"/>
+    <export function="getBaseModelIdFromCustomModelId" type="shared"/>
+    <export function="isValidElement" type="shared"/>
+    <export function="getValidElementTypes" type="shared"/>
+    <export function="import" type="shared"/>
+
+    <!-- Files -->
+    <file src="models/**/*.col"/>
+    <file src="models/**/*.txd"/>
+    <file src="models/**/*.dff"/>
+
+    <!-- ............................................................................... -->
+    <!-- OPTIONAL THINGS: .............................................................. -->
+
+    <!-- Update Checker (RECOMMENDED, please keep this to be warned of new releases!) -->
+    <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
+    <aclrequest>
+        <right name="function.fetchRemote" access="true"/>
+    </aclrequest>
+
+    <!-- Debugging / Testing -->
+    <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
+    <script src="scripts/optional/debug/c_debug.lua" type="client"/>
+    <script src="scripts/optional/debug/s_debug.lua" type="server"/>
+</meta>
