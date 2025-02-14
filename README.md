@@ -33,7 +33,7 @@ Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/rele
 
 ## Media
 
-![Screenshot 1](/.github/img/ss1.jpg)
+![Screenshot 1](/.github/img/ss1.png)
 
 ## Final Note
 

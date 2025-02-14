@@ -143,7 +143,7 @@ end
 
 newmodelsUtils.setElementResource = function(element, theResource)
     if isElement(element) then
-        theResource = theResource or resource
+        if not isElement(theResource) then theResource = resource end
         if type(newmodelsUtils.resources[theResource]) ~= "table" then
             newmodelsUtils.resources[theResource] = {}
         end

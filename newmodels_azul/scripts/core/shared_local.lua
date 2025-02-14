@@ -33,7 +33,9 @@ function setElementCustomModel(element, id)
     end
     if not isClientsideScript then
         elementModels[element] = id -- Set serverside
-        triggerClientEvent(getElementsByType("player"), "newmodels_azul:setElementCustomModel", element, id)
+        setTimer(function()
+            triggerClientEvent(getElementsByType("player"), "newmodels_azul:setElementCustomModel", element, id)
+        end, 50, 1)
     else
         triggerEvent("newmodels_azul:setElementCustomModel", element, id)
     end
