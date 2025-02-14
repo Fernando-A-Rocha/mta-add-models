@@ -191,3 +191,11 @@ addEventHandler("onPlayerResourceStart", root, function(res)
         triggerClientEvent(source, "newmodels_azul:receiveCustomModels", resourceRoot, customModels, elementModels)
     end
 end)
+
+-- Handle element destroy (clear any custom model ID from the table)
+-- Syncing with clients is not necessary as they already handle onClientElementDestroy
+addEventHandler("onElementDestroy", root, function()
+    if elementModels[source] then
+        elementModels[source] = nil
+    end
+end)

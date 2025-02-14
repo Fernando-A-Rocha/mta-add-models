@@ -68,3 +68,21 @@ addCommandHandler("testspawn", function(thePlayer)
     setElementModel(thePlayer, skinId)
     outputChatBox("Player spawned at current location with skin ID "..skinId..".", thePlayer)
 end, false, false)
+
+addCommandHandler("testvehtemp", function(thePlayer, cmd, id)
+    id = tonumber(id)
+    if not id then
+        return outputChatBox("Syntax: /"..cmd.." <default or custom id>", thePlayer)
+    end
+    local x,y,z = getElementPosition(thePlayer)
+    local rx,ry,rz = getElementRotation(thePlayer)
+    local element = createVehicle(id, x, y, z, rx, ry, rz)
+    if not element then
+        return outputChatBox("Failed to create vehicle.", thePlayer)
+    end
+    setElementDimension(element, getElementDimension(thePlayer))
+    setElementInterior(element, getElementInterior(thePlayer))
+    setElementPosition(thePlayer, x+2, y, z)
+    outputChatBox("TEMPORARY Vehicle created with ID "..id..". It will be destroyed in 5 seconds.", thePlayer)
+    setTimer(destroyElement, 5000, 1, element)
+end, false, false)

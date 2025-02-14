@@ -43,7 +43,11 @@ local function updateDebugViewInfo()
             loadedModelsStr_ = str .. ", " .. loadedModelsStr_
         end
     end
-    loadedModelsStr = "Loaded new models:\n" .. loadedModelsStr_
+    if loadedModelsStr_ ~= "" then
+        loadedModelsStr = "Loaded new models:\n" .. loadedModelsStr_
+    else
+        loadedModelsStr = "No new models loaded."
+    end
 
     streamedElements = {}
     for _, element in pairs(getElementsByType("vehicle", root, true)) do
@@ -61,7 +65,8 @@ local function updateDebugViewInfo()
 end
 
 local function drawDebug()
-    dxDrawText(loadedModelsStr, SW/2, 30, SW, 0, 0xFFFFFFFF, 1, "default-bold")
+    dxDrawText("Newmodels Azul v5", SW/2, 15, SW/2, 15, 0xff70e2ff, 1.5, "default-bold", "center", "center")
+    dxDrawText(loadedModelsStr, SW/2, 35, SW/2, 35, 0xFFFFFFFF, 1, "default-bold", "center", "top")
 
     for element, customModelStr in pairs(streamedElements) do
         local x, y, z = getElementPosition(element)

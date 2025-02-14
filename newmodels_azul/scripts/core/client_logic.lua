@@ -9,7 +9,7 @@ local currFreeIdDelay = 9500   -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
 local function applyElementCustomModel(element)
-    local customModel = getElementCustomModel(element)
+    local customModel = elementModels[element]
     if not customModel then return end
     local loadedModel = loadedModels[customModel]
     if not loadedModel then return end
@@ -145,7 +145,7 @@ local function isCustomModelInUse(customModel)
     if loadedModel then
         for _, elementType in pairs(loadedModel.elementTypes) do
             for _, element in pairs(getElementsByType(elementType, root, true)) do
-                if getElementCustomModel(element) == customModel then
+                if elementModels[element] == customModel then
                     return true
                 end
             end
@@ -210,7 +210,7 @@ local function freeAllocatedModel(customModel)
 end
 
 local function attemptApplyElementCustomModel(element)
-    local customModel = getElementCustomModel(element)
+    local customModel = elementModels[element]
     if not customModel then return end
     if not isCustomModelCompatible(customModel, element) then return end
     if not loadedModels[customModel] then
@@ -240,14 +240,15 @@ end)
 
 addEventHandler("onClientElementStreamOut", root, function()
     if not isValidElement(source) then return end
-    local customModel = getElementCustomModel(source)
+    local customModel = elementModels[source]
     if not customModel then return end
     freeAllocatedModel(customModel)
 end)
 
 addEventHandler("onClientElementDestroy", root, function()
     if not isValidElement(source) then return end
-    local customModel = getElementCustomModel(source)
+    local customModel = elementModels[source]
+    elementModels[source] = nil
     if not customModel then return end
     freeAllocatedModel(customModel)
 end)

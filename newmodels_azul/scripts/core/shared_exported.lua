@@ -41,6 +41,13 @@ newmodelsUtils.getSharedElementModelsTbl = function()
     return elementModels
 end
 
+newmodelsUtils.setElementCustomModel = function(...)
+    if IS_IMPORTED then
+        return exports["newmodels_azul"]:setElementCustomModel(...)
+    end
+    return setElementCustomModel(...)
+end
+
 function isCustomModelCompatible(id, elementOrElementType)
     assert(type(id) == "number", "Bad argument @ isCustomModelCompatible [expected number at argument 1, got " .. type(id) .. "]")
     assert(type(elementOrElementType) == "string" or isElement(elementOrElementType), "Bad argument @ isCustomModelCompatible [expected string/element at argument 2, got " .. type(elementOrElementType) .. "]")
@@ -64,33 +71,6 @@ function getElementCustomModel(element)
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
     local tbl = newmodelsUtils.getSharedElementModelsTbl()
     return tbl[element]
-end
-
--- Passing nil id resets the element's custom model
-function setElementCustomModel(element, id)
-    assert(isElement(element), "Invalid element passed: " .. tostring(element))
-    assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
-    id = tonumber(id) or nil
-    if id then
-        -- Check if valid custom model ID
-        local customModelInfo = newmodelsUtils.getSharedCustomModelsTbl()[id]
-        if not customModelInfo then
-            outputDebugString("Invalid custom model ID passed: " .. tostring(id), 1)
-            return false
-        end
-        if not isCustomModelCompatible(id, element) then
-            outputDebugString("Custom model ID " .. id .. " is not compatible with element type " .. getElementType(element), 1)
-            return false
-        end
-    end
-    local tbl = newmodelsUtils.getSharedElementModelsTbl()
-    if not isClientsideScript then
-        tbl[element] = id -- Set serverside
-        triggerClientEvent(getElementsByType("player"), "newmodels_azul:setElementCustomModel", element, id)
-    else
-        triggerEvent("newmodels_azul:setElementCustomModel", element, id)
-    end
-    return true
 end
 
 local IDS_PEDS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312 }
@@ -206,7 +186,7 @@ newmodelsUtils.createElementSafe = function(elementType, id, ...)
     end
     if id ~= baseModel then
         -- Custom model
-        setElementCustomModel(element, id)
+        newmodelsUtils.setElementCustomModel(element, id)
     end
     return element
 end
@@ -266,12 +246,12 @@ function setPickupType(thePickup, theType, id, ammo)
         local baseModel = getBaseModelIdFromCustomModelId(id)
         if id ~= baseModel then
             -- Custom model
-            setElementCustomModel(thePickup, id)
+            newmodelsUtils.setElementCustomModel(thePickup, id)
             return true
         end
     end
 
-    setElementCustomModel(thePickup, nil)
+    newmodelsUtils.setElementCustomModel(thePickup, nil)
     return setPickupTypeMTA(thePickup, theType, id, ammo)
 end
 
@@ -311,7 +291,7 @@ function setElementModel(element, id)
         setElementModelMTA(element, baseModelOfNewId)
     end
 
-    return setElementCustomModel(element, (id ~= baseModelOfNewId) and id or nil)
+    return newmodelsUtils.setElementCustomModel(element, (id ~= baseModelOfNewId) and id or nil)
 end
 
 newmodelsUtils.handleResourceStop = function(stoppedRes)
