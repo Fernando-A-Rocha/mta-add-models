@@ -43,6 +43,15 @@ Remember, the model allocation happens only clientside, so the server has no con
 
 See the [example resources](/[examples]/) to understand how to use the following methods.
 
+### Server VS Client
+
+All newmodels exported functions are shared, meaning you can use them in both client and server side scripts. Their behaviors are different.
+
+The **server-side** functions, specifically for setting a custom model (or creating an element with a custom model) will save the custom models of elements present in your server in a `table`, then sync them using `triggerClientEvent` to all clients online. This means that, for example, creating a vehicle that is a new Helicopter, will automatically make it that model for all players in your server.
+
+In contrast, **client-side** functions do not perform any synchronization of data with other clients. Custom models set by client-side scripts are only applied to the client that is running those scripts. This means that, for example, in a clothing store scenario you can change the player's model to any custom models using client-side functions, and only that player will see the model change in their game.
+
+
 ### Importing functions
 
 The easiest way is to use the following method in the beginning of your script to load the necessary functions.
