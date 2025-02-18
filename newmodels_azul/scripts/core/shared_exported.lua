@@ -274,6 +274,12 @@ function getElementBaseModel(element)
     return customModelInfo and customModelInfo.baseModel or nil
 end
 
+function getCustomModelName(id)
+    assert(type(id) == "number", "Bad argument @ getCustomModelName [expected number at argument 1, got " .. type(id) .. "]")
+    local customInfo = newmodelsUtils.getSharedCustomModelsTbl()[id]
+    return customInfo and customInfo.name or nil
+end
+
 -- PS. You can't set element model on a pickup
 function setElementModel(element, id)
     assert(isElement(element), "Invalid element passed: " .. tostring(element))

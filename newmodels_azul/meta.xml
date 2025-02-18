@@ -1,5 +1,5 @@
 <meta>
-    <info author="FernandoMTA" version="5.0.0" type="script" name="newmodels_azul"
+    <info author="FernandoMTA" version="5.1.0" type="script" name="newmodels_azul"
     description="Adds new vehicle/ped/object models, automatically synced with all players."/>
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
@@ -13,6 +13,7 @@
     <script src="scripts/core/client_logic.lua" type="client"/>
     <script src="scripts/core/server_logic.lua" type="server"/>
     <!-- Exported functions -->
+    <export function="import" type="shared"/>
     <export function="getCustomModels" type="shared"/>
     <export function="getElementModels" type="shared"/>
     <export function="getElementCustomModel" type="shared"/>
@@ -28,9 +29,9 @@
     <export function="getElementModel" type="shared"/>
     <export function="getElementBaseModel" type="shared"/>
     <export function="getBaseModelIdFromCustomModelId" type="shared"/>
+    <export function="getCustomModelName" type="shared"/>
     <export function="isValidElement" type="shared"/>
     <export function="getValidElementTypes" type="shared"/>
-    <export function="import" type="shared"/>
 
     <!-- Files -->
     <file src="models/**/*.col"/>
