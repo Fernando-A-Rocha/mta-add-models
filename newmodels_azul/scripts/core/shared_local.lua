@@ -1,5 +1,27 @@
 local isClientsideScript = localPlayer ~= nil
 
+-- NandoCrypt file extension
+local NANDOCRYPT_EXT = ".nandocrypt"
+
+function isNandoCryptFileName(fn)
+    if type(fn) == "string" then
+        if fn:sub(-#NANDOCRYPT_EXT) == NANDOCRYPT_EXT then
+            local precedingFileExt = fn:sub(-#NANDOCRYPT_EXT - 3, -#NANDOCRYPT_EXT - 1)
+            local precedingNumber = tonumber(fn:sub(1, -#NANDOCRYPT_EXT - 5))
+            return true, precedingFileExt, precedingNumber
+        end
+    end
+    return false
+end
+
+if isClientsideScript then
+    function getNandoDecrypterFunction()
+        if type(ncDecrypt) == "function" then
+            return ncDecrypt
+        end
+    end
+end
+
 -- Shared custom models table:
 customModels = {}
 

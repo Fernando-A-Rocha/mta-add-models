@@ -74,33 +74,34 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
 end
 
 local function parseOneFile(customModelInfo, thisFileName, thisFullPath, name)
-    local fileType = string.sub(thisFileName, -3)
-    if (fileType == "dff" or fileType == "txd" or fileType == "col" or fileType == "txt") then
-        local customModel = tonumber(string.sub(thisFileName, 1, -5))
-        if customModel then
-            if not customModelInfo[customModel] then
-                if isDefaultID(false, customModel) then
-                    return false, "custom model is a default ID: " .. customModel
-                end
-                if customModels[customModel] then
-                    return false, "duplicate custom model: " .. customModel
-                end
-                customModelInfo[customModel] = {}
+    local isNandoCrypted, fileExt, customModel = isNandoCryptFileName(thisFileName)
+    if not isNandoCrypted then
+        fileExt = string.sub(thisFileName, -3)
+        customModel = tonumber(string.sub(thisFileName, 1, -5))
+    end
+    if (fileExt == "dff" or fileExt == "txd" or fileExt == "col" or fileExt == "txt") and customModel then
+        if not customModelInfo[customModel] then
+            if isDefaultID(false, customModel) then
+                return false, "custom model is a default ID: " .. customModel
             end
-            if fileType == "txt" then
-                local customModelSettings, failReason = parseModelSettings(customModel, customModelInfo, thisFullPath)
-                if not customModelSettings then
-                    return false, failReason
-                end
-                customModelInfo[customModel].settings = customModelSettings
-            else
-                if customModelInfo[customModel][fileType] then
-                    return false, "duplicate " .. fileType .. " file for custom model: " .. customModel
-                end
-                customModelInfo[customModel][fileType] = thisFullPath
-                if name then
-                    customModelInfo[customModel].name = name
-                end
+            if customModels[customModel] then
+                return false, "duplicate custom model: " .. customModel
+            end
+            customModelInfo[customModel] = {}
+        end
+        if fileExt == "txt" then
+            local customModelSettings, failReason = parseModelSettings(customModel, customModelInfo, thisFullPath)
+            if not customModelSettings then
+                return false, failReason
+            end
+            customModelInfo[customModel].settings = customModelSettings
+        else
+            if customModelInfo[customModel][fileExt] then
+                return false, "duplicate " .. fileExt .. " file for custom model: " .. customModel
+            end
+            customModelInfo[customModel][fileExt] = thisFullPath
+            if name then
+                customModelInfo[customModel].name = name
             end
         end
     end

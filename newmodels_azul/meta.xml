@@ -47,8 +47,15 @@
         <right name="function.fetchRemote" access="true"/>
     </aclrequest>
 
-    <!-- Debugging / Testing -->
+    <!-- NandoCrypt Support (these files and lines can be removed) -->
+    <script src="scripts/optional/nando_crypt/nando_decrypter" type="client" cache="false"/>
+    <file src="models/**/*.col.nandocrypt"/>
+    <file src="models/**/*.txd.nandocrypt"/>
+    <file src="models/**/*.dff.nandocrypt"/>
+
+    <!-- Debugging / Testing (remove this for a production server) -->
     <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
     <script src="scripts/optional/debug/c_debug.lua" type="client"/>
     <script src="scripts/optional/debug/s_debug.lua" type="server"/>
+
 </meta>
