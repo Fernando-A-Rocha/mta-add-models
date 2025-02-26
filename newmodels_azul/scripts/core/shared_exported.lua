@@ -23,6 +23,8 @@ setPickupTypeMTA = setPickupType
 getElementModelMTA = getElementModel
 setElementModelMTA = setElementModel
 
+spawnPlayerMTA = spawnPlayer
+
 newmodelsUtils.resources = {}
 
 newmodelsUtils.getSharedCustomModelsTbl = function()
@@ -294,18 +296,27 @@ function setElementModel(element, id)
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
     assert(tonumber(id), "Non-number ID passed")
 
-    local baseModelOfNewId = getBaseModelIdFromCustomModelId(id)
+    local baseModel = getBaseModelIdFromCustomModelId(id)
     local currBaseModel = getElementModelMTA(element)
-    if currBaseModel ~= baseModelOfNewId then
+    if currBaseModel ~= baseModel then
         -- Change modal normally
-        setElementModelMTA(element, baseModelOfNewId)
+        setElementModelMTA(element, baseModel)
     else
         -- Force a refresh
         setElementModelMTA(element, 0)
-        setElementModelMTA(element, baseModelOfNewId)
+        setElementModelMTA(element, baseModel)
     end
 
-    return newmodelsUtils.setElementCustomModel(element, (id ~= baseModelOfNewId) and id or nil)
+    return newmodelsUtils.setElementCustomModel(element, (id ~= baseModel) and id or nil)
+end
+
+-- Sets the skin ID after spawning to re-apply custom model on player
+function spawnPlayer(thePlayer, x, y, z, rotation, skinId, ...)
+    local success = spawnPlayerMTA(thePlayer, x, y, z, rotation, getBaseModelIdFromCustomModelId(skinId), ...)
+    if success then
+        setElementModel(thePlayer, skinId)
+    end
+    return success
 end
 
 newmodelsUtils.handleResourceStop = function(stoppedRes)
