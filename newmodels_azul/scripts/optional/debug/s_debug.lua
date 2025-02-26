@@ -63,7 +63,7 @@ end, false, false)
 addCommandHandler("testspawn", function(thePlayer)
     local x,y,z = getElementPosition(thePlayer)
     local _, _, rz = getElementRotation(thePlayer)
-    spawnPlayer(thePlayer, x,y,z, rz, getElementModelMTA(thePlayer), getElementInterior(thePlayer), getElementDimension(thePlayer))
+    spawnPlayer(thePlayer, x,y,z, rz, getElementModel(thePlayer), getElementInterior(thePlayer), getElementDimension(thePlayer))
     outputChatBox("Player spawned at current location with skin ID "..getElementModel(thePlayer)..".", thePlayer)
 end, false, false)
 
