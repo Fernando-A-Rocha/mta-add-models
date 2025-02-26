@@ -1,4 +1,4 @@
-# `Newmodels Azul` Documentation
+# `Newmodels v5 Azul 💙` Documentation
 
 ## Requirements
 
