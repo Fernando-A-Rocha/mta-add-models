@@ -9,27 +9,32 @@ This MTA resource makes use of the clientside allocated models ([engineRequestMo
 
 With this resource you can make scripts or change your existing scripts to add new skin, vehicle and object IDs to your server! For example, you may add all SA-MP object models!
 
-## What changed? ⚠️
-
-**This version (v5) provides no guarantee that your code made for previous versions (v3, v4) will still work, but don't worry, the main concept hasn't changed.**
-
-It is easy to migrate from v4 (not from v3) to v5. The **models folder structure remains the same**, but the scripts have changed.
-
-This resource no longer uses and relies on the **MTA Element Data system** to sync the models to all clients! This major change was made to **improve performance** and control the sync of models more efficiently.
-
 ## Docs/Tutorial
 
-🚀 **Are you new to this resource?**
+🚀 **Are you new to this resource?** Start here: [Documentation file](/.github/doc/DOCUMENTATION.md)
 
-Access the [Documentation file](/.github/doc/DOCUMENTATION.md) to learn everything you need to know.
+## Requirements
 
-## Community
+⚠️ **Before you download and install this resource**, make sure you have the following:
 
-Visit the [Thread on the MTA Forum](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/) to get in touch with fellow users and developers.
+- MTA 1.6 Nightly server (most recent version recommended from [nightly.multitheftauto.com](https://nightly.multitheftauto.com/))
+- Up to date MTA client to play on the server
+- Some scripting knowledge to use the new models in your scripts
+- Basic understanding of GTA:SA and how game mods work
 
 ## Download
 
 Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the **Releases** section.
+
+## Older versions
+
+It is easy to migrate to v5 from newmodels v4 (not from v3; the architecture of that version is no longer used). The **models folder structure remains the same**, but the scripts have changed in the way models are applied to elements.
+
+This resource no longer uses and relies on the **MTA Element Data system** (`setElementData`) to sync the models to all clients! Instead, newmodels makes use of Lua tables and MTA events. This major change was made to **improve performance** and control the sync of models more efficiently.
+
+## Community
+
+Visit the [Thread on the MTA Forum](https://forum.mtasa.com/topic/133212-rel-add-new-models-library/) to get in touch with fellow users and developers.
 
 ## Media
 
