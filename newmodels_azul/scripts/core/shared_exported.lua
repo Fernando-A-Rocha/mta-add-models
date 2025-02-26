@@ -310,13 +310,15 @@ function setElementModel(element, id)
     return newmodelsUtils.setElementCustomModel(element, (id ~= baseModel) and id or nil)
 end
 
--- Sets the skin ID after spawning to re-apply custom model on player
-function spawnPlayer(thePlayer, x, y, z, rotation, skinId, ...)
-    local success = spawnPlayerMTA(thePlayer, x, y, z, rotation, getBaseModelIdFromCustomModelId(skinId), ...)
-    if success then
-        setElementModel(thePlayer, skinId)
+if not isClientsideScript then
+    -- Sets the skin ID after spawning to re-apply custom model on player
+    function spawnPlayer(thePlayer, x, y, z, rotation, skinId, ...)
+        local success = spawnPlayerMTA(thePlayer, x, y, z, rotation, getBaseModelIdFromCustomModelId(skinId), ...)
+        if success then
+            setElementModel(thePlayer, skinId)
+        end
+        return success
     end
-    return success
 end
 
 newmodelsUtils.handleResourceStop = function(stoppedRes)
