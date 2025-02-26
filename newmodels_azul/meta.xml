@@ -1,5 +1,5 @@
 <meta>
-    <info author="FernandoMTA" version="5.1.0" type="script" name="newmodels_azul"
+    <info author="FernandoMTA" version="5.2.0" type="script" name="newmodels_azul"
     description="Adds new vehicle/ped/object models, automatically synced with all players."/>
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
