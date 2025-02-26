@@ -24,6 +24,7 @@
     <export function="getVehicleType" type="shared"/>	
     <export function="createPed" type="shared"/>
     <export function="createPickup" type="shared"/>
+    <export function="spawnPlayer" type="server"/>
     <export function="setPickupType" type="shared"/>
     <export function="setElementModel" type="shared"/>
     <export function="getElementModel" type="shared"/>
