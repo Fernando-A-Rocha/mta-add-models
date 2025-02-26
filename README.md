@@ -13,16 +13,9 @@ With this resource you can make scripts or change your existing scripts to add n
 
 🚀 **Are you new to this resource?** Start here: [Documentation file](/.github/doc/DOCUMENTATION.md)
 
-## Requirements
-
-⚠️ **Before you download and install this resource**, make sure you have the following:
-
-- MTA 1.6 Nightly server (most recent version recommended from [nightly.multitheftauto.com](https://nightly.multitheftauto.com/))
-- Up to date MTA client to play on the server
-- Some scripting knowledge to use the new models in your scripts
-- Basic understanding of GTA:SA and how game mods work
-
 ## Download
+
+⚠️ **Before you download and install this resource**, ensure you meet the requirements specified in the [Documentation](/.github/doc/DOCUMENTATION.md).
 
 Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the **Releases** section.
 

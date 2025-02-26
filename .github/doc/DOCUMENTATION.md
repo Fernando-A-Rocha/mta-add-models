@@ -1,5 +1,16 @@
 # `Newmodels Azul` Documentation
 
+## Requirements
+
+⚠️ **Before you download and install this resource**, make sure you have the following:
+
+- MTA 1.6 Nightly server (most recent version recommended from [nightly.multitheftauto.com](https://nightly.multitheftauto.com/))
+  - Use command `ver` in server console to check the version
+  - Use config `minclientversion` in `mtaserver.conf` to ensure players have the correct client version
+- Up to date MTA client to play on the server
+- Some scripting knowledge to use the new models in your scripts
+- Basic understanding of GTA:SA and how game mods work
+
 ## Frequently Asked Questions (FAQ)
 
 ⚠️ Do not forget to check the [Basics](#basics) section below.
