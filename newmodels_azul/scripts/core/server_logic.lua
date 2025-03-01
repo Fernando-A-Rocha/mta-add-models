@@ -40,6 +40,12 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
                 return false, "invalid lodDistance value: " .. settingStr
             end
             customModelSettings.lodDistance = lodDistance
+        elseif stringStartswith(settingStr, "handling=") then
+            local handlingText = settingStr:sub(10)
+            if not handlingText then
+                return false, "invalid handling value: " .. settingStr
+            end
+            customModelSettings.handling = handlingText
         elseif stringStartswith(settingStr, "settings=") then
             if isFromSettingsOption then -- prevent inception and recursion
                 return false, "settings option cannot point to a settings file that contains another settings option @ " .. thisFullPath

@@ -10,6 +10,84 @@ local reusableModelElements = {}
 local currFreeIdDelay = 9500   -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
+local countHandlingTable = {
+    [1] = "mass",
+    [2] = "turnMass",
+    [3] = "dragCoeff",
+    [4] = "centerOfMassX",
+    [5] = "centerOfMassY",
+    [6] = "centerOfMassZ",
+    [7] = "percentSubmerged",
+    [8] = "tractionMultiplier",
+    [9] = "tractionLoss",
+    [10] = "tractionBias",
+    [11] = "numberOfGears",
+    [12] = "maxVelocity",
+    [13] = "engineAcceleration",
+    [14] = "engineInertia",
+    [15] = "driveType",
+    [16] = "engineType",
+    [17] = "brakeDeceleration",
+    [18] = "brakeBias",
+    [19] = "ABS",
+    [20] = "steeringLock",
+    [21] = "suspensionForceLevel",
+    [22] = "suspensionDamping",
+    [23] = "suspensionHighSpeedDamping",
+    [24] = "suspensionUpperLimit",
+    [25] = "suspensionLowerLimit",
+    [26] = "suspensionFrontRearBias",
+    [27] = "suspensionAntiDiveMultiplier",
+    [28] = "seatOffsetDistance",
+    [29] = "collisionDamageMultiplier",
+    [30] = "monetary",
+    [31] = "modelFlags",
+    [32] = "handlingFlags",
+    [33] = "headLight",
+    [34] = "tailLight",
+    [35] = "animGroup",
+}
+
+local driveTypes = {
+    ["4"] = "awd",
+    ["r"] = "rwd",
+    ["f"] = "fwd",
+}
+
+local function setVehicleHandlingFromText(vehicle, text)
+    local t = {}
+    local tText = split(text, " ")
+    table.remove (tText, 1)
+    for i, v in ipairs (tText) do
+        t[countHandlingTable[i]] = v
+    end
+    
+    local acceptCenterMass = false
+    local centerMass = {x = nil, y = nil, z = nil}
+    for i, v in pairs (t) do
+        if i == "centerOfMassX" then
+            centerMass.x = tonumber(v)
+        elseif i == "centerOfMassY" then
+            centerMass.y = tonumber(v)
+        elseif i == "centerOfMassZ" then
+            centerMass.z = tonumber(v)
+        else
+            if centerMass.x and centerMass.y and centerMass.z and not acceptCenterMass then
+                setVehicleHandling (vehicle, "centerOfMass", {centerMass.x, centerMass.y, centerMass.z})
+                acceptCenterMass = true
+            end
+            
+            if i == "modelFlags" or i == "handlingFlags" then
+                setVehicleHandling (vehicle, i, "0x"..tostring(v))
+            elseif i == "driveType" then
+                setVehicleHandling (vehicle, i, driveTypes[v])
+            else
+                setVehicleHandling (vehicle, i, tonumber(v) or tostring(v))
+            end
+        end
+    end
+end
+
 local function applyElementCustomModel(element)
     local customModel = elementModels[element]
     if not customModel then return end
@@ -36,6 +114,9 @@ local function applyElementCustomModel(element)
         for k, v in pairs(handling) do
             setVehicleHandling(element, k, v)
         end
+    end
+    if loadedModel.handling then
+        setVehicleHandlingFromText(element, loadedModel.handling)
     end
     if paintjob then
         setVehiclePaintjob(element, paintjob)
@@ -111,6 +192,7 @@ local function finishLoadCustomModel(customModel)
             col = col and col.path or nil,
         },
         disableAutoFree = disableAutoFree or false,
+        handling = customInfo.settings.handling,
     }
 
     if isElement(elementToApply) then
