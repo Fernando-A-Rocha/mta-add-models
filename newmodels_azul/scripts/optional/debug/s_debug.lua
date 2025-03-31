@@ -3,15 +3,33 @@ addCommandHandler("testveh", function(thePlayer, cmd, id)
     if not id then
         return outputChatBox("Syntax: /"..cmd.." <default or custom id>", thePlayer)
     end
-    local x,y,z = getElementPosition(thePlayer)
-    local rx,ry,rz = getElementRotation(thePlayer)
-    local element = createVehicle(id, x, y, z, rx, ry, rz)
+
+    -- Validate ID
+    local isValidCustomModel = exports.newmodels_azul:getCustomModels()[id] and true or false
+    local isValidDefaultID = exports.newmodels_azul:isDefaultID("vehicle", id)
+
+    if not isValidCustomModel and not isValidDefaultID then
+        return outputChatBox("Invalid vehicle ID: "..id, thePlayer)
+    end
+
+    local x, y, z = getElementPosition(thePlayer)
+    local rx, ry, rz = getElementRotation(thePlayer)
+
+    -- appropriate function to create the vehicle
+    local element
+    if isValidCustomModel then
+        element = exports.newmodels_azul:createVehicle(id, x, y, z, rx, ry, rz)
+    else
+        element = createVehicle(id, x, y, z, rx, ry, rz)
+    end
+
     if not element then
         return outputChatBox("Failed to create vehicle.", thePlayer)
     end
+
     setElementDimension(element, getElementDimension(thePlayer))
     setElementInterior(element, getElementInterior(thePlayer))
-    setElementPosition(thePlayer, x+2, y, z)
+    setElementPosition(thePlayer, x + 2, y, z)
     outputChatBox("Vehicle created with ID "..id..".", thePlayer)
 end, false, false)
 

@@ -1,7 +1,9 @@
 <meta>
     <include resource="newmodels_azul" minversion="5.0.0"/>
     <script src="s_vehicles.lua" type="server"/>
+    <script src="c_vehicles.lua" type="client"/>
     <aclrequest>
         <right name="function.loadstring" access="true"/>
+        <right name="function.outputDebugString" access="true"/>
     </aclrequest>
 </meta>
