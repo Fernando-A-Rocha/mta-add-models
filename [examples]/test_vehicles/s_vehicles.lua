@@ -1,5 +1,5 @@
 -- Loads newmodels functions, which allow usage of custom model IDs "as if they were normal IDs"
-exports.newmodels_azul:import()
+loadstring(exports.newmodels_azul:import())()
 
 -- Vehicle model, x,y,z, rx,ry,rz, interior,dimension
 local VEHICLE_SPAWNS = {
