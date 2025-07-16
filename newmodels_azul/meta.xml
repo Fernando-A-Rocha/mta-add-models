@@ -33,6 +33,7 @@
     <export function="getCustomModelName" type="shared"/>
     <export function="isValidElement" type="shared"/>
     <export function="getValidElementTypes" type="shared"/>
+    <export function="isCustomModelCompatible" type="shared"/>
 
     <!-- Files -->
     <file src="models/**/*.col"/>
