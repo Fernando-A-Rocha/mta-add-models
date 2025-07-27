@@ -139,6 +139,9 @@ function isDefaultID(elementType, id)
 end
 
 function isValidElement(element)
+    if not element or not isElement(element) then
+        return false
+    end
     local elementType = getElementType(element)
     for _, elementType2 in pairs(VALID_ELEMENT_TYPES) do
         if elementType == elementType2 then
@@ -151,17 +154,16 @@ function getValidElementTypes()
     return VALID_ELEMENT_TYPES
 end
 
+-- In MTA Elements are always destroyed when the resource that created them is stopped: this cannot be changed.
+-- So we use an internal table to keep track of elements created by resources.
 newmodelsUtils.setElementResource = function(element, theResource)
     if isElement(element) then
-        if not isElement(theResource) then theResource = resource end
+        -- if not isElement(theResource) then theResource = resource end
+        if (not theResource) or (not isElement(getResourceRootElement(theResource))) then theResource = resource end
         if type(newmodelsUtils.resources[theResource]) ~= "table" then
             newmodelsUtils.resources[theResource] = {}
         end
         table.insert(newmodelsUtils.resources[theResource], element)
-        local dynRoot = getResourceDynamicElementRoot(theResource)
-        if dynRoot then
-            setElementParent(element, dynRoot)
-        end
     end
 end
 
