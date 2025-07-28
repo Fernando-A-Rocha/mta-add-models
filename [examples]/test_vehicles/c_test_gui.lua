@@ -13,10 +13,7 @@ local spawnButton = guiCreateButton(50, 120, 200, 40, "Spawn Vehicle", false, wi
 
 guiSetVisible(window, false)
 
-function requestVehicleSpawn()
-    local vehicleIDText = guiGetText(input)
-    local vehicleID = tonumber(vehicleIDText)
-
+function spawnVehicleByID(vehicleID)
     if not vehicleID then
         outputChatBox("Error: Please enter a valid number!", 255, 0, 0)
         return
@@ -24,22 +21,25 @@ function requestVehicleSpawn()
 
     local x, y, z = getElementPosition(localPlayer)
     local rot = getPedRotation(localPlayer)
-
     local offsetDistance = 5
     local spawnX = x + offsetDistance * math.sin(math.rad(-rot))
     local spawnY = y + offsetDistance * math.cos(math.rad(-rot))
+    
+    triggerServerEvent("newmodels-test_vehicles:requestVehicleSpawn", resourceRoot, localPlayer, vehicleID, spawnX, spawnY, z, rot)
+end
 
+function requestVehicleSpawn()
+    local vehicleID = tonumber(guiGetText(input))
+    spawnVehicleByID(vehicleID)
     guiSetVisible(window, false)
     showCursor(false)
-
     guiSetText(input, "")
-    triggerServerEvent("spawnVehicleServer", resourceRoot, localPlayer, vehicleID, spawnX, spawnY, z, rot)
 end
 
 addEventHandler("onClientGUIClick", spawnButton, requestVehicleSpawn, false)
 
-addEvent("vehicleSpawnResult", true)
-addEventHandler("vehicleSpawnResult", localPlayer, function(success, message)
+addEvent("newmodels-test_vehicles:vehicleSpawnResponse", true)
+addEventHandler("newmodels-test_vehicles:vehicleSpawnResponse", localPlayer, function(success, message)
     if success then
         outputChatBox(message, 0, 255, 0)
     else
@@ -55,7 +55,7 @@ end
 
 addEventHandler("onClientGUIAccepted", input, onInputEnter)
 
-function toggleGUI()
+function toggleSpawnerGUI()
     local visible = guiGetVisible(window)
     guiSetVisible(window, not visible)
     showCursor(not visible)
@@ -66,4 +66,6 @@ function toggleGUI()
     end
 end
 
-bindKey("F4", "down", toggleGUI)
+bindKey("F4", "down", toggleSpawnerGUI)
+addCommandHandler("vspawner", toggleSpawnerGUI, false)
+addCommandHandler("spawnveh", function(cmd, id) spawnVehicleByID(tonumber(id)) end, false)
