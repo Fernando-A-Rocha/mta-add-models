@@ -13,7 +13,7 @@ local spawnButton = guiCreateButton(50, 120, 200, 40, "Spawn Vehicle", false, wi
 
 guiSetVisible(window, false)
 
-function spawnVehicleByID(vehicleID)
+local function spawnVehicleByID(vehicleID)
     if not vehicleID then
         outputChatBox("Error: Please enter a valid number!", 255, 0, 0)
         return
@@ -28,7 +28,7 @@ function spawnVehicleByID(vehicleID)
     triggerServerEvent("newmodels-test_vehicles:requestVehicleSpawn", resourceRoot, localPlayer, vehicleID, spawnX, spawnY, z, rot)
 end
 
-function requestVehicleSpawn()
+local function requestVehicleSpawn()
     local vehicleID = tonumber(guiGetText(input))
     spawnVehicleByID(vehicleID)
     guiSetVisible(window, false)
@@ -47,7 +47,7 @@ addEventHandler("newmodels-test_vehicles:vehicleSpawnResponse", localPlayer, fun
     end
 end)
 
-function onInputEnter()
+local function onInputEnter()
     if source == input then
         requestVehicleSpawn()
     end
@@ -55,7 +55,7 @@ end
 
 addEventHandler("onClientGUIAccepted", input, onInputEnter)
 
-function toggleSpawnerGUI()
+local function toggleSpawnerGUI()
     local visible = guiGetVisible(window)
     guiSetVisible(window, not visible)
     showCursor(not visible)
