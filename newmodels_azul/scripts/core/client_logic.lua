@@ -98,6 +98,11 @@ local function finishLoadCustomModel(customModel)
         engineSetModelLODDistance(allocatedModel, lodDistance)
     end
 
+    local physicalPropsGroup = customInfo.settings.physicalPropsGroup
+    if physicalPropsGroup then
+        engineSetModelPhysicalPropertiesGroup(allocatedModel, physicalPropsGroup)
+    end
+
     -- Set loadedModel info
     loadedModels[customModel] = {
         id = allocatedModel,
@@ -273,6 +278,7 @@ local function freeAllocatedModelNow(customModel)
         killTimer(loadedModel.freeAllocatedTimer)
     end
     engineResetModelLODDistance(loadedModel.id)
+    engineRestoreModelPhysicalPropertiesGroup(loadedModel.id)
     engineFreeModel(loadedModel.id)
 
     -- Destroy model elements unless used by another loaded model
