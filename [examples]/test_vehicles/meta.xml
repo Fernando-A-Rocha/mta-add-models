@@ -3,6 +3,7 @@
     <script src="s_vehicles.lua" type="server"/>
     <script src="s_vehicles_alt.lua" type="server"/>
     <script src="s_test_cmd.lua" type="server"/>
+    <script src="c_test_gui.lua" type="client"/>
     <aclrequest>
         <right name="function.loadstring" access="true"/>
     </aclrequest>
