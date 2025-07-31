@@ -40,6 +40,12 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
                 return false, "invalid lodDistance value: " .. settingStr
             end
             customModelSettings.lodDistance = lodDistance
+        elseif stringStartswith(settingStr, "physicalPropsGroup=") then
+            local physicalPropsGroup = tonumber(settingStr:sub(20))
+            if not physicalPropsGroup then
+                return false, "invalid physicalPropsGroup value: " .. settingStr
+            end
+            customModelSettings.physicalPropsGroup = physicalPropsGroup
         elseif stringStartswith(settingStr, "settings=") then
             if isFromSettingsOption then -- prevent inception and recursion
                 return false, "settings option cannot point to a settings file that contains another settings option @ " .. thisFullPath
