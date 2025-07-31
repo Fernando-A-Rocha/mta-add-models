@@ -399,7 +399,6 @@ addEventHandler("newmodels_azul:receiveCustomModels", resourceRoot, function(cus
 end, false)
 
 addEventHandler("onClientResourceStop", resourceRoot, function()
-    restoreElementBaseModels()
     -- Free all allocated models instantly
     for customModel, _ in pairs(loadedModels) do
         freeAllocatedModelNow(customModel)
