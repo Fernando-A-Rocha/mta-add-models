@@ -22,4 +22,5 @@ See the [example files](/newmodels_azul/models/) to visualize the structure of t
   - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
   - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
   - `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
+  - `physicalPropsGroup=GROUP_ID` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelPhysicalPropertiesGroup)
   - `settings=PATH_TO_ANOTHER_SETTINGS_FILE_INSIDE_models_FOLDER` (in case you want to share the same settings between multiple models)
