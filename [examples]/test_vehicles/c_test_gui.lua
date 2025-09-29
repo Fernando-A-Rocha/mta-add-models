@@ -20,11 +20,10 @@ local function spawnVehicleByID(vehicleID)
     end
 
     local x, y, z = getElementPosition(localPlayer)
-    local rot = getPedRotation(localPlayer)
+    local _, _ rot = getElementRotation(localPlayer)
     local offsetDistance = 5
     local spawnX = x + offsetDistance * math.sin(math.rad(-rot))
     local spawnY = y + offsetDistance * math.cos(math.rad(-rot))
-    
     triggerServerEvent("newmodels-test_vehicles:requestVehicleSpawn", resourceRoot, localPlayer, vehicleID, spawnX, spawnY, z, rot)
 end
 
@@ -68,4 +67,4 @@ end
 
 bindKey("F4", "down", toggleSpawnerGUI)
 addCommandHandler("vspawner", toggleSpawnerGUI, false)
-addCommandHandler("spawnveh", function(cmd, id) spawnVehicleByID(tonumber(id)) end, false)
+addCommandHandler("spawnveh", function(_, id) spawnVehicleByID(tonumber(id)) end, false)

@@ -9,6 +9,7 @@ loadstring(exports.newmodels_azul:import())()
 local VEHICLE_SPAWNS = {
     {525, -938.74, 1034.21, 23.59, 3.42, 2.85, 20.27, 0, 0},
     {-5, -944.88, 1051.90, 24.84, 355.97, 356.23, 198.86, 0, 0},
+    {-69, -924.62, 1015.67, 22, 355.97, 0, 0, 0, 0},
 }
 
 local function createVehicles()
