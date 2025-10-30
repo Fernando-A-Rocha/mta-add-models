@@ -19,17 +19,9 @@ With this resource you can make scripts or change your existing scripts to add n
 
 Get the [Latest Version](https://github.com/Fernando-A-Rocha/mta-add-models/releases/latest) from the **Releases** section.
 
-## Older versions
-
-It is easy to migrate to v6 from **newmodels v4 and v5**. The **models folder structure remains the same**, but the scripts have changed in the way models are applied to elements.
-
-Migrating from **newmodels v3** is special because the architecture of that version was different.
+## Migrating from Older versions
 
 Please refer to the [Migration Guide](/.github/doc/MIGRATION.md) for more details.
-
-### Important changes
-
-This resource no longer uses and relies on the **MTA Element Data system** (`setElementData`) to sync the models to all clients! Instead, newmodels makes use of Lua tables and MTA events. This major change was made to **improve performance** and control the sync of models more efficiently.
 
 ## Community
 
