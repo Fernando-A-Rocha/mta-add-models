@@ -51,13 +51,17 @@ newmodelsUtils.setElementCustomModel = function(...)
 end
 
 function isCustomModelCompatible(id, elementOrElementType)
-    assert(type(id) == "number", "Bad argument @ isCustomModelCompatible [expected number at argument 1, got " .. type(id) .. "]")
-    assert(type(elementOrElementType) == "string" or isElement(elementOrElementType), "Bad argument @ isCustomModelCompatible [expected string/element at argument 2, got " .. type(elementOrElementType) .. "]")
+    assert(type(id) == "number",
+        "Bad argument @ isCustomModelCompatible [expected number at argument 1, got " .. type(id) .. "]")
+    assert(type(elementOrElementType) == "string" or isElement(elementOrElementType),
+        "Bad argument @ isCustomModelCompatible [expected string/element at argument 2, got " ..
+        type(elementOrElementType) .. "]")
 
     local customInfo = newmodelsUtils.getSharedCustomModelsTbl()[id]
     if not customInfo then return false end
 
-    local elementType = type(elementOrElementType) == "string" and elementOrElementType or getElementType(elementOrElementType)
+    local elementType = type(elementOrElementType) == "string" and elementOrElementType or
+    getElementType(elementOrElementType)
     if elementType == "object" or elementType == "pickup" then
         return customInfo.type == "object"
     elseif elementType == "ped" or elementType == "player" then
@@ -150,6 +154,7 @@ function isValidElement(element)
     end
     return false
 end
+
 function getValidElementTypes()
     return VALID_ELEMENT_TYPES
 end
@@ -287,7 +292,8 @@ function getElementBaseModel(element)
 end
 
 function getCustomModelName(id)
-    assert(type(id) == "number", "Bad argument @ getCustomModelName [expected number at argument 1, got " .. type(id) .. "]")
+    assert(type(id) == "number",
+        "Bad argument @ getCustomModelName [expected number at argument 1, got " .. type(id) .. "]")
     local customInfo = newmodelsUtils.getSharedCustomModelsTbl()[id]
     return customInfo and customInfo.name or nil
 end

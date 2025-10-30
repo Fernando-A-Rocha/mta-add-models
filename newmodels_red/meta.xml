@@ -1,10 +1,48 @@
 <meta>
     <info author="FernandoMTA" version="6.0.0" type="script" name="newmodels_red"
-    description="Adds new vehicle/ped/object models, automatically synced with all players."/>
+    description="Codename Newmodels Red - Adds new vehicle/ped/object models, automatically synced with all players."/>
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
       https://nightly.mtasa.com  -->
     <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"></min_mta_version>
+
+    <!-- Model Files: ....................................................................... -->
+    <file src="models/**/*.col"/>
+    <file src="models/**/*.txd"/>
+    <file src="models/**/*.dff"/>
+
+    <file src="models_alt/**/*.col"/>
+    <file src="models_alt/**/*.txd"/>
+    <file src="models_alt/**/*.dff"/>
+
+    <!-- OPTIONAL THINGS: .............................................................. -->
+
+    <!-- Update Checker -->
+    <!-- Recommended! Please keep this to be warned of new releases -->
+    <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
+    <aclrequest>
+        <right name="function.fetchRemote" access="true"/>
+    </aclrequest>
+
+    <!-- NandoCrypt Support (this can be removed if you do not use NandoCrypt) -->
+    <script src="scripts/optional/nando_crypt/nando_decrypter" type="client" cache="false"/>
+    <file src="models/**/*.col.nandocrypt"/>
+    <file src="models/**/*.txd.nandocrypt"/>
+    <file src="models/**/*.dff.nandocrypt"/>
+    <file src="models_alt/**/*.col.nandocrypt"/>
+    <file src="models_alt/**/*.txd.nandocrypt"/>
+    <file src="models_alt/**/*.dff.nandocrypt"/>
+
+    <!-- Debugging / Testing (remove this for a production server) -->
+    <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
+    <script src="scripts/optional/debug/c_debug.lua" type="client"/>
+    <script src="scripts/optional/debug/s_debug.lua" type="server"/>
+
+    <!-- Alternative way of loading new models -->
+    <!-- Inspired by mod_list from newmodels v3 -->
+    <script src="models_alt/s_mod_list.lua" type="server"/>
+
+    <!-- SYSTEM: ....................................................................... -->
 
     <!-- Main Scripts -->
     <script src="scripts/core/shared_local.lua" type="shared"/>
@@ -12,7 +50,8 @@
     <script src="scripts/core/shared_importfunc.lua" type="shared"/>
     <script src="scripts/core/client_logic.lua" type="client"/>
     <script src="scripts/core/server_logic.lua" type="server"/>
-    <!-- Exported functions -->
+
+    <!-- Exported functions [shared] -->
     <export function="import" type="shared"/>
     <export function="getCustomModels" type="shared"/>
     <export function="getElementModels" type="shared"/>
@@ -34,30 +73,8 @@
     <export function="isValidElement" type="shared"/>
     <export function="getValidElementTypes" type="shared"/>
     <export function="isCustomModelCompatible" type="shared"/>
-
-    <!-- Files -->
-    <file src="models/**/*.col"/>
-    <file src="models/**/*.txd"/>
-    <file src="models/**/*.dff"/>
-
-    <!-- ............................................................................... -->
-    <!-- OPTIONAL THINGS: .............................................................. -->
-
-    <!-- Update Checker (RECOMMENDED, please keep this to be warned of new releases!) -->
-    <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
-    <aclrequest>
-        <right name="function.fetchRemote" access="true"/>
-    </aclrequest>
-
-    <!-- NandoCrypt Support (these files and lines can be removed) -->
-    <script src="scripts/optional/nando_crypt/nando_decrypter" type="client" cache="false"/>
-    <file src="models/**/*.col.nandocrypt"/>
-    <file src="models/**/*.txd.nandocrypt"/>
-    <file src="models/**/*.dff.nandocrypt"/>
-
-    <!-- Debugging / Testing (remove this for a production server) -->
-    <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
-    <script src="scripts/optional/debug/c_debug.lua" type="client"/>
-    <script src="scripts/optional/debug/s_debug.lua" type="server"/>
-
+    
+    <!-- Exported functions [server only] -->
+    <export function="addExternalMods" type="server"/>
+    <export function="removeExternalMods" type="server"/>
 </meta>

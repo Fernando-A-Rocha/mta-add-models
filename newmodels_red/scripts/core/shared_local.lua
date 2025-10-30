@@ -5,13 +5,17 @@ local NANDOCRYPT_EXT = ".nandocrypt"
 
 function isNandoCryptFileName(fn)
     if type(fn) == "string" then
-        if fn:sub(-#NANDOCRYPT_EXT) == NANDOCRYPT_EXT then
-            local precedingFileExt = fn:sub(-#NANDOCRYPT_EXT - 3, -#NANDOCRYPT_EXT - 1)
-            local precedingNumber = tonumber(fn:sub(1, -#NANDOCRYPT_EXT - 5))
+        if fn:sub(- #NANDOCRYPT_EXT) == NANDOCRYPT_EXT then
+            local precedingFileExt = fn:sub(- #NANDOCRYPT_EXT - 3, - #NANDOCRYPT_EXT - 1)
+            local precedingNumber = tonumber(fn:sub(1, - #NANDOCRYPT_EXT - 5))
             return true, precedingFileExt, precedingNumber
         end
     end
     return false
+end
+
+function getNandoCryptExtension()
+    return NANDOCRYPT_EXT
 end
 
 if isClientsideScript then
@@ -49,7 +53,8 @@ function setElementCustomModel(element, id)
             return false
         end
         if not isCustomModelCompatible(id, element) then
-            outputDebugString("Custom model ID " .. id .. " is not compatible with element type " .. getElementType(element), 1)
+            outputDebugString(
+                "Custom model ID " .. id .. " is not compatible with element type " .. getElementType(element), 1)
             return false
         end
     end

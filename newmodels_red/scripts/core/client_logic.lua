@@ -56,10 +56,10 @@ local function finishLoadCustomModel(customModel)
     local enableDFFAlphaTransparency = customInfo.settings.enableDFFAlphaTransparency
 
     if (col and not engineReplaceCOL(col.element, allocatedModel))
-    or (txd and not engineImportTXD(txd.element, allocatedModel))
-    or (dff and not engineReplaceModel(dff.element, allocatedModel, enableDFFAlphaTransparency or nil)) then
+        or (txd and not engineImportTXD(txd.element, allocatedModel))
+        or (dff and not engineReplaceModel(dff.element, allocatedModel, enableDFFAlphaTransparency or nil)) then
         -- Destroy all non-reused col/txd/dff elements
-        for _, modType in pairs({"col", "txd", "dff"}) do
+        for _, modType in pairs({ "col", "txd", "dff" }) do
             local mod = queuedInfo[modType]
             if mod and (not mod.isReused) and isElement(mod.element) then
                 destroyElement(mod.element)
@@ -129,7 +129,8 @@ local function onFailedToLoadModFile(customModel, filePath, fileType)
     local queuedInfo = loadingQueue[customModel]
     if queuedInfo then
         engineFreeModel(queuedInfo.allocatedModel)
-        outputDebugString("Failed to load " .. fileType .. " file for custom model " .. customModel..": "..filePath, 1)
+        outputDebugString("Failed to load " .. fileType .. " file for custom model " .. customModel .. ": " .. filePath,
+            1)
 
         loadingQueue[customModel] = nil
     end
@@ -184,7 +185,8 @@ local function beginLoadCustomModel(customModel, elementToApply)
 
     if (encryptedFiles.col or encryptedFiles.txd or encryptedFiles.dff) and not decryptFunc then
         -- Cancel as we cannot decrypt the files
-        outputDebugString("Failed to load custom model " .. customModel .. " due to missing NandoCrypt decrypter function", 1)
+        outputDebugString(
+            "Failed to load custom model " .. customModel .. " due to missing NandoCrypt decrypter function", 1)
         return
     end
 
@@ -233,8 +235,8 @@ local function beginLoadCustomModel(customModel, elementToApply)
             onLoadedModFile(customModel, modType, modPath, reusedElement, true)
         elseif encryptedFiles[modType] then
             if not decryptFunc(modPath, function(data)
-                loadModElement(modType, modPath, data)
-            end) then
+                    loadModElement(modType, modPath, data)
+                end) then
                 onFailedToLoadModFile(customModel, modPath, modType)
                 return
             end
@@ -254,6 +256,8 @@ local function beginLoadCustomModel(customModel, elementToApply)
     if dffPath then
         loadOneMod("dff", dffPath)
     end
+
+    return allocatedModel
 end
 
 local function isCustomModelInUse(customModel)
@@ -304,6 +308,7 @@ local function freeAllocatedModelNow(customModel)
 
     -- Unset loadedModel info
     loadedModels[customModel] = nil
+    return true
 end
 
 local function freeAllocatedModel(customModel)
@@ -385,24 +390,25 @@ local function restoreElementBaseModels()
     end
 end
 
-addEventHandler("newmodels_red:receiveCustomModels", resourceRoot, function(customModelsFromServer, elementModelsFromServer)
-    restoreElementBaseModels()
+addEventHandler("newmodels_red:receiveCustomModels", resourceRoot,
+    function(customModelsFromServer, elementModelsFromServer)
+        restoreElementBaseModels()
 
-    -- Unload all loaded models
-    for customModel, _ in pairs(loadedModels) do
-        freeAllocatedModelNow(customModel)
-    end
-
-    customModels = customModelsFromServer
-
-    elementModels = elementModelsFromServer
-
-    for _, elementType in pairs(getValidElementTypes()) do
-        for _, element in pairs(getElementsByType(elementType, root, true)) do
-            attemptApplyElementCustomModel(element)
+        -- Unload all loaded models
+        for customModel, _ in pairs(loadedModels) do
+            freeAllocatedModelNow(customModel)
         end
-    end
-end, false)
+
+        customModels = customModelsFromServer
+
+        elementModels = elementModelsFromServer
+
+        for _, elementType in pairs(getValidElementTypes()) do
+            for _, element in pairs(getElementsByType(elementType, root, true)) do
+                attemptApplyElementCustomModel(element)
+            end
+        end
+    end, false)
 
 addEventHandler("onClientResourceStop", resourceRoot, function()
     -- Free all allocated models instantly

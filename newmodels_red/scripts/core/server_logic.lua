@@ -1,5 +1,12 @@
 -- Loading of custom models from the "models" directory.
 
+local baseModelCounts = {}
+
+local RESOURCE_NAME = getResourceName(resource)
+local function srvLog(str)
+    outputServerLog("[" .. RESOURCE_NAME .. "] " .. str)
+end
+
 local VALID_MODEL_TYPES = { "vehicle", "object", "ped" }
 
 -- Model .txt settings:
@@ -48,7 +55,9 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
             customModelSettings.physicalPropsGroup = physicalPropsGroup
         elseif stringStartswith(settingStr, "settings=") then
             if isFromSettingsOption then -- prevent inception and recursion
-                return false, "settings option cannot point to a settings file that contains another settings option @ " .. thisFullPath
+                return false,
+                    "settings option cannot point to a settings file that contains another settings option @ " ..
+                    thisFullPath
             end
             local settingsPath = settingStr:sub(10)
             local settingsFullPath = "models/" .. settingsPath
@@ -61,8 +70,8 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
             end
             return settingsInfo
         else
-            for _, settingModelType in pairs({"txd", "dff", "col"}) do
-                if stringStartswith(settingStr, settingModelType.."=") then
+            for _, settingModelType in pairs({ "txd", "dff", "col" }) do
+                if stringStartswith(settingStr, settingModelType .. "=") then
                     local settingModelPath = settingStr:sub(#settingModelType + 2)
                     local settingModelFullPath = "models/" .. settingModelPath
                     if not fileExists(settingModelFullPath) then
@@ -122,7 +131,6 @@ local function loadModels()
     if not filesAndFolders then
         return false, "failed to list models directory"
     end
-    local baseModelCounts = {}
     for _, modelType in pairs(VALID_MODEL_TYPES) do
         local modelTypePath = "models/" .. modelType
         if pathIsDirectory(modelTypePath) then
@@ -152,13 +160,15 @@ local function loadModels()
                                 end
                                 for _, fileOrFolderInsideThis in pairs(filesAndFoldersInsideThis) do
                                     local fullPathInsideThis = fullPathInside .. "/" .. fileOrFolderInsideThis
-                                    local parsed, failReason = parseOneFile(customModelInfo, fileOrFolderInsideThis, fullPathInsideThis, fileOrFolderInside)
+                                    local parsed, failReason = parseOneFile(customModelInfo, fileOrFolderInsideThis,
+                                        fullPathInsideThis, fileOrFolderInside)
                                     if not parsed then
                                         return false, failReason
                                     end
                                 end
                             elseif pathIsFile(fullPathInside) then
-                                local parsed, failReason = parseOneFile(customModelInfo, fileOrFolderInside, fullPathInside)
+                                local parsed, failReason = parseOneFile(customModelInfo, fileOrFolderInside,
+                                    fullPathInside)
                                 if not parsed then
                                     return false, failReason
                                 end
@@ -188,8 +198,145 @@ end
 
 local result, failReason = loadModels()
 if not result then
-    outputServerLog("[loadModels] " .. failReason)
+    srvLog("[loadModels] " .. failReason)
     outputDebugString("Failed to load models. See server log for details.", 1)
+    return
+end
+
+-- Loads custom models from backwards compatible modList table
+local function loadModelsViaModList()
+    if type(modList) ~= "table" then
+        return false, "modList is not a table"
+    end
+    local countLoaded = 0
+    -- Iterate over each model type (ped, vehicle, object) in modList
+    for modelType, modelList in pairs(modList) do
+        if (modelType == "ped" or modelType == "vehicle" or modelType == "object") and type(modelList) == "table" then
+            -- Iterate over each individual model entry in the list
+            for _, modInfo in ipairs(modelList) do
+                -- Check for required fields
+                if type(modInfo) == "table"
+                    and (type(modInfo.id) == "number")
+                    and (type(modInfo.base_id) == "number")
+                    and (modInfo.path) then
+                    local customModel = modInfo.id
+                    if isDefaultID(false, customModel) then
+                        return false, "custom model is a default ID: " .. customModel
+                    end
+                    if customModels[customModel] then
+                        return false, "duplicate custom model: " .. customModel
+                    end
+                    local baseModel = modInfo.base_id
+                    if not isDefaultID(false, baseModel) then
+                        return false, "invalid " .. modelType .. " base model: " .. baseModel
+                    end
+                    local dff_path, txd_path, col_path
+                    local settings = {}
+                    local ignoreDFF, ignoreTXD, ignoreCOL = modInfo.ignoreDFF, modInfo.ignoreTXD, modInfo.ignoreCOL
+                    if modelType ~= "object" then
+                        ignoreCOL = true -- COL not used for peds & vehicles
+                    end
+
+                    if type(modInfo.path) == "string" then
+                        -- Expects files to be named ID.dff or ID.txd in that folder
+                        local folder = modInfo.path
+
+                        -- Only load if not ignored
+                        if not ignoreDFF then
+                            dff_path = folder .. customModel .. ".dff"
+                        end
+                        if not ignoreTXD then
+                            txd_path = folder .. customModel .. ".txd"
+                        end
+                        if not ignoreCOL then
+                            col_path = folder .. customModel .. ".col"
+                        end
+                    elseif type(modInfo.path) == "table" then
+                        -- Expects {dff="filepath.dff", txd="filepath.txd", col="filepath.col"}
+                        -- Only load if not ignored
+                        if not ignoreDFF and modInfo.path["dff"] then
+                            dff_path = modInfo.path["dff"]
+                        end
+                        if not ignoreTXD and modInfo.path["txd"] then
+                            txd_path = modInfo.path["txd"]
+                        end
+                        if not ignoreCOL and modInfo.path["col"] then
+                            col_path = modInfo.path["col"]
+                        end
+                    else
+                        -- Invalid path type
+                        return false, "Invalid path type for custom model ID: " .. customModel
+                    end
+
+                    if not modInfo.name then
+                        baseModelCounts[baseModel] = (baseModelCounts[baseModel] or 0) + 1
+                    end
+
+                    if type(modInfo.lodDistance) == "number" then
+                        settings["lodDistance"] = modInfo.lodDistance
+                    end
+                    if modInfo.disableAutoFree then
+                        settings["disableAutoFree"] = true
+                    end
+                    if not modInfo.filteringEnabled then
+                        settings["disableTXDTextureFiltering"] = true
+                    end
+                    if modInfo.alphaTransparency then
+                        settings["enableDFFAlphaTransparency"] = true
+                    end
+                    -- Download system not implemented, so 'metaDownloadFalse' ignored.
+
+                    -- Check if mod files exist
+                    local ncExt = getNandoCryptExtension()
+                    -- If a file does not exist, check again adding the NandoCrypt extension
+                    if dff_path and not fileExists(dff_path) then
+                        if fileExists(dff_path .. ncExt) then
+                            dff_path = dff_path .. ncExt
+                        else
+                            return false, "DFF file not found for custom model ID: " .. customModel
+                        end
+                    end
+                    if txd_path and not fileExists(txd_path) then
+                        if fileExists(txd_path .. ncExt) then
+                            txd_path = txd_path .. ncExt
+                        else
+                            return false, "TXD file not found for custom model ID: " .. customModel
+                        end
+                    end
+                    if col_path and not fileExists(col_path) then
+                        if fileExists(col_path .. ncExt) then
+                            col_path = col_path .. ncExt
+                        else
+                            return false, "COL file not found for custom model ID: " .. customModel
+                        end
+                    end
+
+                    customModels[customModel] = {
+                        type = modelType,
+                        baseModel = baseModel,
+                        dff = dff_path or nil,
+                        txd = txd_path or nil,
+                        col = col_path or nil,
+                        name = modInfo.name or string.format("%d#%d", baseModel, baseModelCounts[baseModel]),
+                        settings = settings,
+                    }
+                    countLoaded = countLoaded + 1
+                else
+                    return false, "Found an invalid modInfo entry in modList for model type: " .. modelType
+                end
+            end
+        else
+            return false, "Invalid model type or model list in modList: Index " .. tostring(modelType)
+        end
+    end
+
+    srvLog("Loaded " .. countLoaded .. " models via modList.")
+    return true
+end
+local result2, failReason2 = loadModelsViaModList()
+if result2 == false then
+    srvLog("[loadModelsViaModList] " .. failReason2)
+    outputDebugString("Failed to load models via modList. See server log for details.", 1)
     return
 end
 
@@ -224,3 +371,15 @@ addEventHandler("onElementDestroy", root, function()
         elementModels[source] = nil
     end
 end)
+
+--
+-- The following 2 add & remove functions were inspired by their newmodels v3 versions.
+--
+
+function addExternalMods()
+
+end
+
+function removeExternalMods()
+
+end
