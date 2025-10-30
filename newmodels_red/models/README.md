@@ -2,7 +2,7 @@
 
 Model files (ending in `.dff`/`.col`/`.txd`) must be placed in this `models` folder **following specific rules**.
 
-See the [example files](/newmodels_azul/models/) to visualize the structure of this system.
+See the [example files](/newmodels_red/models/) to visualize the structure of this system.
 
 - **Required:** Vehicles must be placed in the `vehicle` folder, Skins in `ped`, and Objects in `object`
 

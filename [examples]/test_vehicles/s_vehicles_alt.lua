@@ -1,9 +1,9 @@
 -- Alternative method with loadstring
---   These vehicles will not be destroyed if newmodels_azul stops
+--   These vehicles will not be destroyed if newmodels_red stops
 --   because the elements are children of this resource on creation.
 
 -- Loads newmodels functions, which allow usage of custom model IDs "as if they were normal IDs"
-loadstring(exports.newmodels_azul:import())()
+loadstring(exports.newmodels_red:import())()
 
 -- Vehicle model, x,y,z, rx,ry,rz, interior,dimension
 local VEHICLE_SPAWNS = {

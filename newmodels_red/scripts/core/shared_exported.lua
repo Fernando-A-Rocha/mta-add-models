@@ -29,7 +29,7 @@ newmodelsUtils.resources = {}
 
 newmodelsUtils.getSharedCustomModelsTbl = function()
     if IS_IMPORTED then
-        return exports["newmodels_azul"]:getCustomModels()
+        return exports["newmodels_red"]:getCustomModels()
     end
     -- Script is running within this resource, so we can access the table directly
     return customModels
@@ -37,7 +37,7 @@ end
 
 newmodelsUtils.getSharedElementModelsTbl = function()
     if IS_IMPORTED then
-        return exports["newmodels_azul"]:getElementModels()
+        return exports["newmodels_red"]:getElementModels()
     end
     -- Script is running within this resource, so we can access the table directly
     return elementModels
@@ -45,7 +45,7 @@ end
 
 newmodelsUtils.setElementCustomModel = function(...)
     if IS_IMPORTED then
-        return exports["newmodels_azul"]:setElementCustomModel(...)
+        return exports["newmodels_red"]:setElementCustomModel(...)
     end
     return setElementCustomModel(...)
 end

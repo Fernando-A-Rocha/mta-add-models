@@ -1,5 +1,5 @@
-addEvent("newmodels_azul:receiveCustomModels", true)
-addEvent("newmodels_azul:setElementCustomModel", true)
+addEvent("newmodels_red:receiveCustomModels", true)
+addEvent("newmodels_red:setElementCustomModel", true)
 
 loadedModels = {}
 
@@ -337,7 +337,7 @@ local function attemptApplyElementCustomModel(element)
     end
 end
 
-addEventHandler("newmodels_azul:setElementCustomModel", root, function(id)
+addEventHandler("newmodels_red:setElementCustomModel", root, function(id)
     if not isValidElement(source) then return end
     id = tonumber(id) or nil
     local oldCustomModel = elementModels[source]
@@ -385,7 +385,7 @@ local function restoreElementBaseModels()
     end
 end
 
-addEventHandler("newmodels_azul:receiveCustomModels", resourceRoot, function(customModelsFromServer, elementModelsFromServer)
+addEventHandler("newmodels_red:receiveCustomModels", resourceRoot, function(customModelsFromServer, elementModelsFromServer)
     restoreElementBaseModels()
 
     -- Unload all loaded models

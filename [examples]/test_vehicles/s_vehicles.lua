@@ -1,5 +1,5 @@
 -- Method with exports
---   These vehicles will be destroyed if newmodels_azul stops
+--   These vehicles will be destroyed if newmodels_red stops
 --   because they are children of that resource.
 
 -- Vehicle model, x,y,z, rx,ry,rz, interior,dimension
@@ -12,7 +12,7 @@ local VEHICLE_SPAWNS = {
 local function createVehicles()
     for i, data in ipairs(VEHICLE_SPAWNS) do
         local model, x, y, z, rx, ry, rz, interior, dimension = unpack(data)
-        local vehicle = exports["newmodels_azul"]:createVehicle(model, x, y, z, rx, ry, rz)
+        local vehicle = exports["newmodels_red"]:createVehicle(model, x, y, z, rx, ry, rz)
         if vehicle then
             setElementInterior(vehicle, interior)
             setElementDimension(vehicle, dimension)

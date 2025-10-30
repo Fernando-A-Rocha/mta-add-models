@@ -56,10 +56,10 @@ function setElementCustomModel(element, id)
     if not isClientsideScript then
         elementModels[element] = id -- Set serverside
         setTimer(function()
-            triggerClientEvent(getElementsByType("player"), "newmodels_azul:setElementCustomModel", element, id)
+            triggerClientEvent(getElementsByType("player"), "newmodels_red:setElementCustomModel", element, id)
         end, 50, 1)
     else
-        triggerEvent("newmodels_azul:setElementCustomModel", element, id)
+        triggerEvent("newmodels_red:setElementCustomModel", element, id)
     end
     return true
 end

@@ -196,12 +196,12 @@ end
 -- Save elementModels in root element data to restore on next startup
 addEventHandler("onResourceStop", resourceRoot, function()
     if next(elementModels) then
-        setElementData(root, "newmodels_azul:elementModels_backup", elementModels, false)
+        setElementData(root, "newmodels_red:elementModels_backup", elementModels, false)
     end
 end, false)
 
 -- Restore elementModels from root element data on startup if any
-local elementModelsBackup = getElementData(root, "newmodels_azul:elementModels_backup")
+local elementModelsBackup = getElementData(root, "newmodels_red:elementModels_backup")
 if type(elementModelsBackup) == "table" then
     for element, id in pairs(elementModelsBackup) do
         if isElement(element) then
@@ -213,7 +213,7 @@ end
 
 addEventHandler("onPlayerResourceStart", root, function(res)
     if res == resource then
-        triggerClientEvent(source, "newmodels_azul:receiveCustomModels", resourceRoot, customModels, elementModels)
+        triggerClientEvent(source, "newmodels_red:receiveCustomModels", resourceRoot, customModels, elementModels)
     end
 end)
 

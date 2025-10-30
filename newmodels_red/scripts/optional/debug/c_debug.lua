@@ -65,7 +65,7 @@ local function updateDebugViewInfo()
 end
 
 local function drawDebug()
-    dxDrawText("Newmodels v5 Azul", SW/2, 15, SW/2, 15, 0xff70e2ff, 1.5, "default-bold", "center", "center")
+    dxDrawText("Newmodels v6 Red", SW/2, 15, SW/2, 15, 0xffff7070, 1.5, "default-bold", "center", "center")
     dxDrawText(loadedModelsStr, SW/2, 32, SW/2, 32, 0xFFFFFFFF, 1, "default-bold", "center", "top")
 
     for element, customModelStr in pairs(streamedElements) do

@@ -1,5 +1,5 @@
 <meta>
-    <include resource="newmodels_azul" minversion="5.0.0"/>
+    <include resource="newmodels_red" minversion="6.0.0"/>
     <script src="s_vehicles.lua" type="server"/>
     <script src="s_vehicles_alt.lua" type="server"/>
     <script src="s_test_cmd.lua" type="server"/>
