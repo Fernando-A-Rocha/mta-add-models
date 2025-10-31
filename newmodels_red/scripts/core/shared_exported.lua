@@ -25,8 +25,6 @@ setElementModelMTA = setElementModel
 
 spawnPlayerMTA = spawnPlayer
 
-newmodelsUtils.resources = {}
-
 newmodelsUtils.getSharedCustomModelsTbl = function()
     if IS_IMPORTED then
         return exports["newmodels_red"]:getCustomModels()
@@ -61,7 +59,7 @@ function isCustomModelCompatible(id, elementOrElementType)
     if not customInfo then return false end
 
     local elementType = type(elementOrElementType) == "string" and elementOrElementType or
-    getElementType(elementOrElementType)
+        getElementType(elementOrElementType)
     if elementType == "object" or elementType == "pickup" then
         return customInfo.type == "object"
     elseif elementType == "ped" or elementType == "player" then
@@ -159,19 +157,6 @@ function getValidElementTypes()
     return VALID_ELEMENT_TYPES
 end
 
--- In MTA Elements are always destroyed when the resource that created them is stopped: this cannot be changed.
--- So we use an internal table to keep track of elements created by resources.
-newmodelsUtils.setElementResource = function(element, theResource)
-    if isElement(element) then
-        -- if not isElement(theResource) then theResource = resource end
-        if (not theResource) or (not isElement(getResourceRootElement(theResource))) then theResource = resource end
-        if type(newmodelsUtils.resources[theResource]) ~= "table" then
-            newmodelsUtils.resources[theResource] = {}
-        end
-        table.insert(newmodelsUtils.resources[theResource], element)
-    end
-end
-
 function getBaseModelIdFromCustomModelId(id)
     local customInfo = newmodelsUtils.getSharedCustomModelsTbl()[id]
     if customInfo then
@@ -211,14 +196,12 @@ end
 function createObject(id, ...)
     assert(type(id) == "number", "Invalid model ID passed: " .. tostring(id))
     local object = newmodelsUtils.createElementSafe("object", id, ...)
-    newmodelsUtils.setElementResource(object, sourceResource)
     return object
 end
 
 function createVehicle(id, ...)
     assert(type(id) == "number", "Invalid model ID passed: " .. tostring(id))
     local vehicle = newmodelsUtils.createElementSafe("vehicle", id, ...)
-    newmodelsUtils.setElementResource(vehicle, sourceResource)
     return vehicle
 end
 
@@ -233,7 +216,6 @@ end
 function createPed(id, ...)
     assert(type(id) == "number", "Invalid model ID passed: " .. tostring(id))
     local ped = newmodelsUtils.createElementSafe("ped", id, ...)
-    newmodelsUtils.setElementResource(ped, sourceResource)
     return ped
 end
 
@@ -247,7 +229,6 @@ function createPickup(x, y, z, theType, id, respawnTime, ammo)
     else
         pickup = createPickupMTA(x, y, z, theType, id, respawnTime, ammo)
     end
-    newmodelsUtils.setElementResource(pickup, sourceResource)
     return pickup
 end
 
@@ -327,20 +308,4 @@ if not isClientsideScript then
         end
         return success
     end
-end
-
-newmodelsUtils.handleResourceStop = function(stoppedRes)
-    if newmodelsUtils.resources[stoppedRes] then
-        for i = 1, #newmodelsUtils.resources[stoppedRes] do
-            local element = newmodelsUtils.resources[stoppedRes][i]
-            if isElement(element) then
-                destroyElement(element)
-            end
-        end
-    end
-end
-if isClientsideScript then
-    addEventHandler("onClientResourceStop", root, newmodelsUtils.handleResourceStop)
-else
-    addEventHandler("onResourceStop", root, newmodelsUtils.handleResourceStop)
 end

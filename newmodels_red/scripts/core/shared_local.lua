@@ -53,6 +53,7 @@ function setElementCustomModel(element, id)
             return false
         end
         if not isCustomModelCompatible(id, element) then
+            iprint(customModelInfo)
             outputDebugString(
                 "Custom model ID " .. id .. " is not compatible with element type " .. getElementType(element), 1)
             return false
