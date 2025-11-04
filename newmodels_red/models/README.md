@@ -12,15 +12,22 @@ See the [example files](/newmodels_red/models/) to visualize the structure of th
 
 - **Required:** Then, you must place the model files named as the New ID of the model (e.g. `80001.dff` & `80001.txd`)
 
+---
 
-*Optionally*, models can be customized with a `New ID.txt` file with the following settings (any line that doesn't contain these words is ignored):
+*Optionally*, models can be customized:
 
-  - `disableAutoFree`
-  - `disableTXDTextureFiltering`
-  - `enableDFFAlphaTransparency`
-  - `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
-  - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
-  - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
-  - `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
-  - `physicalPropsGroup=GROUP_ID` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelPhysicalPropertiesGroup)
-  - `settings=PATH_TO_ANOTHER_SETTINGS_FILE_INSIDE_models_FOLDER` (in case you want to share the same settings between multiple models)
+- With the `s_model_settings.lua` global model settings file;
+- With a `New ID.txt` file.
+
+The available options are (any line that doesn't contain a valid setting string is ignored):
+
+- `disableAutoFree`
+- `disableTXDTextureFiltering`
+- `enableDFFAlphaTransparency`
+- `downloadFilesOnDemand`
+- `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
+- `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
+- `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)
+- `lodDistance=NUMBER` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance)
+- `physicalPropsGroup=GROUP_ID` (used for setting https://wiki.multitheftauto.com/wiki/EngineSetModelPhysicalPropertiesGroup)
+- `settings=PATH_TO_ANOTHER_SETTINGS_FILE_INSIDE_models_FOLDER` (in case you want to share the same settings between multiple models)

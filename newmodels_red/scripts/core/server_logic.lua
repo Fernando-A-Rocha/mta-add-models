@@ -20,12 +20,9 @@ local function stringStartswith(str, start)
     return str:sub(1, #start) == start
 end
 
--- Model .txt settings:
-local CUSTOM_MODEL_BOOL_SETTINGS = {
-    ["disableAutoFree"] = true,
-    ["disableTXDTextureFiltering"] = true,
-    ["enableDFFAlphaTransparency"] = true,
-}
+-- Model settings (from .txt files overriding defaults):
+local DECLARATIVE_SETTINGS = { "disableAutoFree", "disableTXDTextureFiltering", "enableDFFAlphaTransparency",
+    "downloadFilesOnDemand" }
 --   - txd=path
 --   - dff=path
 --   - col=path
@@ -34,6 +31,9 @@ local CUSTOM_MODEL_BOOL_SETTINGS = {
 
 local function parseModelSettings(customModel, customModelInfo, thisFullPath, isFromSettingsOption)
     local customModelSettings = {}
+    for key, value in pairs(DEFAULT_AUTO_MODEL_SETTINGS) do
+        customModelSettings[key] = value
+    end
     local file = fileOpen(thisFullPath, true)
     if not file then
         return false, "failed to open file: " .. thisFullPath
@@ -46,9 +46,12 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
     local lines = split(info, "\n")
     for _, settingStr in pairs(lines) do
         settingStr = settingStr:gsub("\r", "")
-        if CUSTOM_MODEL_BOOL_SETTINGS[settingStr] then
-            customModelSettings[settingStr] = true
-        elseif stringStartswith(settingStr, "lodDistance=") then
+        for _, declarativeSetting in pairs(DECLARATIVE_SETTINGS) do
+            if settingStr == declarativeSetting then
+                customModelSettings[declarativeSetting] = true
+            end
+        end
+        if stringStartswith(settingStr, "lodDistance=") then
             local lodDistance = tonumber(settingStr:sub(13))
             if not lodDistance then
                 return false, "invalid lodDistance value: " .. settingStr
@@ -138,6 +141,7 @@ local function loadModels()
     if not filesAndFolders then
         return false, "failed to list directory: " .. AUTO_MODELS_FOLDER
     end
+    local countLoaded = 0
     for _, modelType in pairs(VALID_MODEL_TYPES) do
         local modelTypePath = AUTO_MODELS_FOLDER .. "/" .. modelType
         if pathIsDirectory(modelTypePath) then
@@ -194,12 +198,14 @@ local function loadModels()
                                 name = info.name or ("%d#%d"):format(baseModel, baseModelCounts[baseModel]),
                                 settings = info.settings or {},
                             }
+                            countLoaded = countLoaded + 1
                         end
                     end
                 end
             end
         end
     end
+    srvLog("Loaded " .. countLoaded .. " models from auto models folder.")
     return true
 end
 
@@ -304,6 +310,10 @@ local function parseModListEntry(modelType, modInfo)
             else
                 return false, "DFF file not found for custom model ID " .. customModel .. ": " .. dff_path
             end
+        elseif stringStartswith(dff_path, AUTO_MODELS_FOLDER .. "/") then
+            -- Disallow using auto models folder for modList entries
+            return false,
+                "DFF file for custom model ID " .. customModel .. " cannot be in the auto models folder: " .. dff_path
         end
     end
 
@@ -315,6 +325,10 @@ local function parseModListEntry(modelType, modInfo)
             else
                 return false, "TXD file not found for custom model ID " .. customModel .. ": " .. txd_path
             end
+        elseif stringStartswith(txd_path, AUTO_MODELS_FOLDER .. "/") then
+            -- Disallow using auto models folder for modList entries
+            return false,
+                "TXD file for custom model ID " .. customModel .. " cannot be in the auto models folder: " .. txd_path
         end
     end
 
@@ -326,6 +340,10 @@ local function parseModListEntry(modelType, modInfo)
             else
                 return false, "COL file not found for custom model ID " .. customModel .. ": " .. col_path
             end
+        elseif stringStartswith(col_path, AUTO_MODELS_FOLDER .. "/") then
+            -- Disallow using auto models folder for modList entries
+            return false,
+                "COL file for custom model ID " .. customModel .. " cannot be in the auto models folder: " .. col_path
         end
     end
 
@@ -386,7 +404,7 @@ local function loadModelsViaModList()
         end
     end
 
-    srvLog("Loaded " .. countLoaded .. " models via modList.")
+    srvLog("Loaded " .. countLoaded .. " models via modList Lua.")
     return true
 end
 local result2, failReason2 = loadModelsViaModList()

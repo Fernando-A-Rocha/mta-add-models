@@ -6,11 +6,6 @@
       https://nightly.mtasa.com  -->
     <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"></min_mta_version>
 
-    <!-- AUTO NEW MODEL FILES: ........................................................... -->
-    <file src="models/**/*.col"/>
-    <file src="models/**/*.txd"/>
-    <file src="models/**/*.dff"/>
-
     <!-- OPTIONAL FEATURES: .............................................................. -->
 
     <!-- Alternative way of loading new models -->
@@ -41,8 +36,13 @@
         <right name="function.fetchRemote" access="true"/>
     </aclrequest>
 
-    <!-- SYSTEM: ....................................................................... -->
+    <!-- REQUIRED: ....................................................................... -->
 
+    <!-- Model Files & Config -->
+    <file src="models/**/*.col"/>
+    <file src="models/**/*.txd"/>
+    <file src="models/**/*.dff"/>
+    <script src="models/s_model_settings.lua" type="server"/>
     <!-- Main Scripts -->
     <script src="scripts/core/lib/server_async.lua" type="server"/>
     <script src="scripts/core/shared_local.lua" type="shared"/>
