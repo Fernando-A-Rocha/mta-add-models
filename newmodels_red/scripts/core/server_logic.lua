@@ -1,13 +1,24 @@
--- Loading of custom models from the "models" directory.
+-- Server-side logic for adding new models
+local RESOURCE_NAME = getResourceName(resource)
+local AUTO_MODELS_FOLDER = "models"
+local VALID_MODEL_TYPES = { "vehicle", "object", "ped" }
 
 local baseModelCounts = {}
 
-local RESOURCE_NAME = getResourceName(resource)
+-- Async:setDebug(true);
+Async:setPriority("low");
+
 local function srvLog(str)
     outputServerLog("[" .. RESOURCE_NAME .. "] " .. str)
 end
 
-local VALID_MODEL_TYPES = { "vehicle", "object", "ped" }
+-- .................................................................
+-- ...... Load new models automatically from folder structure ......
+-- .................................................................
+
+local function stringStartswith(str, start)
+    return str:sub(1, #start) == start
+end
 
 -- Model .txt settings:
 local CUSTOM_MODEL_BOOL_SETTINGS = {
@@ -20,10 +31,6 @@ local CUSTOM_MODEL_BOOL_SETTINGS = {
 --   - col=path
 --   - lodDistance=number
 --   - settings=path
-
-local function stringStartswith(str, start)
-    return str:sub(1, #start) == start
-end
 
 local function parseModelSettings(customModel, customModelInfo, thisFullPath, isFromSettingsOption)
     local customModelSettings = {}
@@ -60,7 +67,7 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
                     thisFullPath
             end
             local settingsPath = settingStr:sub(10)
-            local settingsFullPath = "models/" .. settingsPath
+            local settingsFullPath = AUTO_MODELS_FOLDER .. "/" .. settingsPath
             if not fileExists(settingsFullPath) then
                 return false, "settings file not found: " .. settingsPath
             end
@@ -73,7 +80,7 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
             for _, settingModelType in pairs({ "txd", "dff", "col" }) do
                 if stringStartswith(settingStr, settingModelType .. "=") then
                     local settingModelPath = settingStr:sub(#settingModelType + 2)
-                    local settingModelFullPath = "models/" .. settingModelPath
+                    local settingModelFullPath = AUTO_MODELS_FOLDER .. "/" .. settingModelPath
                     if not fileExists(settingModelFullPath) then
                         return false, "setting " .. settingModelType .. " file not found: " .. settingModelPath
                     end
@@ -124,15 +131,15 @@ local function parseOneFile(customModelInfo, thisFileName, thisFullPath, name)
 end
 
 local function loadModels()
-    if not pathIsDirectory("models") then
-        return false, "models directory not found"
+    if not pathIsDirectory(AUTO_MODELS_FOLDER) then
+        return false, "directory not found: " .. AUTO_MODELS_FOLDER
     end
-    local filesAndFolders = pathListDir("models")
+    local filesAndFolders = pathListDir(AUTO_MODELS_FOLDER)
     if not filesAndFolders then
-        return false, "failed to list models directory"
+        return false, "failed to list directory: " .. AUTO_MODELS_FOLDER
     end
     for _, modelType in pairs(VALID_MODEL_TYPES) do
-        local modelTypePath = "models/" .. modelType
+        local modelTypePath = AUTO_MODELS_FOLDER .. "/" .. modelType
         if pathIsDirectory(modelTypePath) then
             local filesAndFoldersHere = pathListDir(modelTypePath)
             if not filesAndFoldersHere then
@@ -199,10 +206,15 @@ end
 local result, failReason = loadModels()
 if not result then
     srvLog("[loadModels] " .. failReason)
-    outputDebugString("Failed to load models. See server log for details.", 1)
+    outputDebugString("Failed to load new models. See server log for details.", 1)
     return
 end
 
+-- .................................................................
+-- ...... Load new models from modList table .......................
+-- .................................................................
+
+-- This function is also used by external function to add models
 local function parseModListEntry(modelType, modInfo)
     if (type(modInfo.id) ~= "number") or (type(modInfo.base_id) ~= "number") or (not modInfo.path) then
         return false,
@@ -278,7 +290,9 @@ local function parseModListEntry(modelType, modInfo)
     if modInfo.alphaTransparency then
         settings["enableDFFAlphaTransparency"] = true
     end
-    -- Note: 'metaDownloadFalse' handling is omitted as per original code comment
+    if modInfo.metaDownloadFalse then
+        settings["downloadFilesOnDemand"] = true
+    end
 
     local ncExt = getNandoCryptExtension()
 
@@ -327,17 +341,27 @@ local function parseModListEntry(modelType, modInfo)
     }
 end
 local function loadModelsViaModList()
+    -- Loading modList is optional, so we return nil to ignore if not found
     if type(modList) ~= "table" then
-        return false, "modList is not a table"
+        return nil
     end
 
     local countLoaded = 0
-    local validModelTypes = { ped = true, vehicle = true, object = true }
 
-    -- Iterate over each model type (ped, vehicle, object) in modList
+    -- Iterate over each model type in modList
     for modelType, modelList in pairs(modList) do
-        if not validModelTypes[modelType] or type(modelList) ~= "table" then
-            return false, "Invalid model type or model list in modList: Index " .. tostring(modelType)
+        local validType = false
+        for _, vType in pairs(VALID_MODEL_TYPES) do
+            if modelType == vType then
+                validType = true
+                break
+            end
+        end
+        if not validType then
+            return false, "Invalid model type in modList: " .. tostring(modelType)
+        end
+        if type(modelList) ~= "table" then
+            return false, "Invalid Model list in '" .. modelType .. "' modList"
         end
 
         -- Iterate over each individual model entry in the list
@@ -371,6 +395,12 @@ if result2 == false then
     outputDebugString("Failed to load models via modList. See server log for details.", 1)
     return
 end
+
+baseModelCounts = {}
+
+-- .................................................................
+-- ...... Logic for syncing custom models with clients .............
+-- .................................................................
 
 -- Save elementModels in root element data to restore on next startup
 addEventHandler("onResourceStop", resourceRoot, function()
@@ -407,22 +437,46 @@ addEventHandler("onElementDestroy", root, function()
     end
 end)
 
---
--- The following 2 add & remove functions were inspired by their newmodels v3 versions.
---
 
-function addExternalModels(listToAdd)
+
+-- .......................................................................
+-- ...... Exported functions for adding/removing models dynamically ......
+-- .......................................................................
+
+local function sendListToAllPlayers()
+    for _, player in pairs(getElementsByType("player")) do
+        sendCustomModelsToPlayer(player)
+    end
+    srvLog("Sent updated customModels table to online players.")
+end
+
+-- The following 2 add & remove functions were inspired by their newmodels v3 versions.
+
+function addExternalModels(listToAdd, asyncLoad)
     if type(listToAdd) ~= "table" then
         return false, "invalid arg 1: not a table"
     end
-    local countLoaded = 0
-    for _, modInfo in pairs(listToAdd) do
+    if #listToAdd == 0 then
+        return false, "invalid arg 1: empty table"
+    end
+    if type(listToAdd[1]) ~= "table" then
+        return false, "invalid arg 1: first entry is not a table"
+    end
+    local srcResName = sourceResource and getResourceName(sourceResource) or "unknown"
+    local function parseOneListEntry(modInfo)
         if type(modInfo) ~= "table" then
             return false, "Found a modInfo entry that is not a table in listToAdd"
         end
         local modelType = modInfo.type
-        if not (modelType == "ped" or modelType == "vehicle" or modelType == "object") then
-            return false, "Invalid or missing model type in modInfo entry in listToAdd"
+        local validType = false
+        for _, vType in pairs(VALID_MODEL_TYPES) do
+            if modelType == vType then
+                validType = true
+                break
+            end
+        end
+        if not validType then
+            return false, "Invalid model type in modInfo entry: " .. tostring(modelType)
         end
         local parsedInfo, parsingFailReason = parseModListEntry(modelType, modInfo)
         if not parsedInfo then
@@ -437,15 +491,34 @@ function addExternalModels(listToAdd)
             name = parsedInfo.modName,
             settings = parsedInfo.settings,
         }
-        countLoaded = countLoaded + 1
+        return true
     end
-
-    srvLog("Added " .. countLoaded .. " external models via addExternalModels.")
-    srvLog("Sending new customModels to online players...")
-    for _, player in pairs(getElementsByType("player")) do
-        sendCustomModelsToPlayer(player)
+    if (asyncLoad == true) then
+        srvLog("Beginning async addition of new models from '" .. srcResName .. "' via addExternalModels...")
+        Async:foreach(listToAdd, function(modInfo)
+                local parsed, parsingFailReason = parseOneListEntry(modInfo)
+                if not parsed then
+                    srvLog("Failed to add one external model via addExternalModels (async): " .. parsingFailReason)
+                end
+            end,
+            function()
+                srvLog("Finished adding new models from '" .. srcResName .. "' via addExternalModels (async).")
+                sendListToAllPlayers()
+            end)
+        return true
+    else
+        local countLoaded = 0
+        for _, modInfo in pairs(listToAdd) do
+            local parsed, parsingFailReason = parseOneListEntry(modInfo)
+            if not parsed then
+                return false, parsingFailReason
+            end
+            countLoaded = countLoaded + 1
+        end
+        srvLog("Added " .. countLoaded .. " new models from '" .. srcResName .. "' via addExternalModels.")
+        sendListToAllPlayers()
+        return true
     end
-    return true
 end
 
 function removeExternalModels(listToRemove)

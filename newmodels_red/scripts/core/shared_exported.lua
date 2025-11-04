@@ -110,16 +110,16 @@ function isDefaultID(elementType, id)
     if not elementType then
         -- Check all IDs
         if newmodelsUtils.isDefaultObjectID(id) then
-            return true
+            return true, "object"
         end
         for _, id2 in pairs(IDS_PEDS) do
             if id2 == id then
-                return true
+                return true, "ped"
             end
         end
         for _, id2 in pairs(IDS_VEHICLES) do
             if id2 == id then
-                return true
+                return true, "vehicle"
             end
         end
     elseif elementType == "ped" or elementType == "player" then
@@ -180,6 +180,23 @@ newmodelsUtils.createElementWithModel = function(elementType, modelid, ...)
     return false
 end
 
+if not IS_IMPORTED then
+    newmodelsUtils.resourceElements = {}
+    -- In MTA Elements are always destroyed when the resource that created them is stopped: this cannot be changed.
+    -- So we use an internal table to keep track of elements created by resources.
+    newmodelsUtils.assignElementToResource = function(theElement, theResource)
+        if not theResource then return end
+        local resRoot = getResourceRootElement(theResource)
+        if not resRoot then return end
+        if not isElement(theElement) then return end
+        local theResName = getResourceName(theResource)
+        if not newmodelsUtils.resourceElements[theResName] then
+            newmodelsUtils.resourceElements[theResName] = {}
+        end
+        newmodelsUtils.resourceElements[theResName][#newmodelsUtils.resourceElements[theResName] + 1] = theElement
+    end
+end
+
 newmodelsUtils.createElementSafe = function(elementType, id, ...)
     local baseModel = getBaseModelIdFromCustomModelId(id)
     local element = newmodelsUtils.createElementWithModel(elementType, baseModel, ...)
@@ -190,6 +207,7 @@ newmodelsUtils.createElementSafe = function(elementType, id, ...)
         -- Custom model
         newmodelsUtils.setElementCustomModel(element, id)
     end
+    if not IS_IMPORTED then newmodelsUtils.assignElementToResource(element, sourceResource) end
     return element
 end
 
@@ -307,5 +325,25 @@ if not isClientsideScript then
             setElementModel(thePlayer, skinId)
         end
         return success
+    end
+end
+
+if not IS_IMPORTED then
+    newmodelsUtils.handleResourceStop = function(stoppedRes)
+        local theResName = getResourceName(stoppedRes)
+        if type(newmodelsUtils.resourceElements) == "table" and type(newmodelsUtils.resourceElements[theResName]) == "table" then
+            for i = 1, #newmodelsUtils.resourceElements[theResName] do
+                local element = newmodelsUtils.resourceElements[theResName][i]
+                if isElement(element) then
+                    destroyElement(element)
+                end
+            end
+            newmodelsUtils.resourceElements[theResName] = nil
+        end
+    end
+    if isClientsideScript then
+        addEventHandler("onClientResourceStop", root, newmodelsUtils.handleResourceStop)
+    else
+        addEventHandler("onResourceStop", root, newmodelsUtils.handleResourceStop)
     end
 end

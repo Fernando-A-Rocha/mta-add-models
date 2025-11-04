@@ -6,23 +6,19 @@
       https://nightly.mtasa.com  -->
     <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"></min_mta_version>
 
-    <!-- MODEL FILES: ....................................................................... -->
+    <!-- AUTO NEW MODEL FILES: ........................................................... -->
     <file src="models/**/*.col"/>
     <file src="models/**/*.txd"/>
     <file src="models/**/*.dff"/>
 
+    <!-- OPTIONAL FEATURES: .............................................................. -->
+
+    <!-- Alternative way of loading new models -->
+    <!-- Inspired by mod_list from newmodels v3 -->
+    <script src="models_alt/s_mod_list.lua" type="server"/>
     <file src="models_alt/**/*.col"/>
     <file src="models_alt/**/*.txd"/>
     <file src="models_alt/**/*.dff"/>
-
-    <!-- OPTIONAL FEATURES: .............................................................. -->
-
-    <!-- Update Checker -->
-    <!-- Recommended! Please keep this to be warned of new releases -->
-    <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
-    <aclrequest>
-        <right name="function.fetchRemote" access="true"/>
-    </aclrequest>
 
     <!-- NandoCrypt Support (this can be removed if you do not use NandoCrypt) -->
     <script src="scripts/optional/nando_crypt/nando_decrypter" type="client" cache="false"/>
@@ -38,18 +34,23 @@
     <script src="scripts/optional/debug/c_debug.lua" type="client"/>
     <script src="scripts/optional/debug/s_debug.lua" type="server"/>
 
-    <!-- Alternative way of loading new models -->
-    <!-- Inspired by mod_list from newmodels v3 -->
-    <script src="models_alt/s_mod_list.lua" type="server"/>
+    <!-- Update Checker -->
+    <!-- Recommended! Please keep this to be warned of new releases -->
+    <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
+    <aclrequest>
+        <right name="function.fetchRemote" access="true"/>
+    </aclrequest>
 
     <!-- SYSTEM: ....................................................................... -->
 
     <!-- Main Scripts -->
+    <script src="scripts/core/lib/server_async.lua" type="server"/>
     <script src="scripts/core/shared_local.lua" type="shared"/>
     <script src="scripts/core/shared_exported.lua" type="shared"/>
     <script src="scripts/core/shared_importfunc.lua" type="shared"/>
     <script src="scripts/core/client_logic.lua" type="client"/>
     <script src="scripts/core/server_logic.lua" type="server"/>
+    <script src="scripts/core/server_dev.lua" type="server"/>
 
     <!-- Exported functions [shared] -->
     <export function="import" type="shared"/>

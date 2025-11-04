@@ -7,10 +7,14 @@
      description="uses newmodels functions to add all SA-MP objects"
      version="6.0.0"
      type="script" />
+    
+    <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
+      https://nightly.mtasa.com  -->
+    <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"/>
+
+    <file src="models/*.col" download="false"/>
+    <file src="models/*.txd" download="false"/>
+    <file src="models/*.dff" download="false"/>
 
     <script type="server" src="server.lua" />
-
-    <file src="models/*.col"></file>
-    <file src="models/*.txd"></file>
-    <file src="models/*.dff"></file>
 </meta>

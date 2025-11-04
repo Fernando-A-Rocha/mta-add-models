@@ -44,8 +44,8 @@
 -- New models need to be grouped by type in the 'modList' table below.
 --
 --   - 'ped' (skins for players and peds)
---   - 'vehicle'
 --   - 'object' (for objects, buildings and pickups)
+--   - 'vehicle'
 --
 
 modList = {

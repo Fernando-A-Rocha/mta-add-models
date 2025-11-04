@@ -1461,10 +1461,6 @@ addEventHandler("onResourceStart", resourceRoot, function()
 		}
 	end
 
-	local success, failReason = exports["newmodels_red"]:addExternalModels(listToAdd)
-	if not success then
-		outputDebugString("[sampobj_red] Failed to add models: " .. tostring(failReason), 1)
-		return
-	end
-	outputDebugString("[sampobj_red] Successfully added SAMP object models.")
+	-- Async loading
+	exports["newmodels_red"]:addExternalModels(listToAdd, true)
 end, false)
