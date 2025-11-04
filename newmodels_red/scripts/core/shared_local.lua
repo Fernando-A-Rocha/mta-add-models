@@ -32,6 +32,13 @@ customModels = {}
 -- Shared element models table:
 elementModels = {}
 
+-- These default values can be overridden per model.
+DEFAULT_AUTO_MODEL_SETTINGS = {
+    ["disableAutoFree"] = false,
+    ["disableTXDTextureFiltering"] = false,
+    ["enableDFFAlphaTransparency"] = false,
+}
+
 function getCustomModels()
     return customModels
 end

@@ -12,22 +12,115 @@ local function srvLog(str)
     outputServerLog("[" .. RESOURCE_NAME .. "] " .. str)
 end
 
--- .................................................................
--- ...... Load new models automatically from folder structure ......
--- .................................................................
-
 local function stringStartswith(str, start)
     return str:sub(1, #start) == start
 end
 
+-- .................................................................
+-- ...... Load new models automatically from folder structure ......
+-- .................................................................
+
 -- Model settings (from .txt files overriding defaults):
-local DECLARATIVE_SETTINGS = { "disableAutoFree", "disableTXDTextureFiltering", "enableDFFAlphaTransparency",
-    "downloadFilesOnDemand" }
+local DECLARATIVE_SETTINGS = { "disableAutoFree", "disableTXDTextureFiltering", "enableDFFAlphaTransparency" }
 --   - txd=path
 --   - dff=path
 --   - col=path
 --   - lodDistance=number
 --   - settings=path
+
+local function parseFilesFromMeta()
+    local mxmlFile = xmlLoadFile("meta.xml", true)
+    if not mxmlFile then
+        return false, "failed to load meta.xml"
+    end
+    local nodes = xmlNodeGetChildren(mxmlFile)
+    if not nodes then
+        xmlUnloadFile(mxmlFile)
+        return false, "failed to get meta.xml children nodes"
+    end
+    local filePaths = {}
+    for _, node in pairs(nodes) do
+        if xmlNodeGetName(node) == "file" then
+            local srcAttr = xmlNodeGetAttribute(node, "src")
+            if srcAttr and type(srcAttr) == "string" then
+                local downloadAttr = xmlNodeGetAttribute(node, "download")
+                filePaths[srcAttr] = { downloadOnDemand = (downloadAttr == "false") }
+            end
+        end
+    end
+    xmlUnloadFile(mxmlFile)
+    return filePaths
+end
+
+local metaFilePaths, metaFailReason = parseFilesFromMeta()
+if not metaFilePaths then
+    srvLog("[parseFilesFromMeta] " .. metaFailReason)
+    outputDebugString("Failed to load new models. See server log for details.", 1)
+    return
+end
+
+-- Basic glob to Lua pattern conversion
+function globToPattern(glob, sep)
+    sep = sep or "/"
+
+    local function escape_lua_pattern(s)
+        return s:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+    end
+
+    local pat = ""
+    local i = 1
+    local len = #glob
+    while i <= len do
+        local c = glob:sub(i, i)
+        if c == "*" then
+            if i + 1 <= len and glob:sub(i + 1, i + 1) == "*" then
+                pat = pat .. ".*"
+                i = i + 2
+            else
+                pat = pat .. "[^" .. escape_lua_pattern(sep) .. "]*"
+                i = i + 1
+            end
+        elseif c == "?" then
+            pat = pat .. "[^" .. escape_lua_pattern(sep) .. "]"
+            i = i + 1
+        else
+            pat = pat .. escape_lua_pattern(c)
+            i = i + 1
+        end
+    end
+
+    pat = "^" .. pat .. "$"
+    return pat
+end
+
+--- Checks if a given file path matches any glob pattern defined in filePaths
+local function matchesMetaFile(filePath, filePaths)
+    for src, data in pairs(filePaths) do
+        local luaPattern = globToPattern(src)
+        -- print("Glob:", src)
+        -- print("Pattern:", luaPattern)
+
+        -- The Lua pattern matching function
+        if filePath:match(luaPattern) then
+            -- print(filePath, "Matched with pattern:", luaPattern)
+            return true, data
+        end
+    end
+    -- print(filePath, "No match found")
+    return false, nil
+end
+
+local function isAnyFileDownloadOnDemand(filePaths)
+    for _, filePath in pairs(filePaths) do
+        if type(filePath) == "string" then
+            local matches, data = matchesMetaFile(filePath, metaFilePaths)
+            if matches and data and data.downloadOnDemand then
+                return true
+            end
+        end
+    end
+    return false
+end
 
 local function parseModelSettings(customModel, customModelInfo, thisFullPath, isFromSettingsOption)
     local customModelSettings = {}
@@ -188,6 +281,10 @@ local function loadModels()
                         for customModel, info in pairs(customModelInfo) do
                             if not info.name then
                                 baseModelCounts[baseModel] = (baseModelCounts[baseModel] or 0) + 1
+                            end
+                            local settings = info.settings or {}
+                            if isAnyFileDownloadOnDemand({ info.dff, info.txd, info.col }) then
+                                settings["downloadFilesOnDemand"] = true
                             end
                             customModels[customModel] = {
                                 type = modelType,

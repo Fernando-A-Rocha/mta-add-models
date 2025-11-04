@@ -27,7 +27,7 @@
 --
 --     		» 'lodDistance' : custom LOD distance in GTA units (number), see possible values https://wiki.multitheftauto.com/wiki/EngineSetModelLODDistance
 --     		» 'ignoreTXD', 'ignoreDFF', 'ignoreCOL' : if true, the script won't try to load TXD/DFF/COL for the mod
---    		» 'metaDownloadFalse' : if true, the mod will be only be downloaded when needed (when trying to set model)
+--    		» 'metaDownloadFalse' : if true, the mod will be only be downloaded when needed (when trying to set model); files must contain download="false" in meta.xml
 --     		» 'disableAutoFree' : if true, the allocated mod ID will not be freed when no element streamed in is no longer using the mod ID
 --      		This causes the mod to stay in memory, be careful when enabling for big mods
 --     		» 'filteringEnabled' (engineLoadTXD)

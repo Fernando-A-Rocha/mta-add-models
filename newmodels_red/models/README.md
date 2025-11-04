@@ -14,17 +14,13 @@ See the [example files](/newmodels_red/models/) to visualize the structure of th
 
 ---
 
-*Optionally*, models can be customized:
-
-- With the `s_model_settings.lua` global model settings file;
-- With a `New ID.txt` file.
+*Optionally*, models can be customized with `New ID.txt` files placed alongside the model files.
 
 The available options are (any line that doesn't contain a valid setting string is ignored):
 
 - `disableAutoFree`
 - `disableTXDTextureFiltering`
 - `enableDFFAlphaTransparency`
-- `downloadFilesOnDemand`
 - `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
 - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
 - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)

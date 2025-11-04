@@ -38,11 +38,11 @@
 
     <!-- REQUIRED: ....................................................................... -->
 
-    <!-- Model Files & Config -->
+    <!-- Model Files -->
     <file src="models/**/*.col"/>
     <file src="models/**/*.txd"/>
     <file src="models/**/*.dff"/>
-    <script src="models/s_model_settings.lua" type="server"/>
+    
     <!-- Main Scripts -->
     <script src="scripts/core/lib/server_async.lua" type="server"/>
     <script src="scripts/core/shared_local.lua" type="shared"/>
