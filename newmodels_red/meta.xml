@@ -45,6 +45,7 @@
     
     <!-- Main Scripts -->
     <script src="scripts/core/lib/server_async.lua" type="server"/>
+    <script src="scripts/core/shared_config.lua" type="shared"/>
     <script src="scripts/core/shared_local.lua" type="shared"/>
     <script src="scripts/core/shared_exported.lua" type="shared"/>
     <script src="scripts/core/shared_importfunc.lua" type="shared"/>

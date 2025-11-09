@@ -397,7 +397,7 @@ local function parseModListEntry(modelType, modInfo)
         settings["downloadFilesOnDemand"] = true
     end
 
-    local ncExt = getNandoCryptExtension()
+    local ncExt = NANDOCRYPT_EXT
 
     -- DFF check
     if dff_path then
