@@ -170,12 +170,11 @@ local function onLoadedModFile(customModel, fileType, filePath, modElement, isRe
         isReused = isReused,
     }
 
-    local expectingLoadCounter = queuedInfo.expectingLoadCounter - 1
-    if expectingLoadCounter == 0 then
-        loadingQueue[customModel].expectingLoadCounter = nil
+    loadingQueue[customModel].countModFilesLoaded = loadingQueue[customModel].countModFilesLoaded + 1
+
+    if loadingQueue[customModel].countModFilesLoaded == #queuedInfo.filesList then
+        loadingQueue[customModel].countModFilesLoaded = nil
         finishLoadCustomModel(customModel)
-    else
-        loadingQueue[customModel].expectingLoadCounter = expectingLoadCounter
     end
 end
 
@@ -255,20 +254,10 @@ local function beginLoadCustomModelElements(customModel)
         end
     end
 
-    local expectingLoadCounter = 0
-    if colPath then expectingLoadCounter = expectingLoadCounter + 1 end
-    if txdPath then expectingLoadCounter = expectingLoadCounter + 1 end
-    if dffPath then expectingLoadCounter = expectingLoadCounter + 1 end
-    loadingQueue[customModel].expectingLoadCounter = expectingLoadCounter
+    loadingQueue[customModel].countModFilesLoaded = 0
 
-    if colPath then
-        loadOneMod("col", colPath)
-    end
-    if txdPath then
-        loadOneMod("txd", txdPath)
-    end
-    if dffPath then
-        loadOneMod("dff", dffPath)
+    for _, fileInfo in pairs(queuedInfo.filesList) do
+        loadOneMod(fileInfo.type, fileInfo.path)
     end
 end
 
@@ -289,16 +278,27 @@ addEventHandler("onClientFileDownloadComplete", resourceRoot, function(filePath,
         if queuedInfo.phase == LOADING_QUEUE_PHASES.DOWNLOAD_FILES then
             for _, fileInfo in pairs(queuedInfo.filesList) do
                 if fileInfo.path == filePath then
-                    if not success then
-                        local downloadRetries = fileInfo.downloadRetries or 0
-                        if downloadRetries < DOWNLOAD_FILE_MAX_RETRIES then
-                            downloadRetries = downloadRetries + 1
-                            fileInfo.downloadRetries = downloadRetries
-                            -- print(
-                            -- "/!\\ Retrying download in " ..
-                            --     (math.ceil(DOWNLOAD_RETRY_WAIT_DELAY_MS / 1000)) .. " s for custom model", customModel,
-                            --     "file:", filePath, "Retry #",
-                            --     downloadRetries)
+                    if (not success) then
+                        if (fileInfo.downloadRetries or 0) < DOWNLOAD_FILE_MAX_RETRIES then
+                            fileInfo.downloadRetries = (fileInfo.downloadRetries or 0) + 1
+                            print(
+                                "/!\\ Retrying download (" ..
+                                (fileInfo.downloadRetries) .. "/" .. DOWNLOAD_FILE_MAX_RETRIES .. ") in " ..
+                                (math.ceil(DOWNLOAD_RETRY_WAIT_DELAY_MS / 1000)) .. " second(s) for custom model",
+                                customModel,
+                                "file:", filePath)
+                            -- Inform the client (console, useful log)
+                            outputConsole(
+                                ("[newmodels_red] Retrying download (%d/%d) in %d second(s) for custom model %s file: %s")
+                                :
+                                format(
+                                    fileInfo.downloadRetries,
+                                    DOWNLOAD_FILE_MAX_RETRIES,
+                                    math.ceil(DOWNLOAD_RETRY_WAIT_DELAY_MS / 1000),
+                                    tostring(customModel),
+                                    tostring(filePath)
+                                )
+                            )
                             setTimer(function()
                                 downloadFile(filePath)
                             end, DOWNLOAD_RETRY_WAIT_DELAY_MS, 1)
@@ -374,10 +374,6 @@ local function beginLoadCustomModel(customModel, elementToApply)
         filesList = filesList,
         -- Start in Phase 1
         phase = LOADING_QUEUE_PHASES.DOWNLOAD_FILES,
-        -- These will be set to { path=string, element=col/txd/dff, isReused=true/false } when loaded
-        col = nil,
-        txd = nil,
-        dff = nil,
     }
 
     beginDownloadModelFiles(customModel)
