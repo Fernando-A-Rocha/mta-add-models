@@ -20,11 +20,12 @@ local function spawnVehicleByID(vehicleID)
     end
 
     local x, y, z = getElementPosition(localPlayer)
-    local _, _ rot = getElementRotation(localPlayer)
+    local _, _
+    rot = getElementRotation(localPlayer)
     local offsetDistance = 5
     local spawnX = x + offsetDistance * math.sin(math.rad(-rot))
     local spawnY = y + offsetDistance * math.cos(math.rad(-rot))
-    triggerServerEvent("newmodels-test_vehicles:requestVehicleSpawn", resourceRoot, localPlayer, vehicleID, spawnX, spawnY, z, rot)
+    triggerServerEvent("newmodels-test_vehicles:requestVehicleSpawn", resourceRoot, vehicleID, spawnX, spawnY, z, rot)
 end
 
 local function requestVehicleSpawn()

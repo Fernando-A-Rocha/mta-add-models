@@ -1,0 +1,82 @@
+<meta>
+    <info author="FernandoMTA" version="6.0.0" type="script" name="newmodels_red"
+    description="Codename Newmodels Red - Adds new vehicle/ped/object models, automatically synced with all players."/>
+    
+    <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
+      https://nightly.mtasa.com  -->
+    <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"></min_mta_version>
+
+    <!-- OPTIONAL FEATURES: .............................................................. -->
+
+    <!-- Alternative way of loading new models -->
+    <!-- Inspired by mod_list from newmodels v3 -->
+    <script src="models_alt/s_mod_list.lua" type="server"/>
+    <file src="models_alt/**/*.col" download="false"/>
+    <file src="models_alt/**/*.txd" download="false"/>
+    <file src="models_alt/**/*.dff" download="false"/>
+
+    <!-- NandoCrypt Support (this can be removed if you do not use NandoCrypt) -->
+    <script src="scripts/optional/nando_crypt/nando_decrypter" type="client" cache="false"/>
+    <file src="models/**/*.col.nandocrypt"/>
+    <file src="models/**/*.txd.nandocrypt"/>
+    <file src="models/**/*.dff.nandocrypt"/>
+    <file src="models_alt/**/*.col.nandocrypt" download="false"/>
+    <file src="models_alt/**/*.txd.nandocrypt" download="false"/>
+    <file src="models_alt/**/*.dff.nandocrypt" download="false"/>
+
+    <!-- Debugging / Testing (remove this for a production server) -->
+    <script src="scripts/optional/debug/g_debug.lua" type="shared"/>
+    <script src="scripts/optional/debug/c_debug.lua" type="client"/>
+    <script src="scripts/optional/debug/s_debug.lua" type="server"/>
+
+    <!-- Update Checker -->
+    <!-- Recommended! Please keep this to be warned of new releases -->
+    <script src="scripts/optional/update_checker/s_update_checker.lua" type="server"/>
+    <aclrequest>
+        <right name="function.fetchRemote" access="true"/>
+    </aclrequest>
+
+    <!-- REQUIRED: ....................................................................... -->
+
+    <!-- Model Files -->
+    <file src="models/**/*.col"/>
+    <file src="models/**/*.txd"/>
+    <file src="models/**/*.dff"/>
+    
+    <!-- Main Scripts -->
+    <script src="scripts/core/lib/server_async.lua" type="server"/>
+    <script src="scripts/core/shared_config.lua" type="shared"/>
+    <script src="scripts/core/shared_local.lua" type="shared"/>
+    <script src="scripts/core/shared_exported.lua" type="shared"/>
+    <script src="scripts/core/shared_importfunc.lua" type="shared"/>
+    <script src="scripts/core/client_logic.lua" type="client"/>
+    <script src="scripts/core/server_logic.lua" type="server"/>
+    <script src="scripts/core/server_dev.lua" type="server"/>
+
+    <!-- Exported functions [shared] -->
+    <export function="import" type="shared"/>
+    <export function="getCustomModels" type="shared"/>
+    <export function="getElementModels" type="shared"/>
+    <export function="getElementCustomModel" type="shared"/>
+    <export function="setElementCustomModel" type="shared"/>
+    <export function="isDefaultID" type="shared"/>
+    <export function="createObject" type="shared"/>
+    <export function="createVehicle" type="shared"/>	
+    <export function="getVehicleType" type="shared"/>	
+    <export function="createPed" type="shared"/>
+    <export function="createPickup" type="shared"/>
+    <export function="spawnPlayer" type="server"/>
+    <export function="setPickupType" type="shared"/>
+    <export function="setElementModel" type="shared"/>
+    <export function="getElementModel" type="shared"/>
+    <export function="getElementBaseModel" type="shared"/>
+    <export function="getBaseModelIdFromCustomModelId" type="shared"/>
+    <export function="getCustomModelName" type="shared"/>
+    <export function="isValidElement" type="shared"/>
+    <export function="getValidElementTypes" type="shared"/>
+    <export function="isCustomModelCompatible" type="shared"/>
+    
+    <!-- Exported functions [server only] -->
+    <export function="addExternalModels" type="server"/>
+    <export function="removeExternalModels" type="server"/>
+</meta>

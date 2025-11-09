@@ -1,0 +1,20 @@
+<meta>
+    <!-- This resource is available in the repository below.
+    Its version matches the main newmodels version!
+    https://github.com/Fernando-A-Rocha/mta-add-models -->
+
+    <info author="Fernando" name="SAMP Objects Red"
+     description="uses newmodels functions to add all SA-MP objects"
+     version="6.0.0"
+     type="script" />
+    
+    <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
+      https://nightly.mtasa.com  -->
+    <min_mta_version client="1.6.0-9.22649.0" server="1.6.0-9.22649.0"/>
+
+    <file src="models/*.col" download="false"/>
+    <file src="models/*.txd" download="false"/>
+    <file src="models/*.dff" download="false"/>
+
+    <script type="server" src="server.lua" />
+</meta>
