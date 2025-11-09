@@ -1,9 +1,12 @@
 addEvent("newmodels_red:receiveCustomModels", true)
 addEvent("newmodels_red:setElementCustomModel", true)
+addEvent("newmodels_red:preDownloadNewModels", true)
 
 addEvent("newmodels_red:internal:onModelFilesReady", false)
 
 loadedModels = {}
+
+local filesBeingPreDownloaded = {}
 
 local reusableModelElements = {}
 local loadingQueue = {}
@@ -273,6 +276,16 @@ end
 
 -- Handle file downloads requested by this resource
 addEventHandler("onClientFileDownloadComplete", resourceRoot, function(filePath, success)
+    if filesBeingPreDownloaded[filePath] then
+        if not success then
+            outputDebugString(
+                "Pre-download of file '" .. filePath .. "' failed.", 1)
+        else
+            print("Pre-download of file '" .. filePath .. "' succeeded.")
+        end
+        filesBeingPreDownloaded[filePath] = nil
+        return
+    end
     for customModel, queuedInfo in pairs(loadingQueue) do
         local countFilesDownloaded = queuedInfo.countFilesDownloaded
         if queuedInfo.phase == LOADING_QUEUE_PHASES.DOWNLOAD_FILES then
@@ -535,3 +548,39 @@ addEventHandler("onClientResourceStop", resourceRoot, function()
         freeAllocatedModelNow(customModel)
     end
 end, false)
+
+-- Custom event to allow developer to force download some files at a certain moment
+-- Useful for pre-downloading files before they are needed
+-- Usage: triggerEvent("newmodels_red:preDownloadNewModels", localPlayer, { <customModelId1>, <customModelId2>, ... })
+local function requestPreDownloadNewModels(customModelList)
+    if type(customModelList) ~= "table" then
+        outputDebugString("requestPreDownloadNewModels: Invalid arg(1), table expected", 2)
+        return
+    end
+    for _, customModel in pairs(customModelList) do
+        if type(customModel) ~= "number" then
+            outputDebugString("requestPreDownloadNewModels: Invalid custom model ID: " .. tostring(customModel), 2)
+        elseif not customModels[customModel] then
+            outputDebugString(
+                "requestPreDownloadNewModels: Custom model ID " .. tostring(customModel) .. " does not exist.", 2)
+        elseif loadingQueue[customModel] then
+            outputDebugString(
+                "requestPreDownloadNewModels: Custom model ID " .. tostring(customModel) .. " is already loading...", 2)
+        else
+            local customInfo = customModels[customModel]
+            local filesList = {}
+            if customInfo.col then filesList[#filesList + 1] = { type = "col", path = customInfo.col } end
+            if customInfo.txd then filesList[#filesList + 1] = { type = "txd", path = customInfo.txd } end
+            if customInfo.dff then filesList[#filesList + 1] = { type = "dff", path = customInfo.dff } end
+
+            for _, fileInfo in pairs(filesList) do
+                filesBeingPreDownloaded[fileInfo.path] = {
+                    customModel = customModel,
+                }
+                downloadFile(fileInfo.path)
+            end
+        end
+    end
+end
+
+addEventHandler("newmodels_red:preDownloadNewModels", localPlayer, requestPreDownloadNewModels, false)
