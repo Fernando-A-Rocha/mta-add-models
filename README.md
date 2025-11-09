@@ -1,4 +1,4 @@
-# `Newmodels v6 Red 🟥`
+# `Newmodels v6 Red 🍒`
 
 This MTA resource makes use of the clientside allocated models ([engineRequestModel](https://wiki.multitheftauto.com/wiki/EngineRequestModel) and related features) to add new peds (skins), vehicles and objects:
 

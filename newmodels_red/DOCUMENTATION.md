@@ -1,4 +1,4 @@
-# `Newmodels v6 Red 🟥` Documentation
+# `Newmodels v6 Red 🍒` Documentation
 
 ## Requirements
 

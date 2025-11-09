@@ -1,6 +1,6 @@
 # Migrating from previous `Newmodels` versions
 
-This article explains how to migrate from previous versions of newmodels to the newest `Newmodels v6 Red 🟥` version.
+This article explains how to migrate from previous versions of newmodels to the newest `Newmodels v6 Red 🍒` version.
 
 ## Migrating from v4 and v5
 
