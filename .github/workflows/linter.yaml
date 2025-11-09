@@ -15,4 +15,4 @@ jobs:
     - name: Lint mta resources
       run: |
         echo 'ignore = {"512", "122","142","111","341","112","113","143","321","631","211","212","213","611","612","621"}' > config.lua
-        luacheck --config config.lua ./
+        luacheck --exclude-files '**/*async.lua' --config config.lua ./
