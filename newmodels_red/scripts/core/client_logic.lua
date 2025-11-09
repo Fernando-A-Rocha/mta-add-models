@@ -1,5 +1,7 @@
 addEvent("newmodels_red:receiveCustomModels", true)
 addEvent("newmodels_red:setElementCustomModel", true)
+
+-- For developers:
 addEvent("newmodels_red:preDownloadNewModels", true)
 
 addEvent("newmodels_red:internal:onModelFilesReady", false)
