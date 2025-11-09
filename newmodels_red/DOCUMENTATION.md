@@ -30,7 +30,7 @@
 | **Can I use the new models in my existing scripts by calling the exported functions directly?**  | Yes, you can call the exported functions directly in your scripts, without using `loadstring`.                                                                                                             |
 | **Can I use the new models in both server-side and client-side scripts?**                        | Yes, the exported functions are shared, meaning you can use them in both client and server side scripts. However, their behaviors are different.                                                           |
 | **Why is are new models added client-side in MTA and this logic doesn't exist server-side?**                      | MTA model allocation happens client-side, so the server has no concept of any new IDs. Server-side model allocation is still not implemented on MTA (but may be in the future 😉), so this system provides a way to work around this limitation. |
-| **Are there any premade modpacks for new models that I can drag & drop to my server?**                      | Sure, the community has created many new object, vehicle and skin mods over the years. You can search for these models online. You can find more information about adding all of SA-MP's objects [on this page](./SAMP_OBJ.md) |
+| **Are there any premade modpacks for new models that I can drag & drop to my server?**                      | Sure, the community has created many new object, vehicle and skin mods over the years. You can search for these models online. You can find more information about adding all of SA-MP's objects [on this document](/[examples]/sampobj_red/README.md) |
 
 ## Basics
 
