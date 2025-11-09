@@ -1,12 +1,18 @@
 addEvent("newmodels_red:receiveCustomModels", true)
 addEvent("newmodels_red:setElementCustomModel", true)
 
+addEvent("newmodels_red:internal:onModelFilesReady", false)
+
 loadedModels = {}
 
+local reusableModelElements = {}
 local loadingQueue = {}
 
-local reusableModelElements = {}
-
+local LOADING_QUEUE_PHASES = {
+    DOWNLOAD_FILES = 1,
+    LOAD_MODEL_ELEMENTS = 2,
+    APPLY_NEW_MODEL = 3,
+}
 local currFreeIdDelay = 9500   -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
@@ -46,18 +52,15 @@ local function finishLoadCustomModel(customModel)
     local queuedInfo = loadingQueue[customModel]
     if not queuedInfo then return end
 
-    local customInfo = customModels[customModel]
-    if not customInfo then return end
+    if queuedInfo.phase ~= LOADING_QUEUE_PHASES.LOAD_MODEL_ELEMENTS then return end
+    -- Move to phase 3
+    loadingQueue[customModel].phase = LOADING_QUEUE_PHASES.APPLY_NEW_MODEL
 
     local allocatedModel = queuedInfo.allocatedModel
     local col, txd, dff = queuedInfo.col, queuedInfo.txd, queuedInfo.dff
     local elementToApply = queuedInfo.elementToApply
 
-    local enableDFFAlphaTransparency = customInfo.settings.enableDFFAlphaTransparency
-
-    if (col and not engineReplaceCOL(col.element, allocatedModel))
-        or (txd and not engineImportTXD(txd.element, allocatedModel))
-        or (dff and not engineReplaceModel(dff.element, allocatedModel, enableDFFAlphaTransparency or nil)) then
+    local function cancelLoading()
         -- Destroy all non-reused col/txd/dff elements
         for _, modType in pairs({ "col", "txd", "dff" }) do
             local mod = queuedInfo[modType]
@@ -71,6 +74,20 @@ local function finishLoadCustomModel(customModel)
         engineFreeModel(allocatedModel)
 
         loadingQueue[customModel] = nil
+    end
+
+    local customInfo = customModels[customModel]
+    if not customInfo then
+        cancelLoading()
+        return
+    end
+
+    local enableDFFAlphaTransparency = customInfo.settings.enableDFFAlphaTransparency
+
+    if (col and not engineReplaceCOL(col.element, allocatedModel))
+        or (txd and not engineImportTXD(txd.element, allocatedModel))
+        or (dff and not engineReplaceModel(dff.element, allocatedModel, enableDFFAlphaTransparency or nil)) then
+        cancelLoading()
         outputDebugString("Failed to load custom model " .. customModel .. " due to col/txd/dff replacing failure", 1)
         return
     end
@@ -153,27 +170,30 @@ local function onLoadedModFile(customModel, fileType, filePath, modElement, isRe
         isReused = isReused,
     }
 
-    local expectingAmount = queuedInfo.expectingAmount - 1
-    if expectingAmount == 0 then
+    local expectingLoadCounter = queuedInfo.expectingLoadCounter - 1
+    if expectingLoadCounter == 0 then
+        loadingQueue[customModel].expectingLoadCounter = nil
         finishLoadCustomModel(customModel)
     else
-        loadingQueue[customModel].expectingAmount = expectingAmount
+        loadingQueue[customModel].expectingLoadCounter = expectingLoadCounter
     end
 end
 
-local function beginLoadCustomModel(customModel, elementToApply)
+local function beginLoadCustomModelElements(customModel)
+    local queuedInfo = loadingQueue[customModel]
+    if not queuedInfo then return end
+    if queuedInfo.phase ~= LOADING_QUEUE_PHASES.DOWNLOAD_FILES then return end
+    -- Move to phase 2
+    loadingQueue[customModel].phase = LOADING_QUEUE_PHASES.LOAD_MODEL_ELEMENTS
+
     local customInfo = customModels[customModel]
     if not customInfo then
-        outputDebugString("Trying to load custom model " .. customModel .. " that does not exist", 2)
-        return
-    end
-
-    if loadedModels[customModel] then
-        outputDebugString("Trying to load custom model " .. customModel .. " that is already loaded", 1)
+        loadingQueue[customModel] = nil
         return
     end
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
+    local disableTXDTextureFiltering = customInfo.settings.disableTXDTextureFiltering
 
     local decryptFunc = getNandoDecrypterFunction()
 
@@ -187,30 +207,18 @@ local function beginLoadCustomModel(customModel, elementToApply)
         -- Cancel as we cannot decrypt the files
         outputDebugString(
             "Failed to load custom model " .. customModel .. " due to missing NandoCrypt decrypter function", 1)
+        loadingQueue[customModel] = nil
         return
     end
-
-    local expectingAmount = 0
-    if colPath then expectingAmount = expectingAmount + 1 end
-    if txdPath then expectingAmount = expectingAmount + 1 end
-    if dffPath then expectingAmount = expectingAmount + 1 end
 
     local allocatedModel = engineRequestModel(customInfo.type, customInfo.baseModel)
     if not allocatedModel then
         outputDebugString("Failed to load custom model " .. customModel .. " due to model allocation failure", 1)
+        loadingQueue[customModel] = nil
         return
     end
 
-    loadingQueue[customModel] = {
-        allocatedModel = allocatedModel,
-        elementToApply = elementToApply,
-        expectingAmount = expectingAmount,
-        -- These will be set to { path=string, element=col/txd/dff, isReused=true/false } when loaded
-        col = nil,
-        txd = nil,
-        dff = nil,
-    }
-    local disableTXDTextureFiltering = customInfo.settings.disableTXDTextureFiltering
+    loadingQueue[customModel].allocatedModel = allocatedModel
 
     local function loadModElement(modType, modPath, modData)
         local modElement
@@ -247,6 +255,12 @@ local function beginLoadCustomModel(customModel, elementToApply)
         end
     end
 
+    local expectingLoadCounter = 0
+    if colPath then expectingLoadCounter = expectingLoadCounter + 1 end
+    if txdPath then expectingLoadCounter = expectingLoadCounter + 1 end
+    if dffPath then expectingLoadCounter = expectingLoadCounter + 1 end
+    loadingQueue[customModel].expectingLoadCounter = expectingLoadCounter
+
     if colPath then
         loadOneMod("col", colPath)
     end
@@ -256,8 +270,117 @@ local function beginLoadCustomModel(customModel, elementToApply)
     if dffPath then
         loadOneMod("dff", dffPath)
     end
+end
 
-    return allocatedModel
+local function onFailedToDownloadModFile(customModel, filePath)
+    local queuedInfo = loadingQueue[customModel]
+    if queuedInfo then
+        outputDebugString(
+            "downloadFile failed for '" .. filePath .. "' for custom model " .. customModel .. ", aborting load process.",
+            1)
+        loadingQueue[customModel] = nil
+    end
+end
+
+-- Handle file downloads requested by this resource
+addEventHandler("onClientFileDownloadComplete", resourceRoot, function(filePath, success)
+    for customModel, queuedInfo in pairs(loadingQueue) do
+        local countFilesDownloaded = queuedInfo.countFilesDownloaded
+        if queuedInfo.phase == LOADING_QUEUE_PHASES.DOWNLOAD_FILES then
+            for _, fileInfo in pairs(queuedInfo.filesList) do
+                if fileInfo.path == filePath then
+                    if not success then
+                        local downloadRetries = fileInfo.downloadRetries or 0
+                        if downloadRetries < DOWNLOAD_FILE_MAX_RETRIES then
+                            downloadRetries = downloadRetries + 1
+                            fileInfo.downloadRetries = downloadRetries
+                            -- print(
+                            -- "/!\\ Retrying download in " ..
+                            --     (math.ceil(DOWNLOAD_RETRY_WAIT_DELAY_MS / 1000)) .. " s for custom model", customModel,
+                            --     "file:", filePath, "Retry #",
+                            --     downloadRetries)
+                            setTimer(function()
+                                downloadFile(filePath)
+                            end, DOWNLOAD_RETRY_WAIT_DELAY_MS, 1)
+                            return
+                        end
+                        onFailedToDownloadModFile(customModel, filePath)
+                        return
+                    end
+                    -- print("Download success for custom model", customModel, "file:", filePath)
+
+                    countFilesDownloaded = countFilesDownloaded + 1
+                    loadingQueue[customModel].countFilesDownloaded = countFilesDownloaded
+
+                    if countFilesDownloaded == #queuedInfo.filesList then
+                        -- print("   All files downloaded for custom model", customModel)
+                        beginLoadCustomModelElements(customModel)
+                    end
+                    return
+                end
+            end
+        end
+    end
+end, false)
+
+local function beginDownloadModelFiles(customModel)
+    local queuedInfo = loadingQueue[customModel]
+    if not queuedInfo then return end
+    if queuedInfo.phase ~= LOADING_QUEUE_PHASES.DOWNLOAD_FILES then return end
+
+    local customInfo = customModels[customModel]
+    if not customInfo then
+        loadingQueue[customModel] = nil
+        return
+    end
+
+    if (not customInfo.settings["downloadFilesOnDemand"]) then
+        -- No downloading needed, proceed to load model elements
+        beginLoadCustomModelElements(customModel)
+        return
+    end
+
+    loadingQueue[customModel].countFilesDownloaded = 0
+
+    -- local totalFilesCount = #queuedInfo.filesList
+    -- print(customModel, "downloading files...", totalFilesCount)
+
+    for _, fileInfo in pairs(queuedInfo.filesList) do
+        downloadFile(fileInfo.path)
+    end
+end
+
+local function beginLoadCustomModel(customModel, elementToApply)
+    local customInfo = customModels[customModel]
+    if not customInfo then
+        outputDebugString("Trying to load custom model " .. customModel .. " that does not exist", 2)
+        return
+    end
+
+    if loadedModels[customModel] then
+        outputDebugString("Trying to load custom model " .. customModel .. " that is already loaded", 1)
+        return
+    end
+
+    local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
+
+    local filesList = {}
+    if colPath then filesList[#filesList + 1] = { type = "col", path = colPath } end
+    if txdPath then filesList[#filesList + 1] = { type = "txd", path = txdPath } end
+    if dffPath then filesList[#filesList + 1] = { type = "dff", path = dffPath } end
+
+    loadingQueue[customModel] = {
+        elementToApply = elementToApply,
+        filesList = filesList,
+        -- Start in Phase 1
+        phase = LOADING_QUEUE_PHASES.DOWNLOAD_FILES,
+        -- These will be set to { path=string, element=col/txd/dff, isReused=true/false } when loaded
+        col = nil,
+        txd = nil,
+        dff = nil,
+    }
+
+    beginDownloadModelFiles(customModel)
 end
 
 local function isCustomModelInUse(customModel)

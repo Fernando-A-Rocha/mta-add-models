@@ -11,18 +11,18 @@
     <!-- Alternative way of loading new models -->
     <!-- Inspired by mod_list from newmodels v3 -->
     <script src="models_alt/s_mod_list.lua" type="server"/>
-    <file src="models_alt/**/*.col"/>
-    <file src="models_alt/**/*.txd"/>
-    <file src="models_alt/**/*.dff"/>
+    <file src="models_alt/**/*.col" download="false"/>
+    <file src="models_alt/**/*.txd" download="false"/>
+    <file src="models_alt/**/*.dff" download="false"/>
 
     <!-- NandoCrypt Support (this can be removed if you do not use NandoCrypt) -->
     <script src="scripts/optional/nando_crypt/nando_decrypter" type="client" cache="false"/>
     <file src="models/**/*.col.nandocrypt"/>
     <file src="models/**/*.txd.nandocrypt"/>
     <file src="models/**/*.dff.nandocrypt"/>
-    <file src="models_alt/**/*.col.nandocrypt"/>
-    <file src="models_alt/**/*.txd.nandocrypt"/>
-    <file src="models_alt/**/*.dff.nandocrypt"/>
+    <file src="models_alt/**/*.col.nandocrypt" download="false"/>
+    <file src="models_alt/**/*.txd.nandocrypt" download="false"/>
+    <file src="models_alt/**/*.dff.nandocrypt" download="false"/>
 
     <!-- Debugging / Testing (remove this for a production server) -->
     <script src="scripts/optional/debug/g_debug.lua" type="shared"/>

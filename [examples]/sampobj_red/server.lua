@@ -1457,7 +1457,8 @@ addEventHandler("onResourceStart", resourceRoot, function()
 				dff = folderPath .. id .. ".dff",
 				txd = folderPath .. id .. ".txd",
 				col = folderPath .. id .. ".col",
-			}
+			},
+			metaDownloadFalse = true,
 		}
 	end
 

@@ -51,21 +51,21 @@
 modList = {
 	ped = {
 
-		{ id = 20001, base_id = 1, path = "models_alt/peds/", name = "Mafioso 1" },
-		{ id = 20003, base_id = 1, path = "models_alt/peds/", name = "Mafioso 2" },
+		{ id = 20001, base_id = 1, path = "models_alt/peds/", name = "Mafioso 1", metaDownloadFalse = true },
+		{ id = 20003, base_id = 1, path = "models_alt/peds/", name = "Mafioso 2", metaDownloadFalse = true },
 		{ id = 20002, base_id = 1, path = "models_alt/peds/", name = "Mafioso 3", metaDownloadFalse = true },
 	},
 	vehicle = {
-		{ id = 80001, base_id = 507, path = "models_alt/vehicles/",                                                               name = "Schafter",        disableAutoFree = true },
-		{ id = 80002, base_id = 489, path = "models_alt/vehicles/",                                                               name = "02 Landstalker" },
-		{ id = 80003, base_id = 400, path = "models_alt/vehicles/",                                                               name = "86 Landstalker 1" },
-		{ id = 80004, base_id = 400, path = "models_alt/vehicles/",                                                               name = "98 Landstalker 1" },
-		{ id = 80005, base_id = 468, path = "models_alt/vehicles/",                                                               name = "Sanchez Test",    ignoreTXD = true },
-		{ id = 80006, base_id = 507, path = { dff = "models_alt/vehicles/elegant.dff", txd = "models_alt/vehicles/elegant.txd" }, name = "Elegant Test" },
+		{ id = 80001, base_id = 507, path = "models_alt/vehicles/",                                                               name = "Schafter",         disableAutoFree = true,  metaDownloadFalse = true },
+		{ id = 80002, base_id = 489, path = "models_alt/vehicles/",                                                               name = "02 Landstalker",   metaDownloadFalse = true },
+		{ id = 80003, base_id = 400, path = "models_alt/vehicles/",                                                               name = "86 Landstalker 1", metaDownloadFalse = true },
+		{ id = 80004, base_id = 400, path = "models_alt/vehicles/",                                                               name = "98 Landstalker 1", metaDownloadFalse = true },
+		{ id = 80005, base_id = 468, path = "models_alt/vehicles/",                                                               name = "Sanchez Test",     ignoreTXD = true,        metaDownloadFalse = true },
+		{ id = 80006, base_id = 507, path = { dff = "models_alt/vehicles/elegant.dff", txd = "models_alt/vehicles/elegant.txd" }, name = "Elegant Test",     metaDownloadFalse = true },
 	},
 	object = {
-		{ id = 50001, base_id = 1337, path = "models_alt/objects/", name = "Engine Hoist" },
-		{ id = 50002, base_id = 3594, lodDistance = 300,            path = { txd = "models_alt/objects/wrecked_car.txd", dff = "models_alt/objects/wrecked_car1.dff", col = "models_alt/objects/wrecked_car1.col" }, name = "Wrecked Car 1" },
-		{ id = 50003, base_id = 3593, lodDistance = 300,            path = { txd = "models_alt/objects/wrecked_car.txd", dff = "models_alt/objects/wrecked_car2.dff", col = "models_alt/objects/wrecked_car2.col" }, name = "Wrecked Car 2" },
+		{ id = 50001, base_id = 1337, path = "models_alt/objects/", name = "Engine Hoist",                                                                                                                           metaDownloadFalse = true },
+		{ id = 50002, base_id = 3594, lodDistance = 300,            path = { txd = "models_alt/objects/wrecked_car.txd", dff = "models_alt/objects/wrecked_car1.dff", col = "models_alt/objects/wrecked_car1.col" }, name = "Wrecked Car 1",  metaDownloadFalse = true },
+		{ id = 50003, base_id = 3593, lodDistance = 300,            path = { txd = "models_alt/objects/wrecked_car.txd", dff = "models_alt/objects/wrecked_car2.dff", col = "models_alt/objects/wrecked_car2.col" }, name = "Wrecked Car 2",  metaDownloadFalse = true },
 	},
 }

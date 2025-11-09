@@ -1,4 +1,5 @@
 -- Useful dev commands
+-- Only usable from server console
 
 local function msg(str)
     outputServerLog(("[%s] %s"):format(getResourceName(resource), str))
