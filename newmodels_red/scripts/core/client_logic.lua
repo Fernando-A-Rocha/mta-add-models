@@ -272,6 +272,11 @@ local function onFailedToDownloadModFile(customModel, filePath)
         outputDebugString(
             "downloadFile failed for '" .. filePath .. "' for custom model " .. customModel .. ", aborting load process.",
             1)
+        -- Inform the client (console, useful log)
+        outputConsole(
+            ("[newmodels_red] Too many failed download attempts for '%s' for custom model %s, aborting load process.")
+            :format(tostring(filePath), tostring(customModel))
+        )
         loadingQueue[customModel] = nil
     end
 end
