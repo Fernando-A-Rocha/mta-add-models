@@ -4,7 +4,7 @@ With [`newmodels_red`](https://github.com/Fernando-A-Rocha/mta-add-models) (and 
 
 ## Large Size ⚠️
 
-There are over 1,400 SA-MP object models! It is recommended to keep `download="false"` in the resource's `meta.xml` as well as `metaDownloadFalse=true` in `server.lua` to prevent clients from downloading all the models when they join your server.
+There are over 1,400 SA-MP object models! It is recommended to keep `download="false"` in the resource's `meta.xml` as well as `metaDownloadFalse=true` in `s_load.lua` to prevent clients from downloading all the models when they join your server.
 
 ## How to install
 

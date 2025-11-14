@@ -185,10 +185,10 @@ if not IS_IMPORTED then
     -- In MTA Elements are always destroyed when the resource that created them is stopped: this cannot be changed.
     -- So we use an internal table to keep track of elements created by resources.
     newmodelsUtils.assignElementToResource = function(theElement, theResource)
-        if not theResource then return end
+        if not isElement(theElement) then return end
+        if not (isElement(theResource) and getElementType(theResource) == "resource") then return end
         local resRoot = getResourceRootElement(theResource)
         if not resRoot then return end
-        if not isElement(theElement) then return end
         local theResName = getResourceName(theResource)
         if not newmodelsUtils.resourceElements[theResName] then
             newmodelsUtils.resourceElements[theResName] = {}

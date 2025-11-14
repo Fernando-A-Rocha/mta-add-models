@@ -139,7 +139,6 @@ local function finishLoadCustomModel(customModel)
         },
         disableAutoFree = disableAutoFree or false,
     }
-
     if isElement(elementToApply) then
         applyElementCustomModel(elementToApply)
     end
@@ -282,7 +281,11 @@ local function onFailedToDownloadModFile(customModel, filePath)
 end
 
 -- Handle file downloads requested by this resource
-addEventHandler("onClientFileDownloadComplete", resourceRoot, function(filePath, success)
+addEventHandler("onClientFileDownloadComplete", root, function(filePath, success)
+    if source ~= resourceRoot then
+        -- Append resource name to the path
+        filePath = ":" .. getElementID(source) .. "/" .. filePath
+    end
     if filesBeingPreDownloaded[filePath] then
         if not success then
             outputDebugString(
@@ -341,7 +344,7 @@ addEventHandler("onClientFileDownloadComplete", resourceRoot, function(filePath,
             end
         end
     end
-end, false)
+end)
 
 local function beginDownloadModelFiles(customModel)
     local queuedInfo = loadingQueue[customModel]
@@ -362,7 +365,7 @@ local function beginDownloadModelFiles(customModel)
 
     loadingQueue[customModel].countFilesDownloaded = 0
 
-    -- local totalFilesCount = #queuedInfo.filesList
+    local totalFilesCount = #queuedInfo.filesList
     -- print(customModel, "downloading files...", totalFilesCount)
 
     for _, fileInfo in pairs(queuedInfo.filesList) do
@@ -395,7 +398,6 @@ local function beginLoadCustomModel(customModel, elementToApply)
         -- Start in Phase 1
         phase = LOADING_QUEUE_PHASES.DOWNLOAD_FILES,
     }
-
     beginDownloadModelFiles(customModel)
 end
 

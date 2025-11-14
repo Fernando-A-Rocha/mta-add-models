@@ -5,7 +5,7 @@
 
     <info author="Fernando" name="SAMP Objects Red"
      description="uses newmodels functions to add all SA-MP objects"
-     version="6.0.0"
+     version="6.0.1"
      type="script" />
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED
@@ -16,5 +16,6 @@
     <file src="models/*.txd" download="false"/>
     <file src="models/*.dff" download="false"/>
 
-    <script type="server" src="server.lua" />
+    <script type="server" src="s_data.lua" />
+    <script type="server" src="s_load.lua" />
 </meta>

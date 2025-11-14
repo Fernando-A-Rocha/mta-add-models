@@ -1,5 +1,5 @@
 <meta>
-    <info author="FernandoMTA" version="6.0.0" type="script" name="newmodels_red"
+    <info author="FernandoMTA" version="6.0.1" type="script" name="newmodels_red"
     description="Codename Newmodels Red - Adds new vehicle/ped/object models, automatically synced with all players."/>
     
     <!-- IMPORTANT TO HAVE THIS VERSION OR HIGHER SO THAT IT WORKS AS EXPECTED

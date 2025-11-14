@@ -27,9 +27,9 @@ local function getElementCustomModelString(element)
     local customModel = getElementCustomModel(element)
     if customModel and customModels[customModel] then
         local name, baseModel = customModels[customModel].name, customModels[customModel].baseModel
-        return {("%d \"%s\" (%d)"):format(customModel, name, baseModel), 0xffffa263}
+        return { ("%d \"%s\" (%d)"):format(customModel, name, baseModel), 0xffffa263 }
     else
-        return {("%d"):format(getElementModel(element))}
+        return { ("%d"):format(getElementModel(element)) }
     end
 end
 
@@ -44,9 +44,9 @@ local function updateDebugViewInfo()
         end
     end
     if loadedModelsStr_ ~= "" then
-        loadedModelsStr = "Loaded new models:\n" .. loadedModelsStr_
+        loadedModelsStr = "Loaded new models (client-side):\n" .. loadedModelsStr_
     else
-        loadedModelsStr = "No new models loaded."
+        loadedModelsStr = "No new models loaded (client-side)"
     end
 
     streamedElements = {}
@@ -65,8 +65,8 @@ local function updateDebugViewInfo()
 end
 
 local function drawDebug()
-    dxDrawText("Newmodels v6 Red", SW/2, 15, SW/2, 15, 0xffff7070, 1.5, "default-bold", "center", "center")
-    dxDrawText(loadedModelsStr, SW/2, 32, SW/2, 32, 0xFFFFFFFF, 1, "default-bold", "center", "top")
+    dxDrawText("Newmodels v6 Red", SW / 2, 15, SW / 2, 15, 0xffff7070, 1.5, "default-bold", "center", "center")
+    dxDrawText(loadedModelsStr, SW / 2, 32, SW / 2, 32, 0xFFFFFFFF, 1, "default-bold", "center", "top")
 
     for element, customModelStr in pairs(streamedElements) do
         local x, y, z = getElementPosition(element)
@@ -87,7 +87,9 @@ local function toggleDebugView(cmd)
         addEventHandler("onClientRender", root, drawDebug, false)
         addEventHandler("onClientElementDestroy", root, handleElementDestroyed)
     else
-        if debugTimer and isTimer(debugTimer) then killTimer(debugTimer); debugTimer = nil end
+        if debugTimer and isTimer(debugTimer) then
+            killTimer(debugTimer); debugTimer = nil
+        end
         streamedElements = {}
         removeEventHandler("onClientRender", root, drawDebug)
         removeEventHandler("onClientElementDestroy", root, handleElementDestroyed)
