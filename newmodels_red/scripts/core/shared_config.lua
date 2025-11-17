@@ -5,6 +5,7 @@ DEFAULT_AUTO_MODEL_SETTINGS = {
     ["disableAutoFree"] = false,
     ["disableTXDTextureFiltering"] = false,
     ["enableDFFAlphaTransparency"] = false,
+    ["loadRawData"] = true,
 }
 
 -- For downloadFile behavior

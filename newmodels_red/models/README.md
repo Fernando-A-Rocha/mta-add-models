@@ -21,6 +21,7 @@ The available options are (any line that doesn't contain a valid setting string 
 - `disableAutoFree`
 - `disableTXDTextureFiltering`
 - `enableDFFAlphaTransparency`
+- `loadRawData`
 - `txd=PATH_TO_TXD_FILE_INSIDE_models_FOLDER` (used for shared textures)
 - `dff=PATH_TO_DFF_FILE_INSIDE_models_FOLDER` (used for shared models)
 - `col=PATH_TO_COL_FILE_INSIDE_models_FOLDER` (used for shared collisions)

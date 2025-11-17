@@ -35,7 +35,8 @@
 --
 -- > New parameters added in newmodels v6:
 --
---     None.
+--     'loadRawData' : if true, the mod files will be loaded using the file content data,
+--          and not passing the file path to engineLoad* MTA functions.
 --
 -- ..........................
 -- AVAILABLE TYPES .....

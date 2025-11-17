@@ -21,6 +21,13 @@ local LOADING_QUEUE_PHASES = {
 local currFreeIdDelay = 9500   -- ms
 local FREE_ID_DELAY_STEP = 500 -- ms
 
+local function getCustomModelSetting(settings, key)
+    if settings and settings[key] ~= nil then
+        return settings[key]
+    end
+    return DEFAULT_AUTO_MODEL_SETTINGS[key]
+end
+
 local function applyElementCustomModel(element)
     local customModel = elementModels[element]
     if not customModel then return end
@@ -87,7 +94,7 @@ local function finishLoadCustomModel(customModel)
         return
     end
 
-    local enableDFFAlphaTransparency = customInfo.settings.enableDFFAlphaTransparency
+    local enableDFFAlphaTransparency = getCustomModelSetting(customInfo.settings, "enableDFFAlphaTransparency")
 
     if (col and not engineReplaceCOL(col.element, allocatedModel))
         or (txd and not engineImportTXD(txd.element, allocatedModel))
@@ -114,14 +121,14 @@ local function finishLoadCustomModel(customModel)
         reusableModelElements[dff.path] = dff.element
     end
 
-    local disableAutoFree = customInfo.settings.disableAutoFree
-    local lodDistance = customInfo.settings.lodDistance
-    if lodDistance then
+    local disableAutoFree = getCustomModelSetting(customInfo.settings, "disableAutoFree")
+    local lodDistance = getCustomModelSetting(customInfo.settings, "lodDistance")
+    if type(lodDistance) == "number" then
         engineSetModelLODDistance(allocatedModel, lodDistance)
     end
 
-    local physicalPropsGroup = customInfo.settings.physicalPropsGroup
-    if physicalPropsGroup then
+    local physicalPropsGroup = getCustomModelSetting(customInfo.settings, "physicalPropsGroup")
+    if type(physicalPropsGroup) == "number" then
         engineSetModelPhysicalPropertiesGroup(allocatedModel, physicalPropsGroup)
     end
 
@@ -196,7 +203,8 @@ local function beginLoadCustomModelElements(customModel)
     end
 
     local colPath, txdPath, dffPath = customInfo.col, customInfo.txd, customInfo.dff
-    local disableTXDTextureFiltering = customInfo.settings.disableTXDTextureFiltering
+    local disableTXDTextureFiltering = getCustomModelSetting(customInfo.settings, "disableTXDTextureFiltering")
+    local loadRawData = getCustomModelSetting(customInfo.settings, "loadRawData")
 
     local decryptFunc = getNandoDecrypterFunction()
 
@@ -234,10 +242,9 @@ local function beginLoadCustomModelElements(customModel)
         end
         if not modElement then
             onFailedToLoadModFile(customModel, modPath, modType)
-            return false
+            return
         end
         onLoadedModFile(customModel, modType, modPath, modElement)
-        return true
     end
 
     local function loadOneMod(modType, modPath)
@@ -249,12 +256,19 @@ local function beginLoadCustomModelElements(customModel)
                     loadModElement(modType, modPath, data)
                 end) then
                 onFailedToLoadModFile(customModel, modPath, modType)
+            end
+        elseif loadRawData then
+            local file = fileOpen(modPath)
+            if not file then
+                onFailedToLoadModFile(customModel, modPath, modType)
                 return
             end
+            local data = fileRead(file, fileGetSize(file))
+            fileClose(file)
+            -- print("Loaded raw data for", modType, "of custom model", customModel)
+            loadModElement(modType, modPath, data)
         else
-            if not loadModElement(modType, modPath) then
-                return
-            end
+            loadModElement(modType, modPath)
         end
     end
 
@@ -357,7 +371,7 @@ local function beginDownloadModelFiles(customModel)
         return
     end
 
-    if (not customInfo.settings["downloadFilesOnDemand"]) then
+    if (not getCustomModelSetting(customInfo.settings, "downloadFilesOnDemand")) then
         -- No downloading needed, proceed to load model elements
         beginLoadCustomModelElements(customModel)
         return

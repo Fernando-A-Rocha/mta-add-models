@@ -21,7 +21,8 @@ end
 -- .................................................................
 
 -- Model settings (from .txt files overriding defaults):
-local DECLARATIVE_SETTINGS = { "disableAutoFree", "disableTXDTextureFiltering", "enableDFFAlphaTransparency" }
+local DECLARATIVE_SETTINGS = { "disableAutoFree", "disableTXDTextureFiltering", "enableDFFAlphaTransparency",
+    "loadRawData" }
 --   - txd=path
 --   - dff=path
 --   - col=path
@@ -123,10 +124,6 @@ local function isAnyFileDownloadOnDemand(filePaths)
 end
 
 local function parseModelSettings(customModel, customModelInfo, thisFullPath, isFromSettingsOption)
-    local customModelSettings = {}
-    for key, value in pairs(DEFAULT_AUTO_MODEL_SETTINGS) do
-        customModelSettings[key] = value
-    end
     local file = fileOpen(thisFullPath, true)
     if not file then
         return false, "failed to open file: " .. thisFullPath
@@ -136,6 +133,7 @@ local function parseModelSettings(customModel, customModelInfo, thisFullPath, is
     if not info then
         return false, "failed to read file: " .. thisFullPath
     end
+    local customModelSettings = {}
     local lines = split(info, "\n")
     for _, settingStr in pairs(lines) do
         settingStr = settingStr:gsub("\r", "")
@@ -395,6 +393,10 @@ local function parseModListEntry(modelType, modInfo)
     end
     if modInfo.metaDownloadFalse then
         settings["downloadFilesOnDemand"] = true
+    end
+    -- New setting from v6
+    if modInfo.loadRawData then
+        settings["loadRawData"] = true
     end
 
     local ncExt = NANDOCRYPT_EXT
