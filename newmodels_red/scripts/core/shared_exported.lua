@@ -301,7 +301,7 @@ end
 function setElementModel(element, id)
     assert(isElement(element), "Invalid element passed: " .. tostring(element))
     assert(isValidElement(element), "Invalid element type passed: " .. getElementType(element))
-    assert(tonumber(id), "Non-number ID passed")
+    assert(type(id) == "number", "Bad argument @ setElementModel [expected number at argument 2, got " .. type(id) .. "]")
 
     local baseModel = getBaseModelIdFromCustomModelId(id)
     local currBaseModel = getElementModelMTA(element)
