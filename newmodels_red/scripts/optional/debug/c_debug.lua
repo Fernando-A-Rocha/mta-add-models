@@ -35,6 +35,7 @@ end
 
 local function updateDebugViewInfo()
     local loadedModelsStr_ = ""
+    local count = 0
     for customModel, v in pairsByKeys(loadedModels) do
         local str = ("%d \"%s\" (%d)"):format(customModel, v.name, v.baseModel)
         if loadedModelsStr_ == "" then
@@ -42,9 +43,10 @@ local function updateDebugViewInfo()
         else
             loadedModelsStr_ = str .. ", " .. loadedModelsStr_
         end
+        count = count + 1
     end
     if loadedModelsStr_ ~= "" then
-        loadedModelsStr = "Loaded new models (client-side):\n" .. loadedModelsStr_
+        loadedModelsStr = ("Loaded new models (client-side: %d):\n"):format(count) .. loadedModelsStr_
     else
         loadedModelsStr = "No new models loaded (client-side)"
     end

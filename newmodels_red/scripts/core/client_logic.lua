@@ -70,7 +70,7 @@ local function finishLoadCustomModel(customModel)
 
     local allocatedModel = queuedInfo.allocatedModel
     local col, txd, dff = queuedInfo.col, queuedInfo.txd, queuedInfo.dff
-    local elementToApply = queuedInfo.elementToApply
+    local waitingElements = queuedInfo.waitingElements or {}
 
     local function cancelLoading()
         -- Destroy all non-reused col/txd/dff elements
@@ -146,8 +146,11 @@ local function finishLoadCustomModel(customModel)
         },
         disableAutoFree = disableAutoFree or false,
     }
-    if isElement(elementToApply) then
-        applyElementCustomModel(elementToApply)
+
+    for element, _ in pairs(waitingElements) do
+        if isElement(element) then
+            applyElementCustomModel(element)
+        end
     end
 
     loadingQueue[customModel] = nil
@@ -388,6 +391,14 @@ local function beginDownloadModelFiles(customModel)
 end
 
 local function beginLoadCustomModel(customModel, elementToApply)
+    if loadingQueue[customModel] then
+        -- Model is already loading, add this element to the waiting list
+        if isElement(elementToApply) then
+            loadingQueue[customModel].waitingElements[elementToApply] = true
+        end
+        return
+    end
+
     local customInfo = customModels[customModel]
     if not customInfo then
         outputDebugString("Trying to load custom model " .. customModel .. " that does not exist", 2)
@@ -406,8 +417,13 @@ local function beginLoadCustomModel(customModel, elementToApply)
     if txdPath then filesList[#filesList + 1] = { type = "txd", path = txdPath } end
     if dffPath then filesList[#filesList + 1] = { type = "dff", path = dffPath } end
 
+    local waitingElements = {}
+    if isElement(elementToApply) then
+        waitingElements[elementToApply] = true
+    end
+
     loadingQueue[customModel] = {
-        elementToApply = elementToApply,
+        waitingElements = waitingElements,
         filesList = filesList,
         -- Start in Phase 1
         phase = LOADING_QUEUE_PHASES.DOWNLOAD_FILES,
