@@ -391,6 +391,9 @@ local function parseModListEntry(modelType, modInfo)
     if modInfo.alphaTransparency then
         settings["enableDFFAlphaTransparency"] = true
     end
+    if type(modInfo.physicalPropsGroup) == "number" then
+        settings["physicalPropsGroup"] = modInfo.physicalPropsGroup
+    end
     if modInfo.metaDownloadFalse then
         settings["downloadFilesOnDemand"] = true
     end
