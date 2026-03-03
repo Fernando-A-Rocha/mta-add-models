@@ -32,6 +32,7 @@
 --      		This causes the mod to stay in memory, be careful when enabling for big mods
 --     		» 'filteringEnabled' (engineLoadTXD)
 --     		» 'alphaTransparency' (engineReplaceModel)
+--          » 'physicalPropsGroup' : GROUP_ID (number), used for engineSetModelPhysicalPropertiesGroup
 --
 -- > New parameters added in newmodels v6:
 --
