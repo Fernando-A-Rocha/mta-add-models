@@ -244,6 +244,12 @@ local function loadModels()
                 local fullPath = modelTypePath .. "/" .. fileOrFolder
                 if pathIsDirectory(fullPath) then
                     local baseModel = tonumber(fileOrFolder)
+                    if not baseModel and modelType == "vehicles" then
+                        baseModel = getVehicleModelFromName(fileOrFolder)
+                        if not baseModel then
+                            srvLog("[loadModels] folder name isn't valid to get the vehicle ID, skipping: " .. fileOrFolder)
+                        end
+                    end
                     if baseModel then
                         if not isDefaultID(false, baseModel) then
                             return false, "invalid " .. modelType .. " base model: " .. baseModel
