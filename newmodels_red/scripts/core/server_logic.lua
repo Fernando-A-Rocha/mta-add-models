@@ -291,7 +291,7 @@ local function loadModels()
                                 txd = info.txd,
                                 col = info.col,
                                 name = info.name or ("%d#%d"):format(baseModel, baseModelCounts[baseModel]),
-                                settings = info.settings or {},
+                                settings = settings,
                             }
                             countLoaded = countLoaded + 1
                         end
